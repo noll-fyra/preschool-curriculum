@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-primary: #4A9B6F;
+  --color-primary-light: #6BBF8E;
+  --color-primary-pale: #A8D9BC;
+  --color-primary-wash: #E8F5EE;
+
+  --color-bg-warm: #FFFDF8;
+  --color-bg-cream: #FDF6E8;
+  --color-bg-deep: #F5EFE0;
+
+  --color-text-dark: #2D3A2E;
+  --color-text-mid: #5C6B5D;
+  --color-text-muted: #9DAE9E;
+
+  --color-accent-amber: #F5A623;
+  --color-accent-coral: #E8745A;
+  --color-accent-blue: #7BA3D4;
+
+  --color-border: #D8E8DC;
+}
+
+/* Global resets */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  background-color: #FFFDF8;
+  color: #2D3A2E;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  background: #4A9B6F;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0 0 8px 8px;
+  font-weight: 700;
+  z-index: 9999;
+  text-decoration: none;
+  transition: top 0.2s;
+}
+.skip-link:focus {
+  top: 0;
+}
+
+/* Scroll nudge bounce */
+@keyframes bounce-down {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+.bounce {
+  animation: bounce-down 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bounce { animation: none; }
+}
