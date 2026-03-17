@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Child, Milestone, WeeklyAssignment } from "@/lib/types";
+import { getChildDisplayName } from "@/lib/display-name";
 import { ChildAvatar } from "./ChildAvatar";
 import { getSwapOptions } from "@/lib/assignments";
 
@@ -89,12 +90,12 @@ export function AssignmentWeekView({
               className="rounded-2xl border border-[var(--color-border)] bg-white p-4"
             >
               <div className="flex items-center gap-2 mb-3">
-                <ChildAvatar name={child.name} size="sm" />
+                <ChildAvatar name={getChildDisplayName(child)} size="sm" />
                 <span
                   className="font-semibold text-sm"
                   style={{ color: "var(--color-text-dark)" }}
                 >
-                  {child.name}
+                  {getChildDisplayName(child)}
                 </span>
               </div>
 

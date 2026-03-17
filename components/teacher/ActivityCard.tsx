@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { PlannedActivity, ActivityFeedback, Child, Milestone } from "@/lib/types";
+import { getChildDisplayName } from "@/lib/display-name";
 import { ChildAvatar } from "./ChildAvatar";
 
 const AREA_STYLES: Record<string, { bg: string; text: string; label: string }> = {
@@ -116,7 +117,7 @@ export function ActivityCard({
           <div className="flex items-center gap-1 flex-wrap flex-1">
             {assignedChildren.slice(0, 5).map((child) => (
               <span key={child.id} className="flex items-center gap-1">
-                <ChildAvatar name={child.name} size="xs" />
+                <ChildAvatar name={getChildDisplayName(child)} size="xs" />
               </span>
             ))}
             {assignedChildren.length > 5 && (
@@ -168,12 +169,12 @@ export function ActivityCard({
             return (
               <div key={child.id} className="px-4 py-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <ChildAvatar name={child.name} size="sm" />
+                  <ChildAvatar name={getChildDisplayName(child)} size="sm" />
                   <span
                     className="text-sm font-medium"
                     style={{ color: "var(--color-text-dark)" }}
                   >
-                    {child.name}
+                    {getChildDisplayName(child)}
                   </span>
                   {!isEditing && (
                     <button

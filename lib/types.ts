@@ -3,6 +3,7 @@ export type LevelId = "B" | "D" | "S";
 export type MilestoneStatus = "not_started" | "in_progress" | "achieved";
 export type ReportStatus = "draft" | "published";
 export type Pronoun = "he" | "she" | "they";
+export type Gender = "male" | "female" | "non-binary";
 
 export type YearLevelId = "N1" | "N2" | "K1" | "K2";
 
@@ -46,10 +47,19 @@ export interface Class {
   termLabel: string;
 }
 
+export interface Teacher {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  classIds: string[]; // classes this teacher is assigned to
+}
+
 export interface Child {
   id: string;
-  name: string;
-  pronoun: Pronoun;
+  firstName: string;
+  lastName: string;
+  gender: Gender;
   classId: string;
   dateOfBirth?: string; // ISO date string (YYYY-MM-DD)
   yearLevel?: YearLevelId;
@@ -117,6 +127,59 @@ export interface Report {
   status: ReportStatus;
   generatedAt: string;
   publishedAt?: string;
+}
+
+export interface TeacherUpdateMedia {
+  type: "photo" | "video";
+  url: string;
+}
+
+export interface TeacherUpdate {
+  id: string;
+  teacherId: string;
+  classId: string;
+  /** Empty = whole class; non-empty = only these students */
+  childIds: string[];
+  text: string;
+  media: TeacherUpdateMedia[];
+  createdAt: string;
+}
+
+export type NoteTag =
+  | "learning"
+  | "milestone_moment"
+  | "behaviour"
+  | "social"
+  | "welfare"
+  | "family";
+
+export interface PersonalitySnapshot {
+  childId: string;
+  content: string;
+  updatedAt: string; // ISO datetime
+}
+
+export interface TeacherStrategies {
+  childId: string;
+  whatWorks: string; // newline-separated items
+  whatToWatch: string; // newline-separated items
+  updatedAt: string;
+}
+
+export interface FamilyContext {
+  childId: string;
+  content: string;
+  updatedAt: string;
+}
+
+export interface TeacherNote {
+  id: string;
+  childId: string;
+  content: string;
+  tags: NoteTag[];
+  welfare: boolean;
+  createdAt: string;
+  deletedAt?: string; // welfare notes cannot be soft-deleted
 }
 
 // Derived / view types

@@ -4,6 +4,7 @@ import Problem from "@/components/sections/Problem";
 import Solution from "@/components/sections/Solution";
 import Milestones from "@/components/sections/Milestones";
 import TeacherExperience from "@/components/sections/TeacherExperience";
+import StudentExperience from "@/components/sections/StudentExperience";
 import ParentExperience from "@/components/sections/ParentExperience";
 import LearningAreas from "@/components/sections/LearningAreas";
 import ResearchStats from "@/components/sections/ResearchStats";
@@ -20,6 +21,7 @@ export default function Home() {
         <Solution />
         <Milestones />
         <TeacherExperience />
+        <StudentExperience />
         <ParentExperience />
         <LearningAreas />
         <ResearchStats />

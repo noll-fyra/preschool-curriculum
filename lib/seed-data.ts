@@ -1,5 +1,6 @@
 import type {
   Class,
+  Teacher,
   Milestone,
   Child,
   ChildMilestoneProgress,
@@ -7,6 +8,11 @@ import type {
   TeacherObservation,
   PlannedActivity,
   ActivityFeedback,
+  TeacherUpdate,
+  PersonalitySnapshot,
+  TeacherStrategies,
+  FamilyContext,
+  TeacherNote,
 } from "./types";
 import { getWeekStart } from "./assignments";
 
@@ -318,13 +324,21 @@ export const CLASSES: Class[] = [
   { id: "class-2", name: "Sparrow K2",    termLabel: "Term 2, 2026" },
 ];
 
+// ─── Teachers ──────────────────────────────────────────────────────────────
+
+export const TEACHERS: Teacher[] = [
+  { id: "teacher-1", firstName: "Siti", lastName: "", email: "siti@myschool.edu.sg", classIds: ["class-1"] },
+  { id: "teacher-2", firstName: "Lim", lastName: "", email: "lim@myschool.edu.sg", classIds: ["class-2"] },
+];
+
 // ─── Children ──────────────────────────────────────────────────────────────
 
 export const CHILDREN: Child[] = [
   {
     id: "child-rayan",
-    name: "Rayan",
-    pronoun: "he",
+    firstName: "Rayan",
+    lastName: "",
+    gender: "male",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-04-15",
@@ -339,8 +353,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-aisha",
-    name: "Aisha",
-    pronoun: "she",
+    firstName: "Aisha",
+    lastName: "",
+    gender: "female",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-07-02",
@@ -355,8 +370,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-mei",
-    name: "Mei",
-    pronoun: "she",
+    firstName: "Mei",
+    lastName: "",
+    gender: "female",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-02-10",
@@ -368,8 +384,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-omar",
-    name: "Omar",
-    pronoun: "he",
+    firstName: "Omar",
+    lastName: "",
+    gender: "male",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2020-12-05",
@@ -380,8 +397,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-priya",
-    name: "Priya",
-    pronoun: "she",
+    firstName: "Priya",
+    lastName: "",
+    gender: "female",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-05-28",
@@ -396,8 +414,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-kai",
-    name: "Kai",
-    pronoun: "he",
+    firstName: "Kai",
+    lastName: "",
+    gender: "male",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-09-09",
@@ -408,8 +427,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-sara",
-    name: "Sara",
-    pronoun: "she",
+    firstName: "Sara",
+    lastName: "",
+    gender: "female",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-03-21",
@@ -421,8 +441,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-darius",
-    name: "Darius",
-    pronoun: "he",
+    firstName: "Darius",
+    lastName: "",
+    gender: "male",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2020-11-18",
@@ -433,8 +454,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-aryan",
-    name: "Aryan",
-    pronoun: "he",
+    firstName: "Aryan",
+    lastName: "",
+    gender: "male",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-01-30",
@@ -445,8 +467,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-fatimah",
-    name: "Fatimah",
-    pronoun: "she",
+    firstName: "Fatimah",
+    lastName: "",
+    gender: "female",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-08-12",
@@ -457,8 +480,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-jingwei",
-    name: "Jing Wei",
-    pronoun: "he",
+    firstName: "Jing Wei",
+    lastName: "",
+    gender: "male",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2020-10-03",
@@ -469,8 +493,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-lakshmi",
-    name: "Lakshmi",
-    pronoun: "she",
+    firstName: "Lakshmi",
+    lastName: "",
+    gender: "female",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2020-09-25",
@@ -481,8 +506,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-nathan",
-    name: "Nathan",
-    pronoun: "he",
+    firstName: "Nathan",
+    lastName: "",
+    gender: "male",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-06-06",
@@ -493,8 +519,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-nurul",
-    name: "Nurul",
-    pronoun: "she",
+    firstName: "Nurul",
+    lastName: "",
+    gender: "female",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-11-19",
@@ -505,8 +532,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-ethan",
-    name: "Ethan",
-    pronoun: "he",
+    firstName: "Ethan",
+    lastName: "",
+    gender: "male",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-02-02",
@@ -517,8 +545,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-siti",
-    name: "Siti",
-    pronoun: "she",
+    firstName: "Siti",
+    lastName: "",
+    gender: "female",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-12-01",
@@ -529,8 +558,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-rohan",
-    name: "Rohan",
-    pronoun: "he",
+    firstName: "Rohan",
+    lastName: "",
+    gender: "male",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2020-07-17",
@@ -541,8 +571,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-zoe",
-    name: "Zoe",
-    pronoun: "she",
+    firstName: "Zoe",
+    lastName: "",
+    gender: "female",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-04-09",
@@ -553,8 +584,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-darren",
-    name: "Darren",
-    pronoun: "he",
+    firstName: "Darren",
+    lastName: "",
+    gender: "male",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2020-06-23",
@@ -565,8 +597,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-nadia",
-    name: "Nadia",
-    pronoun: "she",
+    firstName: "Nadia",
+    lastName: "",
+    gender: "female",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-09-30",
@@ -581,8 +614,9 @@ export const CHILDREN: Child[] = [
   // Sparrow K2
   {
     id: "child-amir",
-    name: "Amir",
-    pronoun: "he",
+    firstName: "Amir",
+    lastName: "",
+    gender: "male",
     classId: "class-2",
     yearLevel: "K2",
     dateOfBirth: "2020-01-14",
@@ -593,8 +627,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-bao",
-    name: "Bao",
-    pronoun: "he",
+    firstName: "Bao",
+    lastName: "",
+    gender: "male",
     classId: "class-2",
     yearLevel: "K2",
     dateOfBirth: "2019-12-28",
@@ -605,8 +640,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-clara",
-    name: "Clara",
-    pronoun: "she",
+    firstName: "Clara",
+    lastName: "",
+    gender: "female",
     classId: "class-2",
     yearLevel: "K2",
     dateOfBirth: "2020-03-08",
@@ -617,8 +653,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-dev",
-    name: "Dev",
-    pronoun: "he",
+    firstName: "Dev",
+    lastName: "",
+    gender: "male",
     classId: "class-2",
     yearLevel: "K2",
     dateOfBirth: "2020-05-11",
@@ -629,8 +666,9 @@ export const CHILDREN: Child[] = [
   },
   {
     id: "child-elise",
-    name: "Elise",
-    pronoun: "she",
+    firstName: "Elise",
+    lastName: "",
+    gender: "female",
     classId: "class-2",
     yearLevel: "K2",
     dateOfBirth: "2020-02-19",
@@ -1095,5 +1133,182 @@ export const DEMO_ACTIVITY_FEEDBACK: ActivityFeedback[] = [
     childId: "child-mei",
     note: "Mei could name the emotion (sad) but needed prompting to explain why. Will revisit with a simpler scenario next week.",
     createdAt: new Date().toISOString(),
+  },
+];
+
+// ─── Demo teacher updates ───────────────────────────────────────────────────
+
+function update(
+  id: string,
+  teacherId: string,
+  classId: string,
+  childIds: string[],
+  text: string,
+  media: TeacherUpdate["media"],
+  daysAgo: number
+): TeacherUpdate {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  return {
+    id,
+    teacherId,
+    classId,
+    childIds,
+    text,
+    media,
+    createdAt: d.toISOString(),
+  };
+}
+
+export const DEMO_TEACHER_UPDATES: TeacherUpdate[] = [
+  update(
+    "update-001",
+    "teacher-1",
+    "class-1",
+    [], // whole class
+    "We had a wonderful art session today! The children painted butterflies and practiced their fine motor skills. So proud of everyone's creativity! 🦋",
+    [{ type: "photo", url: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400" }],
+    1
+  ),
+  update(
+    "update-002",
+    "teacher-1",
+    "class-1",
+    ["child-rayan", "child-aisha"],
+    "Rayan and Aisha worked beautifully together during our letter hunt activity. They helped each other find letters around the classroom!",
+    [],
+    2
+  ),
+  update(
+    "update-003",
+    "teacher-1",
+    "class-1",
+    [], // whole class
+    "Story time with our favourite book today. The children loved predicting what happens next!",
+    [
+      { type: "photo", url: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400" },
+      { type: "video", url: "https://example.com/video-placeholder" },
+    ],
+    3
+  ),
+];
+
+// ─── Demo personality snapshots ─────────────────────────────────────────────
+
+export const DEMO_PERSONALITY_SNAPSHOTS: PersonalitySnapshot[] = [
+  {
+    childId: "child-aisha",
+    content:
+      "Curious and methodical — she likes to understand something fully before she tries it, so she may seem slow to start but rarely makes mistakes once she begins. She responds well to being given a helper role. She is close to Kai and learns better when seated near him. Tends to go quiet rather than asking for help when confused — check in proactively.",
+    updatedAt: "2026-03-10T09:15:00.000Z",
+  },
+  {
+    childId: "child-rayan",
+    content:
+      "High energy and enthusiastic — jumps into activities without hesitation. Works well in pairs but loses focus in larger groups. Responds strongly to visual timers and clear step-by-step instructions. Becomes frustrated quickly when a task is too hard; try breaking it into smaller steps.",
+    updatedAt: "2026-03-08T10:00:00.000Z",
+  },
+  {
+    childId: "child-mei",
+    content:
+      "Very observant and quiet — she takes everything in before she speaks. One of the most socially perceptive children in the class. Prefers one-on-one or small group work over whole-class activities. Warms up slowly with new teachers; give her time.",
+    updatedAt: "2026-03-05T11:30:00.000Z",
+  },
+];
+
+// ─── Demo teacher strategies ─────────────────────────────────────────────────
+
+export const DEMO_TEACHER_STRATEGIES: TeacherStrategies[] = [
+  {
+    childId: "child-aisha",
+    whatWorks:
+      "Give her a helper role at the start of an activity — she settles faster\n2-minute transition warning before switching activities\nSeat near Kai — they work well together",
+    whatToWatch:
+      "Goes quiet rather than asking for help — check in proactively when she seems stuck\nCan get overwhelmed in noisy, large-group transitions",
+    updatedAt: "2026-03-10T09:20:00.000Z",
+  },
+  {
+    childId: "child-rayan",
+    whatWorks:
+      "Use a visual timer during centre play — he transitions without meltdown when he can see the time\nPair with a calmer child for collaborative tasks",
+    whatToWatch:
+      "Watch for frustration cues (clenching hands, turning away) — intervene early before it escalates",
+    updatedAt: "2026-03-08T10:05:00.000Z",
+  },
+];
+
+// ─── Demo family contexts ─────────────────────────────────────────────────────
+
+export const DEMO_FAMILY_CONTEXTS: FamilyContext[] = [
+  {
+    childId: "child-aisha",
+    content:
+      "Parents separated Oct 2024. Both on the authorised pickup list — Mum (primary contact) Mon/Wed/Fri, Dad Tue/Thu. They prefer separate communication. Aisha has been quieter at drop-off since the change — normal settling behaviour per counsellor.",
+    updatedAt: "2026-02-15T11:00:00.000Z",
+  },
+  {
+    childId: "child-nadia",
+    content:
+      "Family moved house in Feb 2026 — some disruption to routine expected. Mum (Mdm Farah) is the primary contact and is very responsive on the app.",
+    updatedAt: "2026-02-20T09:00:00.000Z",
+  },
+];
+
+// ─── Demo teacher notes ───────────────────────────────────────────────────────
+
+export const DEMO_TEACHER_NOTES: TeacherNote[] = [
+  {
+    id: "tnote-001",
+    childId: "child-aisha",
+    content:
+      "Completed the letter matching activity independently today — stayed on task for the full 15 minutes without a check-in. First time I've seen her this focused.",
+    tags: ["learning", "milestone_moment"],
+    welfare: false,
+    createdAt: "2026-03-15T10:30:00.000Z",
+  },
+  {
+    id: "tnote-002",
+    childId: "child-aisha",
+    content:
+      "Noticeably quiet at drop-off this week. Took about 20 minutes to settle. Spoke briefly with Mdm Nur — she mentioned some ongoing family adjustment. Nothing alarming but worth monitoring.",
+    tags: ["welfare", "family"],
+    welfare: true,
+    createdAt: "2026-03-12T09:00:00.000Z",
+  },
+  {
+    id: "tnote-003",
+    childId: "child-aisha",
+    content:
+      "Helped Nurul during the sorting activity today without being asked — explained the pattern to her very patiently. Really positive social moment.",
+    tags: ["social"],
+    welfare: false,
+    createdAt: "2026-03-10T14:00:00.000Z",
+  },
+  {
+    id: "tnote-004",
+    childId: "child-rayan",
+    content:
+      "Used the visual timer during centre play for the first time — transitioned to clean-up without any difficulty. This is significant improvement from last week.",
+    tags: ["behaviour"],
+    welfare: false,
+    createdAt: "2026-03-14T11:00:00.000Z",
+  },
+  {
+    id: "tnote-005",
+    childId: "child-rayan",
+    content:
+      "Peanut allergy incident — child touched a snack brought in by another family. EpiPen was not needed but parents were informed immediately. Incident report filed.",
+    tags: ["welfare"],
+    welfare: true,
+    createdAt: "2026-03-06T12:30:00.000Z",
+  },
+  {
+    id: "tnote-006",
+    childId: "child-mei",
+    content:
+      "Spoke up in group circle for the first time today — shared her observation about the caterpillar without prompting. Small moment but big for her.",
+    tags: ["social", "milestone_moment"],
+    welfare: false,
+    createdAt: "2026-03-13T09:45:00.000Z",
   },
 ];

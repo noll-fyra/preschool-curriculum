@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-type Role = "teacher" | "student" | "parent";
+type Role = "teacher" | "student" | "parent" | "admin";
 
 interface DemoRoleBarProps {
   activeRole: Role;
@@ -12,6 +12,7 @@ const ROLES = [
   { id: "teacher" as Role, label: "Teacher", href: "/teacher/class" },
   { id: "student" as Role, label: "Student", href: "/student" },
   { id: "parent"  as Role, label: "Parent",  href: "/parent"       },
+  { id: "admin"   as Role, label: "Admin",   href: "/admin"        },
 ];
 
 export function DemoRoleBar({ activeRole }: DemoRoleBarProps) {

@@ -3,17 +3,23 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useStore } from "@/lib/store";
+import { getChildDisplayName } from "@/lib/display-name";
 import { getActivityConfig } from "@/lib/activity-data";
 import { autoSelectAssignments } from "@/lib/assignments";
-import { getChildLevelPerArea } from "@/lib/selectors";
 import { ChildAvatar } from "@/components/teacher/ChildAvatar";
-import { LEVEL_LABELS } from "@/lib/types";
-import type { LevelId } from "@/lib/types";
 
-const LEVEL_COLORS: Record<LevelId, { bg: string; text: string }> = {
-  B: { bg: "#FEE9E5", text: "#C0432A" },
-  D: { bg: "#FEF3D7", text: "#A06010" },
-  S: { bg: "#E8F5EE", text: "#2D7A4F" },
+// Child-palette colours — hardcoded, never CSS variables (spec §Visual design system)
+const C = {
+  bg: "#FFF8F0",
+  surface: "#FFFFFF",
+  borderWarm: "#E8D5B0",
+  yellow: "#F5C518",
+  yellowLight: "#FFFBEB",
+  green: "#7DC873",
+  greenLight: "#F0FAF0",
+  textDark: "#251B14",
+  textMuted: "#5C4A3A",
+  textAmber: "#5C4200",
 };
 
 export default function StudentActivityHomePage() {
@@ -22,18 +28,19 @@ export default function StudentActivityHomePage() {
   const store = useStore();
 
   const child = store.children.find((c) => c.id === childId);
+  const activityConfigOverrides = store.activityConfigOverrides;
   if (!child) {
     return (
-      <div className="px-5 py-8 text-center">
-        <p style={{ color: "var(--color-text-muted)" }}>Child not found.</p>
-        <Link href="/student" className="mt-4 inline-block text-sm" style={{ color: "var(--color-primary)" }}>
+      <div style={{ padding: "32px 20px", textAlign: "center", background: C.bg, minHeight: "100vh" }}>
+        <p style={{ color: C.textMuted }}>Child not found.</p>
+        <Link href="/student" style={{ display: "inline-block", marginTop: 16, fontSize: 14, color: C.green }}>
           ← Back
         </Link>
       </div>
     );
   }
 
-  // Get milestones for this child (LL + NUM + SED) then filter to only digital activities
+  // Get milestones for this child — only LL and NUM have digital activities
   const allAssigned = autoSelectAssignments(
     childId,
     store.milestones,
@@ -41,168 +48,225 @@ export default function StudentActivityHomePage() {
     store.sessions,
     store.observations
   );
-
-  // Only LL and NUM have digital tap-to-select activities
   const digitalActivities = allAssigned.filter((m) => m.areaId !== "SED");
 
-  const levels = getChildLevelPerArea(childId, store);
-
-  // Check if child has a passing session today for a milestone
+  // Which activities has the child passed today?
   const today = new Date().toISOString().slice(0, 10);
   const passedTodayIds = new Set(
     store.sessions
-      .filter(
-        (s) =>
-          s.childId === childId &&
-          s.passed &&
-          s.attemptedAt.slice(0, 10) === today
-      )
+      .filter((s) => s.childId === childId && s.passed && s.attemptedAt.slice(0, 10) === today)
       .map((s) => s.milestoneId)
   );
 
+  // Only the first not-yet-done activity is "active" (spec §Screen 1 — only one tile active at a time)
+  const firstActiveMilestoneId = digitalActivities.find((m) => !passedTodayIds.has(m.id))?.id ?? null;
+
+  // Teacher updates visible to this child (class-level or tagged)
+  const visibleUpdates = store.teacherUpdates
+    .filter(
+      (u) =>
+        u.classId === child.classId &&
+        (u.childIds.length === 0 || u.childIds.includes(childId))
+    )
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 3);
+
   return (
-    <div className="px-5 py-8 max-w-md mx-auto">
-      {/* Back link */}
-      <Link
-        href="/student"
-        className="inline-flex items-center gap-1 text-sm mb-6"
-        style={{ color: "var(--color-text-muted)" }}
-      >
-        ← Back
-      </Link>
-
-      {/* Child header */}
-      <div className="flex items-center gap-4 mb-6">
-        <ChildAvatar name={child.name} size="lg" />
-        <div>
-          <h1 className="text-2xl font-bold" style={{ color: "var(--color-text-dark)" }}>
-            Hi {child.name}! 👋
-          </h1>
-          <div className="flex gap-2 mt-1">
-            {(["LL", "NUM"] as const).map((area) => {
-              const level = levels[area];
-              const colors = LEVEL_COLORS[level];
-              return (
-                <span
-                  key={area}
-                  className="text-xs px-2 py-0.5 rounded-full font-medium"
-                  style={{ background: colors.bg, color: colors.text }}
-                >
-                  {area}: {LEVEL_LABELS[level]}
-                </span>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Activities section */}
-      <div>
-        <h2
-          className="text-sm font-semibold uppercase tracking-wide mb-3"
-          style={{ color: "var(--color-text-muted)" }}
+    <div style={{ background: C.bg, minHeight: "100vh" }}>
+      <div style={{ maxWidth: 440, margin: "0 auto", padding: "32px 20px 48px" }}>
+        {/* Back link — small, top */}
+        <Link
+          href="/student"
+          style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 14, color: C.textMuted, marginBottom: 24 }}
         >
-          Your activities this week
-        </h2>
+          ← Back
+        </Link>
 
-        {digitalActivities.length === 0 ? (
+        {/* Child greeting — warm, personal */}
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 32 }}>
+          <ChildAvatar name={getChildDisplayName(child)} size="lg" />
+          <h1 style={{ fontSize: 26, fontWeight: 700, color: C.textDark, margin: 0 }}>
+            Hi {getChildDisplayName(child)}! 👋
+          </h1>
+        </div>
+
+        {/* Teacher updates feed — class news for students */}
+        {visibleUpdates.length > 0 && (
           <div
-            className="rounded-xl p-5 text-center border"
             style={{
-              background: "var(--color-bg-cream)",
-              borderColor: "var(--color-border)",
+              borderRadius: 20,
+              padding: 16,
+              marginBottom: 24,
+              border: `2px solid ${C.borderWarm}`,
+              background: C.surface,
             }}
           >
-            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-              No activities yet — check back soon!
+            <p style={{ fontSize: 13, fontWeight: 600, color: C.textDark, marginBottom: 12 }}>
+              📢 News from your teacher
             </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {visibleUpdates.map((u) => (
+                <div
+                  key={u.id}
+                  style={{
+                    padding: 12,
+                    borderRadius: 12,
+                    background: C.yellowLight,
+                    border: `1px solid ${C.yellow}`,
+                  }}
+                >
+                  <p style={{ fontSize: 14, color: C.textDark, lineHeight: 1.5, margin: 0 }}>
+                    {u.text}
+                  </p>
+                  {u.media.some((m) => m.type === "photo") && (
+                    <div style={{ marginTop: 8, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {u.media
+                        .filter((m) => m.type === "photo")
+                        .map((m, i) => (
+                          <div
+                            key={i}
+                            style={{
+                              borderRadius: 8,
+                              overflow: "hidden",
+                              width: 80,
+                              height: 80,
+                              border: `1px solid ${C.borderWarm}`,
+                            }}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={m.url}
+                              alt=""
+                              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = "none";
+                              }}
+                            />
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Activity tiles (spec §Screen 1 — Activity queue) */}
+        {digitalActivities.length === 0 ? (
+          <div
+            style={{
+              borderRadius: 20,
+              padding: 20,
+              textAlign: "center",
+              border: `2px solid ${C.borderWarm}`,
+              background: C.surface,
+            }}
+          >
+            <p style={{ color: C.textMuted, fontSize: 15 }}>No activities yet — check back soon!</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {digitalActivities.map((milestone) => {
-              const config = getActivityConfig(milestone.id);
+              const config = activityConfigOverrides[milestone.id] ?? getActivityConfig(milestone.id);
               if (!config) return null;
 
-              const donedToday = passedTodayIds.has(milestone.id);
-              const areaColors = milestone.areaId === "LL"
-                ? { bg: "#E8EFF8", text: "#3A5EA0" }
-                : { bg: "#E8F5EE", text: "#2D7A4F" };
+              const isDone = passedTodayIds.has(milestone.id);
+              const isActive = milestone.id === firstActiveMilestoneId;
+              // Remaining tiles are locked — the child cannot play out of order
+              const isLocked = !isDone && !isActive;
+
+              // Tile appearance (spec §Screen 1 — Activity tile states)
+              let tileBg = C.surface;
+              let tileBorder = C.borderWarm;
+              let tileOpacity = 1;
+
+              if (isDone) {
+                tileBg = C.greenLight;
+                tileBorder = C.green;
+              } else if (isActive) {
+                tileBg = C.yellowLight;
+                tileBorder = C.yellow;
+              } else {
+                tileOpacity = 0.6;
+              }
 
               return (
                 <div
                   key={milestone.id}
-                  className="rounded-2xl border overflow-hidden"
-                  style={{ background: "white", borderColor: "var(--color-border)" }}
+                  style={{
+                    borderRadius: 20,
+                    border: `3px solid ${tileBorder}`,
+                    background: tileBg,
+                    opacity: tileOpacity,
+                    overflow: "hidden",
+                  }}
                 >
-                  <div className="px-4 py-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <span className="text-3xl">{config.emoji}</span>
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span
-                              className="font-semibold text-base"
-                              style={{ color: "var(--color-text-dark)" }}
-                            >
-                              {config.name}
-                            </span>
-                            {donedToday && (
-                              <span
-                                className="text-xs px-2 py-0.5 rounded-full font-medium"
-                                style={{ background: "#E8F5EE", color: "#2D7A4F" }}
-                              >
-                                ✓ Done!
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span
-                              className="text-xs px-2 py-0.5 rounded-full font-medium"
-                              style={{ background: areaColors.bg, color: areaColors.text }}
-                            >
-                              {milestone.areaId === "LL" ? "Language" : "Numeracy"}
-                            </span>
-                            <span
-                              className="text-xs px-2 py-0.5 rounded-full font-medium"
-                              style={{
-                                background: LEVEL_COLORS[milestone.levelId].bg,
-                                color: LEVEL_COLORS[milestone.levelId].text,
-                              }}
-                            >
-                              {LEVEL_LABELS[milestone.levelId]}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+                  <div style={{ padding: "16px 16px 12px", display: "flex", alignItems: "center", gap: 14 }}>
+                    {/* Emoji — large, child-legible */}
+                    <span style={{ fontSize: 36, lineHeight: 1 }}>{config.emoji}</span>
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      {/* Activity name — no area/level badges (children cannot interpret assessment language) */}
+                      <span style={{ fontSize: 17, fontWeight: 600, color: C.textDark, display: "block" }}>
+                        {config.name}
+                      </span>
+
+                      {/* Done badge — completion only, never performance (spec §Principle 5) */}
+                      {isDone && (
+                        <span
+                          style={{
+                            display: "inline-block",
+                            marginTop: 4,
+                            fontSize: 13,
+                            fontWeight: 600,
+                            color: C.green,
+                          }}
+                        >
+                          ✓ Done!
+                        </span>
+                      )}
                     </div>
+
+                    {/* Lock icon for locked tiles — friendly, not punitive (spec §Design note on locked tiles) */}
+                    {isLocked && (
+                      <span style={{ fontSize: 24, opacity: 0.5 }}>🔒</span>
+                    )}
                   </div>
 
-                  <div className="px-4 pb-4">
-                    <Link
-                      href={`/student/${childId}/play/${milestone.id}`}
-                      className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-semibold text-sm transition-opacity hover:opacity-90"
-                      style={{
-                        background: donedToday ? "var(--color-bg-deep)" : "var(--color-primary)",
-                        color: donedToday ? "var(--color-text-mid)" : "white",
-                      }}
-                    >
-                      {donedToday ? "Play again" : "Play →"}
-                    </Link>
-                  </div>
+                  {/* Play button — only on active tile; locked tiles show no button */}
+                  {(isActive || isDone) && (
+                    <div style={{ padding: "0 16px 16px" }}>
+                      <Link
+                        href={`/student/${childId}/play/${milestone.id}`}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 8,
+                          width: "100%",
+                          padding: "14px",
+                          borderRadius: 32,
+                          border: "none",
+                          background: isDone ? C.borderWarm : C.yellow,
+                          color: isDone ? C.textMuted : C.textAmber,
+                          fontSize: 18,
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          textDecoration: "none",
+                          boxSizing: "border-box",
+                        }}
+                      >
+                        {isDone ? "Play again" : "▶  Play"}
+                      </Link>
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
         )}
       </div>
-
-      {/* Encouragement footer */}
-      <p
-        className="text-center text-sm mt-8"
-        style={{ color: "var(--color-text-muted)" }}
-      >
-        Keep going — you're doing great! 🌟
-      </p>
     </div>
   );
 }

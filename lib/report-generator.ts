@@ -8,6 +8,7 @@ import type {
   LevelId,
 } from "./types";
 import { LEARNING_AREAS, LEVEL_LABELS } from "./types";
+import { getChildDisplayName, getPronounFromGender } from "./display-name";
 import { getCurrentLevel, evaluateSkillMastery, evaluateSEDMastery } from "./mastery";
 
 const LEVEL_DESCRIPTIONS: Record<LevelId, string> = {
@@ -31,8 +32,8 @@ export function generateReportDraft(
   const child = children.find((c) => c.id === childId);
   if (!child) return "";
 
-  const name = child.name;
-  const he = child.pronoun;
+  const name = getChildDisplayName(child);
+  const he = getPronounFromGender(child.gender);
   const his = he === "they" ? "their" : he === "he" ? "his" : "her";
   const Him = he === "they" ? "They" : he === "he" ? "He" : "She";
 

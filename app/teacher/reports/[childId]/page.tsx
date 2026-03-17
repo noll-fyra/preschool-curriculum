@@ -3,6 +3,7 @@
 import { use } from "react";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
+import { getChildDisplayName } from "@/lib/display-name";
 import { ReportEditor } from "@/components/teacher/ReportEditor";
 import { ChildAvatar } from "@/components/teacher/ChildAvatar";
 
@@ -48,13 +49,13 @@ export default function ReportDetailPage({
 
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <ChildAvatar name={child.name} size="lg" />
+        <ChildAvatar name={getChildDisplayName(child)} size="lg" />
         <div>
           <h1
             className="text-2xl font-bold"
             style={{ color: "var(--color-text-dark)" }}
           >
-            {child.name}
+            {getChildDisplayName(child)}
           </h1>
           <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
             Developmental Report · Term 2, 2026
@@ -69,7 +70,7 @@ export default function ReportDetailPage({
             className="text-sm mb-4"
             style={{ color: "var(--color-text-muted)" }}
           >
-            No report generated yet for {child.name}.
+            No report generated yet for {getChildDisplayName(child)}.
           </p>
           <button
             onClick={() => generateReport(childId)}
@@ -85,7 +86,7 @@ export default function ReportDetailPage({
       {report && (
         <ReportEditor
           report={report}
-          childName={child.name}
+          childName={getChildDisplayName(child)}
           onSaveNotes={saveReportNotes}
           onPublish={publishReport}
         />

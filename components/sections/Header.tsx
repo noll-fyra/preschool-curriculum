@@ -1,93 +1,115 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 const navLinks = [
-  { href: "#problem", label: "The problem" },
-  { href: "#solution", label: "How it works" },
-  { href: "#teachers", label: "For teachers" },
-  { href: "#parents", label: "For parents" },
+  { href: "/features", label: "Product" },
+  { href: "/for-teachers", label: "For teachers" },
+  { href: "/for-parents", label: "For parents" },
+  { href: "/for-students", label: "For children" },
 ];
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-200"
       style={{
-        backgroundColor: scrolled ? "rgba(255, 253, 248, 0.95)" : "transparent",
-        backdropFilter: scrolled ? "blur(12px)" : "none",
-        boxShadow: scrolled ? "0 1px 0 rgba(216, 232, 220, 0.8)" : "none",
+        backgroundColor: "rgba(255,255,255,0.97)",
+        backdropFilter: "blur(12px)",
+        borderBottom: scrolled ? "1px solid #E5E5E5" : "1px solid transparent",
       }}
     >
-      <div className="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between">
         {/* Logo */}
-        <a
-          href="#hero"
-          className="flex items-center gap-2.5 font-extrabold text-lg focus-visible:outline-2 focus-visible:outline-offset-2 rounded-sm"
-          style={{ color: "#2D3A2E" }}
-          aria-label="Nurture — back to top"
+        <Link
+          href="/"
+          className="flex items-center gap-2 font-extrabold text-base focus-visible:outline-2 focus-visible:outline-offset-2 rounded-sm shrink-0"
+          style={{ color: "#1A1A1A" }}
+          aria-label="Nurture — home"
         >
           <div
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-sm"
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-sm"
             style={{ backgroundColor: "#4A9B6F" }}
             aria-hidden="true"
           >
             🌱
           </div>
           <span>nurture</span>
-        </a>
+        </Link>
 
-        {/* Desktop nav */}
-        <nav aria-label="Main navigation" className="hidden md:flex items-center gap-6">
+        {/* Desktop nav — centered */}
+        <nav aria-label="Main navigation" className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-semibold transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 rounded-sm"
-              style={{ color: "#5C6B5D" }}
+              className="text-sm px-3 py-1.5 rounded-md transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2"
+              style={{ color: "#5C5C5C", fontWeight: 500 }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.color = "#4A9B6F";
+                (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#F5F5F5";
+                (e.currentTarget as HTMLAnchorElement).style.color = "#1A1A1A";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.color = "#5C6B5D";
+                (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "transparent";
+                (e.currentTarget as HTMLAnchorElement).style.color = "#5C5C5C";
               }}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
+        </nav>
+
+        {/* Desktop CTAs */}
+        <div className="hidden md:flex items-center gap-2 shrink-0">
           <a
             href="mailto:hello@nurture.edu.sg"
-            className="text-sm font-bold px-4 py-2 rounded-full transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2"
+            className="text-sm px-3 py-1.5 rounded-md transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2"
+            style={{ color: "#5C5C5C", fontWeight: 500 }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#F5F5F5";
+              (e.currentTarget as HTMLAnchorElement).style.color = "#1A1A1A";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "transparent";
+              (e.currentTarget as HTMLAnchorElement).style.color = "#5C5C5C";
+            }}
+          >
+            Log in
+          </a>
+          <a
+            href="mailto:hello@nurture.edu.sg"
+            className="text-sm font-semibold px-4 py-1.5 rounded-md transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2"
             style={{
-              backgroundColor: "#4A9B6F",
+              backgroundColor: "#1A1A1A",
               color: "white",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#3D8860";
+              (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#2D2D2D";
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#4A9B6F";
+              (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#1A1A1A";
             }}
           >
-            Get in touch
+            Get started free
           </a>
-        </nav>
+        </div>
 
-        {/* Mobile: just show Get in touch */}
+        {/* Mobile CTA */}
         <a
           href="mailto:hello@nurture.edu.sg"
-          className="md:hidden text-sm font-bold px-4 py-2 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2"
-          style={{ backgroundColor: "#4A9B6F", color: "white" }}
+          className="md:hidden text-sm font-semibold px-3 py-1.5 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2"
+          style={{ backgroundColor: "#1A1A1A", color: "white" }}
         >
-          Contact
+          Get started
         </a>
       </div>
     </header>

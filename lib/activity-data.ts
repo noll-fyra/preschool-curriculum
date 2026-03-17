@@ -23,6 +23,8 @@ export interface ActivityConfig {
   emoji: string;
   isDynamic?: boolean; // if true, questions are generated at runtime (LL-B-01)
   questions: ActivityQuestion[];
+  /** Milestone IDs this activity trains (admin-editable; defaults to [milestoneId]) */
+  skillMilestoneIds?: string[];
 }
 
 // ─── Language & Literacy ────────────────────────────────────────────────────

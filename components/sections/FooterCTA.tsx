@@ -2,121 +2,126 @@
 
 import AnimateIn from "@/components/ui/AnimateIn";
 
+const roles = [
+  {
+    icon: "👩‍🏫",
+    title: "Get started as a teacher",
+    desc: "Dashboard, observations, and pre-drafted reports.",
+    href: "/for-teachers",
+    bg: "#F0FAF5",
+    border: "#B8DEC8",
+  },
+  {
+    icon: "👨‍👩‍👧",
+    title: "Get started as a parent",
+    desc: "Real-time progress feed and at-home activity suggestions.",
+    href: "/for-parents",
+    bg: "#F2F7FD",
+    border: "#B8D4E8",
+  },
+  {
+    icon: "🧒",
+    title: "Get started as a child",
+    desc: "Personalised, audio-guided activities that feel like play.",
+    href: "/for-students",
+    bg: "#FFF8E8",
+    border: "#FDE8B0",
+  },
+];
+
 export default function FooterCTA() {
   return (
-    <footer
-      id="footer"
-      aria-labelledby="footer-heading"
-      style={{ backgroundColor: "#F5EFE0" }}
-    >
-      {/* CTA block */}
-      <section className="py-20 border-b" style={{ borderColor: "#D8E8DC" }}>
+    <footer id="footer" aria-labelledby="footer-cta-heading">
+      {/* Main CTA */}
+      <section
+        className="py-24"
+        style={{ backgroundColor: "#1A2E22" }}
+      >
         <div className="max-w-4xl mx-auto px-5 text-center">
           <AnimateIn>
-            <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-6"
-              style={{ backgroundColor: "#4A9B6F" }}
-              aria-hidden="true"
-            >
-              🌱
-            </div>
+            <p className="text-sm font-semibold mb-4" style={{ color: "#6BBF8E" }}>
+              Try for free
+            </p>
             <h2
-              id="footer-heading"
-              className="font-extrabold mb-4"
+              id="footer-cta-heading"
+              className="font-extrabold mb-5"
               style={{
-                fontSize: "clamp(1.75rem, 4vw, 2.25rem)",
-                color: "#2D3A2E",
-                letterSpacing: "-0.02em",
+                fontSize: "clamp(2rem, 5vw, 3.25rem)",
+                color: "#FFFFFF",
+                letterSpacing: "-0.03em",
+                lineHeight: 1.05,
               }}
             >
-              Nurture is coming soon to{" "}
-              <span style={{ color: "#4A9B6F" }}>your school.</span>
+              Nurture is coming soon<br />
+              <span style={{ color: "#6BBF8E" }}>to your school.</span>
             </h2>
-            <p className="text-lg mb-10 max-w-xl mx-auto" style={{ color: "#5C6B5D" }}>
-              If you&apos;re a parent, you&apos;ll receive more information when the platform
-              launches. If you&apos;re a teacher, your school director will walk you through
-              how it fits into your classroom.
+            <p className="text-lg mb-10 max-w-xl mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>
+              If you&apos;re a parent, you&apos;ll receive more information when the platform launches. If you&apos;re a teacher, your school director will walk you through how it fits your classroom.
             </p>
 
-            {/* Three audience links */}
-            <nav aria-label="Audience links">
-              <div className="flex flex-wrap gap-3 justify-center">
+            <div className="flex flex-wrap gap-3 justify-center mb-16">
+              <a
+                href="mailto:hello@nurture.edu.sg"
+                className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-lg transition-all duration-150"
+                style={{ backgroundColor: "white", color: "#1A1A1A" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#F0F0F0"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "white"; }}
+              >
+                Get started free
+              </a>
+              <a
+                href="mailto:hello@nurture.edu.sg"
+                className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-lg transition-all duration-150"
+                style={{
+                  backgroundColor: "transparent",
+                  color: "rgba(255,255,255,0.85)",
+                  border: "1px solid rgba(255,255,255,0.25)",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.5)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.25)";
+                }}
+              >
+                Request a demo →
+              </a>
+            </div>
+
+            {/* Role cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {roles.map((role) => (
                 <a
-                  href="#parents"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2"
-                  style={{
-                    backgroundColor: "#4A9B6F",
-                    color: "white",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#3D8860";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#4A9B6F";
-                  }}
+                  key={role.title}
+                  href={role.href}
+                  className="p-5 rounded-2xl text-left transition-all duration-150 block focus-visible:outline-2 focus-visible:outline-offset-2"
+                  style={{ backgroundColor: role.bg, border: `1px solid ${role.border}` }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.9"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "1"; }}
                 >
-                  <span>👨‍👩‍👧</span>
-                  What to expect as a parent →
+                  <div className="text-2xl mb-3" aria-hidden="true">{role.icon}</div>
+                  <p className="text-sm font-semibold mb-1" style={{ color: "#1A1A1A" }}>{role.title}</p>
+                  <p className="text-xs" style={{ color: "#737373" }}>{role.desc}</p>
                 </a>
-                <a
-                  href="#teachers"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2"
-                  style={{
-                    backgroundColor: "white",
-                    color: "#2D3A2E",
-                    border: "1.5px solid #D8E8DC",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#FDF6E8";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "white";
-                  }}
-                >
-                  <span>👩‍🏫</span>
-                  How Nurture works in the classroom →
-                </a>
-                <a
-                  href="mailto:hello@nurture.edu.sg"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2"
-                  style={{
-                    backgroundColor: "white",
-                    color: "#2D3A2E",
-                    border: "1.5px solid #D8E8DC",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#FDF6E8";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "white";
-                  }}
-                >
-                  <span>🏫</span>
-                  For education providers: Get in touch →
-                </a>
-              </div>
-            </nav>
+              ))}
+            </div>
           </AnimateIn>
         </div>
       </section>
 
       {/* Footer bar */}
-      <div className="py-6">
+      <div className="py-5" style={{ backgroundColor: "#111D14", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="max-w-6xl mx-auto px-5 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-sm"
-              style={{ backgroundColor: "#4A9B6F" }}
-              aria-hidden="true"
-            >
+            <div className="w-6 h-6 rounded-md flex items-center justify-center text-sm" style={{ backgroundColor: "#4A9B6F" }} aria-hidden="true">
               🌱
             </div>
-            <span className="font-bold text-sm" style={{ color: "#2D3A2E" }}>Nurture</span>
+            <span className="text-sm font-bold" style={{ color: "rgba(255,255,255,0.85)" }}>Nurture</span>
           </div>
-          <p className="text-xs text-center" style={{ color: "#9DAE9E" }}>
+          <p className="text-xs text-center" style={{ color: "rgba(255,255,255,0.3)" }}>
             A learning platform for Singapore&apos;s preschools · Aligned to NEL Framework 2022
           </p>
-          <p className="text-xs" style={{ color: "#9DAE9E" }}>
+          <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
             Built for NTUC First Campus
           </p>
         </div>

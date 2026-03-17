@@ -6,6 +6,7 @@ import type {
   ChildMilestoneProgress,
   ActivitySession,
   TeacherObservation,
+  TeacherUpdate,
   LearningAreaId,
   LevelId,
   Pronoun,
@@ -152,18 +153,23 @@ export function getRecencyLabel(
 
 export interface FeedItem {
   id: string;
-  type: "activity_completed" | "milestone_achieved";
+  type: "activity_completed" | "milestone_achieved" | "teacher_update";
   title: string;
   subtitle: string;
   timestamp: string; // ISO string
-  icon: "activity" | "milestone";
+  icon: "activity" | "milestone" | "teacher_update";
+  /** For teacher_update: media URLs for display */
+  media?: { type: "photo" | "video"; url: string }[];
 }
 
 export function getFeedItems(
   childId: string,
+  classId: string,
   sessions: ActivitySession[],
   progress: ChildMilestoneProgress[],
-  milestones: Milestone[]
+  milestones: Milestone[],
+  teacherUpdates: TeacherUpdate[],
+  teachers: { id: string; firstName: string; lastName: string }[]
 ): FeedItem[] {
   const items: FeedItem[] = [];
 
@@ -212,6 +218,29 @@ export function getFeedItems(
       subtitle: milestone.parentDescription,
       timestamp: p.achievedAt,
       icon: "milestone",
+    });
+  }
+
+  // Teacher updates (class-level or tagging this child)
+  const visibleUpdates = teacherUpdates.filter(
+    (u) =>
+      u.classId === classId &&
+      (u.childIds.length === 0 || u.childIds.includes(childId))
+  );
+  for (const u of visibleUpdates) {
+    const teacher = teachers.find((t) => t.id === u.teacherId);
+    const teacherName = teacher
+      ? [teacher.firstName, teacher.lastName].filter(Boolean).join(" ").trim() || "Teacher"
+      : "Teacher";
+    const subtitle = u.text.length > 80 ? u.text.slice(0, 80) + "…" : u.text;
+    items.push({
+      id: u.id,
+      type: "teacher_update",
+      title: `Update from ${teacherName}`,
+      subtitle,
+      timestamp: u.createdAt,
+      icon: "teacher_update",
+      media: u.media,
     });
   }
 

@@ -7,27 +7,24 @@ const stats = [
   {
     value: 45,
     suffix: "%",
-    color: "#E8745A",
     label: "of early childhood educators report high burnout",
     sub: "Administrative load is a leading cause.",
   },
   {
     value: 60,
     suffix: "%+",
-    color: "#F5A623",
     label: "of parents want to engage their child in learning at home",
-    sub: "But most don't know what to do or whether their effort is aligned to school.",
+    sub: "But most don't know what to do or whether it aligns to school.",
   },
   {
     value: 3,
     suffix: "×",
-    color: "#4A9B6F",
     label: "stronger outcomes with consistent parent-teacher collaboration",
     sub: "Across literacy, numeracy, and social development.",
   },
 ];
 
-function StatCounter({ value, suffix, color }: { value: number; suffix: string; color: string }) {
+function StatCounter({ value, suffix }: { value: number; suffix: string }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
   const animated = useRef(false);
@@ -41,7 +38,6 @@ function StatCounter({ value, suffix, color }: { value: number; suffix: string; 
         if (entry.isIntersecting && !animated.current) {
           animated.current = true;
 
-          // Respect reduced motion
           if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
             setCount(value);
             return;
@@ -67,11 +63,7 @@ function StatCounter({ value, suffix, color }: { value: number; suffix: string; 
   }, [value]);
 
   return (
-    <span
-      ref={ref}
-      className="font-extrabold leading-none tracking-tight"
-      style={{ fontSize: "clamp(2.5rem, 6vw, 4rem)", color }}
-    >
+    <span ref={ref} className="font-extrabold leading-none tracking-tight" style={{ fontSize: "clamp(2.5rem, 6vw, 3.5rem)", color: "#1A1A1A" }}>
       {count}{suffix}
     </span>
   );
@@ -83,37 +75,42 @@ export default function ResearchStats() {
       id="research"
       aria-labelledby="research-heading"
       className="py-24"
-      style={{ backgroundColor: "#F5EFE0" }}
+      style={{ backgroundColor: "#F7F7F5" }}
     >
       <div className="max-w-5xl mx-auto px-5">
         <AnimateIn>
-          <div className="text-center mb-14 max-w-2xl mx-auto">
+          <div className="text-center mb-16 max-w-2xl mx-auto">
+            <p className="text-sm font-semibold mb-3" style={{ color: "#4A9B6F" }}>
+              Why it matters
+            </p>
             <h2
               id="research-heading"
               className="font-extrabold mb-4"
               style={{
-                fontSize: "clamp(1.75rem, 4vw, 2.25rem)",
-                color: "#2D3A2E",
-                letterSpacing: "-0.02em",
+                fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
+                color: "#1A1A1A",
+                letterSpacing: "-0.03em",
               }}
             >
-              Why this matters —{" "}
-              <span style={{ color: "#4A9B6F" }}>and why now.</span>
+              More outcomes. Less admin.
             </h2>
+            <p className="text-lg" style={{ color: "#737373" }}>
+              Nurture was built in direct response to real problems — starting with conversations with teachers, parents, and school directors.
+            </p>
           </div>
         </AnimateIn>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-14">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-px mb-12" style={{ backgroundColor: "#E5E5E5", border: "1px solid #E5E5E5", borderRadius: 16, overflow: "hidden" }}>
           {stats.map((stat, i) => (
-            <AnimateIn key={i} delay={i * 0.12}>
-              <div className="text-center">
+            <AnimateIn key={i} delay={i * 0.1}>
+              <div className="p-8 text-center" style={{ backgroundColor: "#FFFFFF" }}>
                 <div className="mb-3">
-                  <StatCounter value={stat.value} suffix={stat.suffix} color={stat.color} />
+                  <StatCounter value={stat.value} suffix={stat.suffix} />
                 </div>
-                <p className="font-bold text-sm mb-1.5" style={{ color: "#2D3A2E" }}>
+                <p className="text-sm font-semibold mb-1.5 leading-snug" style={{ color: "#1A1A1A" }}>
                   {stat.label}
                 </p>
-                <p className="text-xs" style={{ color: "#9DAE9E" }}>
+                <p className="text-xs" style={{ color: "#9A9A9A" }}>
                   {stat.sub}
                 </p>
               </div>
@@ -123,15 +120,19 @@ export default function ResearchStats() {
 
         <AnimateIn>
           <div
-            className="rounded-2xl p-8 text-center max-w-2xl mx-auto"
-            style={{ backgroundColor: "white", boxShadow: "0 2px 16px rgba(74,155,111,0.08)" }}
+            className="rounded-2xl p-8 text-center"
+            style={{ backgroundColor: "#1A2E22", color: "white" }}
           >
-            <p className="leading-relaxed" style={{ color: "#5C6B5D" }}>
-              Nurture was built in direct response to these realities — starting with conversations
-              with school directors, teachers, and parents, not with technology looking for a problem.
-              The milestone framework, the activity design, and the parent experience were all shaped
-              by how preschool education actually works in Singapore.
+            <p className="text-lg leading-relaxed mb-6" style={{ color: "rgba(255,255,255,0.75)" }}>
+              &ldquo;The milestone framework, the activity design, and the parent experience were all shaped by how preschool education actually works in Singapore — not by technology looking for a problem.&rdquo;
             </p>
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" style={{ backgroundColor: "#4A9B6F" }}>🌱</div>
+              <div className="text-left">
+                <p className="text-sm font-semibold text-white">Nurture</p>
+                <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>Built for Singapore&apos;s preschools · Aligned to NEL Framework 2022</p>
+              </div>
+            </div>
           </div>
         </AnimateIn>
       </div>

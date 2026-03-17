@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { getMilestoneProgressForChild, getChildLevelPerArea } from "@/lib/selectors";
+import { getChildDisplayName, getPronounFromGender } from "@/lib/display-name";
 import { getProgressBarFill, getProgressBarColor, getAreaSummaryText } from "@/lib/parent-summary";
 import { LEARNING_AREAS, LEVEL_LABELS, type LearningAreaId, type LevelId, type MilestoneStatus } from "@/lib/types";
 
@@ -90,7 +91,7 @@ export default function AreaDetailPage() {
   const hasReachedSecure = currentLevel === "S" ||
     sMilestones.some((m) => m.status === "achieved" || m.status === "in_progress");
 
-  const areaSummary = getAreaSummaryText(child.name, child.pronoun, areaId, currentLevel);
+  const areaSummary = getAreaSummaryText(getChildDisplayName(child), getPronounFromGender(child.gender), areaId, currentLevel);
 
   function sectionSummary(milestones: typeof areaMilestones): string {
     const achievedCount = milestones.filter((m) => m.status === "achieved").length;

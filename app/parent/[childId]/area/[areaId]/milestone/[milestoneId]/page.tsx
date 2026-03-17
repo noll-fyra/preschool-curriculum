@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useStore } from "@/lib/store";
+import { getChildDisplayName, getPronounFromGender } from "@/lib/display-name";
 import { getMilestoneProgressForChild } from "@/lib/selectors";
 import { getMilestoneContent } from "@/lib/milestone-content";
 import { getTimeAgoLabel } from "@/lib/parent-summary";
@@ -221,7 +222,7 @@ export default function MilestoneDetailPage() {
           style={{ background: "var(--color-bg-cream)", borderColor: "var(--color-border)" }}
         >
           <p style={{ fontSize: 13, color: "var(--color-text-mid)", lineHeight: 1.6 }}>
-            Now that {child.name} has achieved this, {child.pronoun === "they" ? "they are" : child.pronoun === "he" ? "he is" : "she is"} ready to start working on:{" "}
+            Now that {getChildDisplayName(child)} has achieved this, {getPronounFromGender(child.gender) === "they" ? "they are" : getPronounFromGender(child.gender) === "he" ? "he is" : "she is"} ready to start working on:{" "}
             <span style={{ color: "var(--color-text-dark)", fontWeight: 500 }}>
               {nextMilestone.parentDescription}
             </span>

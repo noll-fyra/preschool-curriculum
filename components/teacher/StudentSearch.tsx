@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
+import { getChildDisplayName } from "@/lib/display-name";
 import { ChildAvatar } from "./ChildAvatar";
 
 interface StudentSearchProps {
@@ -23,8 +24,8 @@ export function StudentSearch({ onClose, autoFocus }: StudentSearchProps) {
     trimmed.length === 0
       ? []
       : children
-          .filter((c) => c.name.toLowerCase().includes(trimmed))
-          .sort((a, b) => a.name.localeCompare(b.name))
+          .filter((c) => getChildDisplayName(c).toLowerCase().includes(trimmed))
+          .sort((a, b) => getChildDisplayName(a).localeCompare(getChildDisplayName(b)))
           .slice(0, 8);
 
   function handleSelect(childId: string, classId: string) {
@@ -112,19 +113,17 @@ export function StudentSearch({ onClose, autoFocus }: StudentSearchProps) {
                   onClick={() => handleSelect(child.id, child.classId)}
                   className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-bg-cream transition-colors"
                 >
-                  <ChildAvatar name={child.name} size="sm" />
+                  <ChildAvatar name={getChildDisplayName(child)} size="sm" />
                   <div className="min-w-0">
                     <p
                       className="text-sm font-medium leading-tight"
                       style={{ color: "var(--color-text-dark)" }}
                     >
-                      {child.name}
+                      {getChildDisplayName(child)}
                     </p>
-                    {cls && (
-                      <p className="text-xs leading-tight" style={{ color: "var(--color-text-muted)" }}>
-                        {cls.name}
-                      </p>
-                    )}
+                    <p className="text-xs leading-tight" style={{ color: "var(--color-text-muted)" }}>
+                      {cls ? cls.name : "Unassigned"}
+                    </p>
                   </div>
                 </button>
               );

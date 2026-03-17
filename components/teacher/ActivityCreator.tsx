@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { LearningAreaId, Child, Milestone, PlannedActivity } from "@/lib/types";
+import { getChildDisplayName } from "@/lib/display-name";
 import { ChildAvatar } from "./ChildAvatar";
 
 const AREAS: { id: LearningAreaId; label: string; bg: string; text: string }[] = [
@@ -191,8 +192,8 @@ export function ActivityCreator({
                   color: selected ? "var(--color-primary)" : "var(--color-text-mid)",
                 }}
               >
-                <ChildAvatar name={child.name} size="xs" />
-                {child.name.split(" ")[0]}
+                <ChildAvatar name={getChildDisplayName(child)} size="xs" />
+                {child.firstName}
               </button>
             );
           })}

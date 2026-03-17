@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
+import { getChildDisplayName } from "@/lib/display-name";
 import { getAllChildrenWithLevels } from "@/lib/selectors";
 import { ChildStatusCard } from "@/components/teacher/ChildStatusCard";
 import { ChildAvatar } from "@/components/teacher/ChildAvatar";
@@ -25,7 +26,7 @@ const LEVELS: { id: LevelId; label: string; bg: string; text: string; border: st
 export default function ClassPage() {
   const store = useStore();
   const activeClass = store.classes.find((c) => c.id === store.activeClassId) ?? store.classes[0];
-  const children = getAllChildrenWithLevels(store).sort((a, b) => a.name.localeCompare(b.name));
+  const children = getAllChildrenWithLevels(store).sort((a, b) => getChildDisplayName(a).localeCompare(getChildDisplayName(b)));
   const [activeFilter, setActiveFilter] = useState<LearningAreaId | "all">("all");
 
   return (
@@ -102,7 +103,7 @@ function GroupedView({
 }) {
   const grouped = LEVELS.map((level) => ({
     ...level,
-    children: children.filter((c) => c.levels[areaId] === level.id).sort((a, b) => a.name.localeCompare(b.name)),
+    children: children.filter((c) => c.levels[areaId] === level.id).sort((a, b) => getChildDisplayName(a).localeCompare(getChildDisplayName(b))),
   }));
 
   return (
@@ -140,9 +141,9 @@ function GroupedView({
                     href={`/teacher/child/${child.id}`}
                     className="flex items-center gap-3 px-4 py-3 hover:bg-bg-cream transition-colors"
                   >
-                    <ChildAvatar name={child.name} size="sm" />
+                    <ChildAvatar name={getChildDisplayName(child)} size="sm" />
                     <span className="text-sm font-medium" style={{ color: "var(--color-text-dark)" }}>
-                      {child.name}
+                      {getChildDisplayName(child)}
                     </span>
                     <svg className="ml-auto opacity-30" width="14" height="14" viewBox="0 0 14 14" fill="none">
                       <path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

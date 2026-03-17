@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import type {
   Class,
+  Teacher,
   Child,
   Milestone,
   ChildMilestoneProgress,
@@ -11,9 +12,17 @@ import type {
   PlannedActivity,
   ActivityFeedback,
   Report,
+  TeacherUpdate,
+  PersonalitySnapshot,
+  TeacherStrategies,
+  FamilyContext,
+  TeacherNote,
+  NoteTag,
 } from "./types";
+import type { ActivityConfig } from "./activity-data";
 import {
   CLASSES,
+  TEACHERS,
   MILESTONES,
   CHILDREN,
   buildInitialProgress,
@@ -21,6 +30,11 @@ import {
   DEMO_OBSERVATIONS,
   DEMO_PLANNED_ACTIVITIES,
   DEMO_ACTIVITY_FEEDBACK,
+  DEMO_TEACHER_UPDATES,
+  DEMO_PERSONALITY_SNAPSHOTS,
+  DEMO_TEACHER_STRATEGIES,
+  DEMO_FAMILY_CONTEXTS,
+  DEMO_TEACHER_NOTES,
 } from "./seed-data";
 import { computeStatus } from "./mastery";
 import { generateReportDraft } from "./report-generator";
@@ -31,6 +45,7 @@ export interface NurtureStore {
   // Data
   classes: Class[];
   activeClassId: string;
+  teachers: Teacher[];
   children: Child[];
   milestones: Milestone[];
   progress: ChildMilestoneProgress[];
@@ -39,6 +54,12 @@ export interface NurtureStore {
   plannedActivities: PlannedActivity[];
   activityFeedback: ActivityFeedback[];
   reports: Report[];
+  teacherUpdates: TeacherUpdate[];
+  activityConfigOverrides: Record<string, ActivityConfig>;
+  personalitySnapshots: PersonalitySnapshot[];
+  teacherStrategies: TeacherStrategies[];
+  familyContexts: FamilyContext[];
+  teacherNotes: TeacherNote[];
 
   // Actions
   setActiveClass: (classId: string) => void;
@@ -53,6 +74,27 @@ export interface NurtureStore {
   saveReportNotes: (reportId: string, teacherNotes: string) => void;
   publishReport: (reportId: string) => void;
   generateReport: (childId: string) => void;
+  createTeacherUpdate: (update: Omit<TeacherUpdate, "id" | "createdAt">) => void;
+  savePersonalitySnapshot: (childId: string, content: string) => void;
+  saveTeacherStrategies: (childId: string, whatWorks: string, whatToWatch: string) => void;
+  saveFamilyContext: (childId: string, content: string) => void;
+  addTeacherNote: (childId: string, content: string, tags: NoteTag[]) => void;
+  deleteTeacherNote: (noteId: string) => void;
+
+  // Admin actions
+  addClass: (c: Omit<Class, "id">) => void;
+  updateClass: (id: string, c: Partial<Omit<Class, "id">>) => void;
+  deleteClass: (id: string) => void;
+  addTeacher: (t: Omit<Teacher, "id">) => void;
+  updateTeacher: (id: string, t: Partial<Omit<Teacher, "id">>) => void;
+  deleteTeacher: (id: string) => void;
+  addChild: (c: Omit<Child, "id">) => void;
+  updateChild: (id: string, c: Partial<Omit<Child, "id">>) => void;
+  deleteChild: (id: string) => void;
+  setChildClass: (childId: string, classId: string) => void;
+  setTeacherClasses: (teacherId: string, classIds: string[]) => void;
+  setActivityConfig: (milestoneId: string, config: ActivityConfig) => void;
+  clearActivityConfigOverride: (milestoneId: string) => void;
 }
 
 // ─── Store ─────────────────────────────────────────────────────────────────
@@ -62,6 +104,7 @@ const initialProgress = buildInitialProgress();
 export const useStore = create<NurtureStore>((set, get) => ({
   classes: CLASSES,
   activeClassId: CLASSES[0].id,
+  teachers: TEACHERS,
   children: CHILDREN,
   milestones: MILESTONES,
   progress: initialProgress,
@@ -70,6 +113,12 @@ export const useStore = create<NurtureStore>((set, get) => ({
   plannedActivities: DEMO_PLANNED_ACTIVITIES,
   activityFeedback: DEMO_ACTIVITY_FEEDBACK,
   reports: [],
+  teacherUpdates: DEMO_TEACHER_UPDATES,
+  activityConfigOverrides: {},
+  personalitySnapshots: DEMO_PERSONALITY_SNAPSHOTS,
+  teacherStrategies: DEMO_TEACHER_STRATEGIES,
+  familyContexts: DEMO_FAMILY_CONTEXTS,
+  teacherNotes: DEMO_TEACHER_NOTES,
 
   // ── Switch active class ──────────────────────────────────────────────────
   setActiveClass: (classId) => set({ activeClassId: classId }),
@@ -254,6 +303,16 @@ export const useStore = create<NurtureStore>((set, get) => ({
     }));
   },
 
+  // ── Create a teacher update (class or student-specific) ──────────────────
+  createTeacherUpdate: (update) => {
+    const newUpdate: TeacherUpdate = {
+      ...update,
+      id: `update-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+    };
+    set((s) => ({ teacherUpdates: [...s.teacherUpdates, newUpdate] }));
+  },
+
   // ── Generate a new report draft ─────────────────────────────────────────
   generateReport: (childId) => {
     const state = get();
@@ -274,5 +333,177 @@ export const useStore = create<NurtureStore>((set, get) => ({
       generatedAt: new Date().toISOString(),
     };
     set((s) => ({ reports: [...s.reports, newReport] }));
+  },
+
+  // ── Profile: personality snapshot ────────────────────────────────────────
+  savePersonalitySnapshot: (childId, content) => {
+    set((state) => {
+      const existing = state.personalitySnapshots.find((s) => s.childId === childId);
+      const updated = { childId, content, updatedAt: new Date().toISOString() };
+      return {
+        personalitySnapshots: existing
+          ? state.personalitySnapshots.map((s) => (s.childId === childId ? updated : s))
+          : [...state.personalitySnapshots, updated],
+      };
+    });
+  },
+
+  // ── Profile: teacher strategies (what works / what to watch) ──────────────
+  saveTeacherStrategies: (childId, whatWorks, whatToWatch) => {
+    set((state) => {
+      const existing = state.teacherStrategies.find((s) => s.childId === childId);
+      const updated = { childId, whatWorks, whatToWatch, updatedAt: new Date().toISOString() };
+      return {
+        teacherStrategies: existing
+          ? state.teacherStrategies.map((s) => (s.childId === childId ? updated : s))
+          : [...state.teacherStrategies, updated],
+      };
+    });
+  },
+
+  // ── Profile: family context ───────────────────────────────────────────────
+  saveFamilyContext: (childId, content) => {
+    set((state) => {
+      const existing = state.familyContexts.find((f) => f.childId === childId);
+      const updated = { childId, content, updatedAt: new Date().toISOString() };
+      return {
+        familyContexts: existing
+          ? state.familyContexts.map((f) => (f.childId === childId ? updated : f))
+          : [...state.familyContexts, updated],
+      };
+    });
+  },
+
+  // ── Profile: teacher notes ────────────────────────────────────────────────
+  addTeacherNote: (childId, content, tags) => {
+    const newNote: TeacherNote = {
+      id: `tnote-${Date.now()}`,
+      childId,
+      content,
+      tags,
+      welfare: tags.includes("welfare"),
+      createdAt: new Date().toISOString(),
+    };
+    set((state) => ({ teacherNotes: [...state.teacherNotes, newNote] }));
+  },
+
+  deleteTeacherNote: (noteId) => {
+    set((state) => {
+      const note = state.teacherNotes.find((n) => n.id === noteId);
+      if (!note || note.welfare) return {}; // welfare notes cannot be deleted
+      return {
+        teacherNotes: state.teacherNotes.map((n) =>
+          n.id === noteId ? { ...n, deletedAt: new Date().toISOString() } : n
+        ),
+      };
+    });
+  },
+
+  // ── Admin: classes ────────────────────────────────────────────────────
+  addClass: (c) => {
+    const id = `class-${Date.now()}`;
+    set((s) => ({ classes: [...s.classes, { ...c, id }] }));
+  },
+  updateClass: (id, c) => {
+    set((s) => ({
+      classes: s.classes.map((x) => (x.id === id ? { ...x, ...c } : x)),
+    }));
+  },
+  deleteClass: (id) => {
+    set((s) => ({
+      classes: s.classes.filter((x) => x.id !== id),
+      teachers: s.teachers.map((t) => ({
+        ...t,
+        classIds: t.classIds.filter((cid) => cid !== id),
+      })),
+      children: s.children.map((c) =>
+        c.classId === id ? { ...c, classId: "" } : c
+      ),
+      teacherUpdates: s.teacherUpdates.filter((u) => u.classId !== id),
+    }));
+  },
+
+  // ── Admin: teachers ───────────────────────────────────────────────────
+  addTeacher: (t) => {
+    const id = `teacher-${Date.now()}`;
+    set((s) => ({
+      teachers: [...s.teachers, { ...t, id, classIds: t.classIds ?? [] }],
+    }));
+  },
+  updateTeacher: (id, t) => {
+    set((s) => ({
+      teachers: s.teachers.map((x) => (x.id === id ? { ...x, ...t } : x)),
+    }));
+  },
+  deleteTeacher: (id) => {
+    set((s) => ({ teachers: s.teachers.filter((x) => x.id !== id) }));
+  },
+
+  // ── Admin: children ────────────────────────────────────────────────────
+  addChild: (c) => {
+    const id = `child-${Date.now()}`;
+    const state = get();
+    const newProgress: ChildMilestoneProgress[] = state.milestones.map((m) => ({
+      childId: id,
+      milestoneId: m.id,
+      status: "not_started" as const,
+    }));
+    set((s) => ({
+      children: [...s.children, { ...c, id }],
+      progress: [...s.progress, ...newProgress],
+    }));
+  },
+  updateChild: (id, c) => {
+    set((s) => ({
+      children: s.children.map((x) => (x.id === id ? { ...x, ...c } : x)),
+    }));
+  },
+  deleteChild: (id) => {
+    set((s) => ({
+      children: s.children.filter((x) => x.id !== id),
+      progress: s.progress.filter((p) => p.childId !== id),
+      sessions: s.sessions.filter((x) => x.childId !== id),
+      observations: s.observations.filter((x) => x.childId !== id),
+      reports: s.reports.filter((r) => r.childId !== id),
+      activityFeedback: s.activityFeedback.filter((f) => f.childId !== id),
+      teacherUpdates: s.teacherUpdates
+        .filter((u) => {
+          if (u.childIds.length === 0) return true;
+          const remaining = u.childIds.filter((cid) => cid !== id);
+          return remaining.length > 0;
+        })
+        .map((u) => ({
+          ...u,
+          childIds: u.childIds.length === 0 ? u.childIds : u.childIds.filter((cid) => cid !== id),
+        })),
+    }));
+  },
+  setChildClass: (childId, classId) => {
+    set((s) => ({
+      children: s.children.map((c) =>
+        c.id === childId ? { ...c, classId } : c
+      ),
+    }));
+  },
+  setTeacherClasses: (teacherId, classIds) => {
+    set((s) => ({
+      teachers: s.teachers.map((t) =>
+        t.id === teacherId ? { ...t, classIds } : t
+      ),
+    }));
+  },
+
+  // ── Admin: activity config overrides (for student play) ─────────────────
+  setActivityConfig: (milestoneId, config) => {
+    set((s) => ({
+      activityConfigOverrides: { ...s.activityConfigOverrides, [milestoneId]: config },
+    }));
+  },
+  clearActivityConfigOverride: (milestoneId) => {
+    set((s) => {
+      const next = { ...s.activityConfigOverrides };
+      delete next[milestoneId];
+      return { activityConfigOverrides: next };
+    });
   },
 }));

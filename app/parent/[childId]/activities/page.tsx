@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useStore } from "@/lib/store";
+import { getChildDisplayName, getPronounFromGender } from "@/lib/display-name";
 import { autoSelectAssignments } from "@/lib/assignments";
 import { getActivityConfig } from "@/lib/activity-data";
 import { LEVEL_LABELS, type LevelId } from "@/lib/types";
@@ -24,6 +25,7 @@ export default function ParentActivitiesPage() {
   const store = useStore();
 
   const child = store.children.find((c) => c.id === childId);
+  const activityConfigOverrides = store.activityConfigOverrides;
   if (!child) {
     return (
       <div className="px-5 py-8 text-center">
@@ -49,7 +51,7 @@ export default function ParentActivitiesPage() {
   );
 
   const himHer =
-    child.pronoun === "he" ? "him" : child.pronoun === "she" ? "her" : "them";
+    getPronounFromGender(child.gender) === "he" ? "him" : getPronounFromGender(child.gender) === "she" ? "her" : "them";
 
   return (
     <div className="px-4 py-5 max-w-lg mx-auto">
@@ -62,7 +64,7 @@ export default function ParentActivitiesPage() {
           Activities
         </h1>
         <p className="mt-1" style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
-          {child.name}&apos;s personalised queue — updated weekly by the class teacher.
+          {getChildDisplayName(child)}&apos;s personalised queue — updated weekly by the class teacher.
         </p>
       </div>
 
@@ -78,7 +80,7 @@ export default function ParentActivitiesPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {digitalActivities.map((milestone) => {
-            const config = getActivityConfig(milestone.id);
+            const config = activityConfigOverrides[milestone.id] ?? getActivityConfig(milestone.id);
             if (!config) return null;
 
             const doneToday = passedTodayIds.has(milestone.id);
@@ -150,7 +152,7 @@ export default function ParentActivitiesPage() {
                       fontSize: 14,
                     }}
                   >
-                    {doneToday ? "Play again" : `Let ${child.name} play →`}
+                    {doneToday ? "Play again" : `Let ${getChildDisplayName(child)} play →`}
                   </Link>
                 </div>
               </div>
@@ -164,7 +166,7 @@ export default function ParentActivitiesPage() {
         className="text-center mt-5"
         style={{ fontSize: 13, color: "var(--color-text-muted)" }}
       >
-        Tap an activity to start it with {child.name}, or let {himHer} tap it alone.
+        Tap an activity to start it with {getChildDisplayName(child)}, or let {himHer} tap it alone.
       </p>
     </div>
   );

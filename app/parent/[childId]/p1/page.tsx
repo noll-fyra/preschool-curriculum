@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useStore } from "@/lib/store";
+import { getChildDisplayName, getPronounFromGender } from "@/lib/display-name";
 import { LEARNING_AREAS, type LearningAreaId } from "@/lib/types";
 
 export default function P1ReadinessPage() {
@@ -46,7 +47,7 @@ export default function P1ReadinessPage() {
   const isOnTrack = achievedAll / totalMilestones >= 0.5;
 
   const pronoun =
-    child.pronoun === "he" ? "He" : child.pronoun === "she" ? "She" : "They";
+    getPronounFromGender(child.gender) === "he" ? "He" : getPronounFromGender(child.gender) === "she" ? "She" : "They";
 
   return (
     <div className="px-4 py-5 max-w-lg mx-auto">
@@ -71,8 +72,8 @@ export default function P1ReadinessPage() {
         className="leading-relaxed mb-5"
         style={{ fontSize: 13, color: "var(--color-text-mid)" }}
       >
-        This shows how {child.name} is progressing toward the skills expected at the start of
-        Primary 1. There&apos;s no rush — {child.pronoun === "they" ? "they have" : child.pronoun === "he" ? "he has" : "she has"} time.{" "}
+        This shows how {getChildDisplayName(child)} is progressing toward the skills expected at the start of
+        Primary 1. There&apos;s no rush — {getPronounFromGender(child.gender) === "they" ? "they have" : getPronounFromGender(child.gender) === "he" ? "he has" : "she has"} time.{" "}
         This is a guide, not a test.
       </p>
 
@@ -129,11 +130,11 @@ export default function P1ReadinessPage() {
           Kindergarten 2 — aligned to Singapore&apos;s NEL Framework.{" "}
           {isOnTrack ? (
             <span style={{ color: "var(--color-text-dark)", fontWeight: 500 }}>
-              {child.name} is on track.
+              {getChildDisplayName(child)} is on track.
             </span>
           ) : (
             <span style={{ color: "var(--color-text-mid)" }}>
-              Ms Priya can discuss {child.name}&apos;s progress in more detail at your next
+              Ms Priya can discuss {getChildDisplayName(child)}&apos;s progress in more detail at your next
               check-in.
             </span>
           )}

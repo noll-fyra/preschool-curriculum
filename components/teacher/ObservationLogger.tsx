@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Child, Milestone } from "@/lib/types";
+import { getChildDisplayName } from "@/lib/display-name";
 import { ChildAvatar } from "./ChildAvatar";
 
 interface ObservationLoggerProps {
@@ -37,7 +38,7 @@ export function ObservationLogger({
     onLog(selectedChildId, milestoneId);
     const milestone = sedMilestones.find((m) => m.id === milestoneId);
     setLastLogged({
-      childName: selectedChild.name,
+      childName: getChildDisplayName(selectedChild),
       milestone: milestone?.statement ?? milestoneId,
     });
 
@@ -94,8 +95,8 @@ export function ObservationLogger({
                     : "var(--color-border)",
                 }}
               >
-                <ChildAvatar name={child.name} size="sm" />
-                {child.name}
+                <ChildAvatar name={getChildDisplayName(child)} size="sm" />
+                {getChildDisplayName(child)}
               </button>
             );
           })}
@@ -109,7 +110,7 @@ export function ObservationLogger({
             className="text-sm font-semibold uppercase tracking-wide mb-3"
             style={{ color: "var(--color-text-muted)" }}
           >
-            2. Select observed behaviour for {selectedChild.name}
+            2. Select observed behaviour for {getChildDisplayName(selectedChild)}
           </h2>
           <div className="flex flex-col gap-2">
             {sedMilestones.map((milestone) => {

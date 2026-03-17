@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useStore } from "@/lib/store";
+import { getTeacherDisplayName } from "@/lib/display-name";
 import { StudentSearch } from "./StudentSearch";
 
 const NAV_ITEMS = [
@@ -16,6 +17,16 @@ const NAV_ITEMS = [
         <rect x="11" y="3" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.8"/>
         <rect x="2" y="12" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.4"/>
         <rect x="11" y="12" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.4"/>
+      </svg>
+    ),
+  },
+  {
+    href: "/teacher/updates",
+    label: "Updates",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <path d="M2 14v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M10 2v12M6 6l4-4 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
   },
@@ -45,8 +56,9 @@ const NAV_ITEMS = [
 
 export function TeacherNav() {
   const pathname = usePathname();
-  const { classes, activeClassId, setActiveClass } = useStore();
+  const { classes, teachers, activeClassId, setActiveClass } = useStore();
   const activeClass = classes.find((c) => c.id === activeClassId) ?? classes[0];
+  const activeTeacher = teachers.find((t) => t.classIds.includes(activeClass.id));
   const [classMenuOpen, setClassMenuOpen] = useState(false);
 
   return (
@@ -156,7 +168,7 @@ export function TeacherNav() {
           style={{ color: "var(--color-text-muted)" }}
         >
           <p className="text-xs font-medium" style={{ color: "var(--color-text-mid)" }}>
-            Ms Siti
+            {activeTeacher ? getTeacherDisplayName(activeTeacher) : "—"}
           </p>
           <p className="text-xs">My First Skool</p>
         </div>

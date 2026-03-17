@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useStore } from "@/lib/store";
+import { getChildDisplayName } from "@/lib/display-name";
 import { ChildAvatar } from "@/components/teacher/ChildAvatar";
 
 export default function ParentHomePage() {
@@ -38,9 +39,9 @@ export default function ParentHomePage() {
               (e.currentTarget as HTMLAnchorElement).style.background = "white";
             }}
           >
-            <ChildAvatar name={child.name} size="lg" />
+            <ChildAvatar name={getChildDisplayName(child)} size="lg" />
             <span className="font-semibold text-base" style={{ color: "var(--color-text-dark)" }}>
-              {child.name}
+              {getChildDisplayName(child)}
             </span>
           </Link>
         ))}

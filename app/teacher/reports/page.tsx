@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useStore } from "@/lib/store";
+import { getChildDisplayName } from "@/lib/display-name";
 import { getActiveClassChildren } from "@/lib/selectors";
 import { ChildAvatar } from "@/components/teacher/ChildAvatar";
 
 export default function ReportsPage() {
   const store = useStore();
   const { generateReport } = store;
-  const activeChildren = getActiveClassChildren(store).sort((a, b) => a.name.localeCompare(b.name));
+  const activeChildren = getActiveClassChildren(store).sort((a, b) => getChildDisplayName(a).localeCompare(getChildDisplayName(b)));
 
   return (
     <div className="px-5 py-6 md:px-8 md:py-8 max-w-2xl">
@@ -35,14 +36,14 @@ export default function ReportsPage() {
               key={child.id}
               className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white border border-[var(--color-border)]"
             >
-              <ChildAvatar name={child.name} size="sm" />
+              <ChildAvatar name={getChildDisplayName(child)} size="sm" />
 
               <div className="flex-1 min-w-0">
                 <p
                   className="font-semibold text-sm"
                   style={{ color: "var(--color-text-dark)" }}
                 >
-                  {child.name}
+                  {getChildDisplayName(child)}
                 </p>
                 <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
                   {isPublished

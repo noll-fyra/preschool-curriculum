@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useStore } from "@/lib/store";
+import { getChildDisplayName, getPronounFromGender } from "@/lib/display-name";
 import {
   getProgressBarFill,
   getProgressBarColor,
@@ -34,12 +35,20 @@ function getGreeting(): string {
 
 // ─── Feed item icon ───────────────────────────────────────────────────────────
 
-function FeedIcon({ type }: { type: "activity" | "milestone" }) {
+function FeedIcon({ type }: { type: "activity" | "milestone" | "teacher_update" }) {
   if (type === "milestone") {
     return (
       <div className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center text-sm"
         style={{ background: "#EAF3DE" }}>
         ⭐
+      </div>
+    );
+  }
+  if (type === "teacher_update") {
+    return (
+      <div className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center text-sm"
+        style={{ background: "#FEF3D7" }}>
+        📝
       </div>
     );
   }
@@ -87,10 +96,18 @@ export default function ParentHomePage() {
 
   const levels = getChildLevelPerArea(childId, store);
   const weekStart = getWeekStart();
-  const feedItems = getFeedItems(childId, store.sessions, store.progress, store.milestones);
+  const feedItems = getFeedItems(
+    childId,
+    child.classId,
+    store.sessions,
+    store.progress,
+    store.milestones,
+    store.teacherUpdates,
+    store.teachers
+  );
   const heroText = getHeroSummary(
-    child.name,
-    child.pronoun,
+    getChildDisplayName(child),
+    getPronounFromGender(child.gender),
     childId,
     store.sessions,
     store.progress,
@@ -115,7 +132,7 @@ export default function ParentHomePage() {
           className="font-medium leading-tight mt-0.5"
           style={{ fontSize: 22, color: "var(--color-text-dark)" }}
         >
-          {child.name}&apos;s dashboard
+          {getChildDisplayName(child)}&apos;s dashboard
         </h1>
       </div>
 
@@ -231,8 +248,8 @@ export default function ParentHomePage() {
           style={{ background: "var(--color-bg-cream)", borderColor: "var(--color-border)" }}
         >
           <p style={{ fontSize: 13, color: "var(--color-text-muted)", lineHeight: 1.6 }}>
-            Nothing logged yet this week. {child.name}&apos;s activity queue is ready whenever{" "}
-            {child.pronoun === "they" ? "they are" : `${child.pronoun === "he" ? "he" : "she"} is`}.
+            Nothing logged yet this week. {getChildDisplayName(child)}&apos;s activity queue is ready whenever{" "}
+            {getPronounFromGender(child.gender) === "they" ? "they are" : `${getPronounFromGender(child.gender) === "he" ? "he" : "she"} is`}.
           </p>
         </div>
       ) : (
@@ -254,6 +271,40 @@ export default function ParentHomePage() {
                 >
                   {item.subtitle}
                 </p>
+                {item.media && item.media.length > 0 && (
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {item.media.map((m, i) =>
+                      m.type === "photo" ? (
+                        <div
+                          key={i}
+                          className="rounded-lg overflow-hidden border"
+                          style={{ borderColor: "var(--color-border)", maxWidth: 120 }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={m.url}
+                            alt=""
+                            className="w-full h-20 object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = "none";
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          key={i}
+                          className="rounded-lg border flex items-center gap-1 px-2 py-1"
+                          style={{ borderColor: "var(--color-border)", background: "var(--color-bg-cream)" }}
+                        >
+                          <span className="text-sm">🎬</span>
+                          <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                            Video
+                          </span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
                 <p className="mt-1" style={{ fontSize: 11, color: "var(--color-text-muted)" }}>
                   {formatFeedTime(item.timestamp)}
                 </p>

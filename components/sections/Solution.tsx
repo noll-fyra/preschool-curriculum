@@ -1,24 +1,34 @@
-import { LoopDiagramDesktop, LoopDiagramMobile } from "@/components/icons/LoopDiagram";
+"use client";
+
 import AnimateIn from "@/components/ui/AnimateIn";
 
 const pillars = [
   {
     color: "#F5A623",
-    emoji: "🧒",
-    title: "For the child",
-    body: "Each child gets their own personalised activity queue — based on where they are right now, not where the curriculum says they should be. Activities are designed for 3–6 year olds: short, audio-guided, and genuinely fun. No reading required.",
+    bg: "#FFFBF2",
+    border: "#FDE8B0",
+    label: "For children",
+    title: "Learning that feels like play.",
+    body: "Each child gets their own personalised activity queue — based on where they are right now, not where the curriculum says they should be. Activities are short, audio-guided, and genuinely fun.",
+    items: ["Personalised activity queue per child", "Audio-guided — no reading required", "Earns stickers, not scores"],
   },
   {
     color: "#4A9B6F",
-    emoji: "👩‍🏫",
-    title: "For the teacher",
-    body: "The classroom observation you've always done is now connected to a system that tracks it. Milestone progress is recorded as children play. Report time means reviewing a pre-drafted summary — not starting from a blank page.",
+    bg: "#F0FAF5",
+    border: "#B8DEC8",
+    label: "For teachers",
+    title: "Less paperwork. Same professional judgment.",
+    body: "Milestone progress is recorded as children play. Observation logging takes two taps. Report time means reviewing a pre-drafted summary — not starting from a blank page.",
+    items: ["Class dashboard with every child at a glance", "Observation log in two taps", "Pre-drafted progress reports"],
   },
   {
     color: "#7BA3D4",
-    emoji: "👨‍👩‍👧",
-    title: "For the parent",
-    body: "Instead of waiting for the next parent-teacher conference, parents get a real-time view of what their child is working on and what it means. For parents who want to help at home, there are simple suggested activities to try together.",
+    bg: "#F2F7FD",
+    border: "#B8D4E8",
+    label: "For parents",
+    title: "Never miss a milestone.",
+    body: "Instead of waiting for the next parent-teacher conference, parents get a real-time view of what their child is working on and what it means. Active parents also get suggested at-home activities.",
+    items: ["Real-time progress feed", "Plain-language milestone context", "Suggested at-home activities"],
   },
 ];
 
@@ -28,64 +38,64 @@ export default function Solution() {
       id="solution"
       aria-labelledby="solution-heading"
       className="py-24"
-      style={{ backgroundColor: "#FFFDF8" }}
+      style={{ backgroundColor: "#F7F7F5" }}
     >
       <div className="max-w-5xl mx-auto px-5">
         <AnimateIn>
           <div className="text-center mb-14 max-w-2xl mx-auto">
+            <p className="text-sm font-semibold mb-3" style={{ color: "#4A9B6F" }}>
+              Built for every role
+            </p>
             <h2
               id="solution-heading"
               className="font-extrabold mb-4"
               style={{
-                fontSize: "clamp(1.75rem, 4vw, 2.25rem)",
-                color: "#2D3A2E",
-                letterSpacing: "-0.02em",
+                fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
+                color: "#1A1A1A",
+                letterSpacing: "-0.03em",
               }}
             >
-              Nurture closes the loop between{" "}
-              <span style={{ color: "#4A9B6F" }}>classroom, home, and teacher.</span>
+              Ask your on-demand learning assistant.
             </h2>
-            <p style={{ color: "#5C6B5D" }}>
-              One continuous data loop — so learning doesn&apos;t stop when the school day does.
+            <p className="text-lg" style={{ color: "#737373" }}>
+              One platform. Three roles. A continuous loop between classroom, home, and teacher.
             </p>
           </div>
         </AnimateIn>
 
-        {/* Loop diagram */}
-        <AnimateIn className="mb-16">
-          {/* Desktop diagram */}
-          <div className="hidden md:block">
-            <LoopDiagramDesktop />
-          </div>
-          {/* Mobile list */}
-          <div className="md:hidden max-w-sm mx-auto">
-            <LoopDiagramMobile />
-          </div>
-        </AnimateIn>
-
-        {/* Three pillars */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {pillars.map((p, i) => (
-            <AnimateIn key={p.title} delay={i * 0.1}>
+            <AnimateIn key={p.label} delay={i * 0.1}>
               <div
-                className="rounded-2xl p-7 h-full"
-                style={{ backgroundColor: p.color + "12", border: `1.5px solid ${p.color}30` }}
+                className="rounded-2xl p-7 h-full flex flex-col"
+                style={{ backgroundColor: p.bg, border: `1px solid ${p.border}` }}
               >
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-4"
-                  style={{ backgroundColor: p.color + "25" }}
+                  className="inline-flex text-xs font-semibold px-2.5 py-1 rounded-full mb-5 w-fit"
+                  style={{ backgroundColor: p.color + "20", color: p.color }}
                 >
-                  {p.emoji}
+                  {p.label}
                 </div>
                 <h3
-                  className="font-bold text-lg mb-3"
-                  style={{ color: "#2D3A2E" }}
+                  className="font-bold text-lg mb-3 leading-snug"
+                  style={{ color: "#1A1A1A", letterSpacing: "-0.02em" }}
                 >
                   {p.title}
                 </h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#5C6B5D" }}>
+                <p className="text-sm leading-relaxed mb-6 flex-1" style={{ color: "#737373" }}>
                   {p.body}
                 </p>
+                <ul className="space-y-2">
+                  {p.items.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm" style={{ color: "#4A4A4A" }}>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0" aria-hidden="true">
+                        <circle cx="8" cy="8" r="7" fill={p.color} fillOpacity="0.15"/>
+                        <path d="M5 8l2 2 4-4" stroke={p.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </AnimateIn>
           ))}
