@@ -31,9 +31,9 @@ export default function LearningAreas() {
       id="learning-areas"
       aria-labelledby="learning-areas-heading"
       className="py-24"
-      style={{ backgroundColor: "#FFFDF8" }}
+      style={{ backgroundColor: "#F3ECE4" }}
     >
-      <div className="max-w-6xl mx-auto px-5">
+      <div className="max-w-5xl mx-auto px-5">
         <AnimateIn>
           <div className="text-center mb-14 max-w-2xl mx-auto">
             <h2
@@ -41,14 +41,14 @@ export default function LearningAreas() {
               className="font-extrabold mb-4"
               style={{
                 fontSize: "clamp(1.75rem, 4vw, 2.25rem)",
-                color: "#2D3A2E",
+                color: "#333333",
                 letterSpacing: "-0.02em",
               }}
             >
               Three areas of learning.{" "}
-              <span style={{ color: "#4A9B6F" }}>One continuous picture.</span>
+              <span style={{ color: "#F79863" }}>One continuous picture.</span>
             </h2>
-            <p style={{ color: "#5C6B5D" }}>
+            <p style={{ color: "#666666" }}>
               Whole-child development — not just academic drilling.
             </p>
           </div>
@@ -68,7 +68,7 @@ export default function LearningAreas() {
                   <area.Icon />
                 </div>
                 <div className="flex items-start justify-between gap-2 mb-3">
-                  <h3 className="font-bold text-lg" style={{ color: "#2D3A2E" }}>
+                  <h3 className="font-bold text-lg" style={{ color: "#333333" }}>
                     {area.title}
                   </h3>
                   <span
@@ -78,7 +78,7 @@ export default function LearningAreas() {
                     {area.badge}
                   </span>
                 </div>
-                <p className="text-sm leading-relaxed flex-1" style={{ color: "#5C6B5D" }}>
+                <p className="text-sm leading-relaxed flex-1" style={{ color: "#666666" }}>
                   {area.body}
                 </p>
               </div>

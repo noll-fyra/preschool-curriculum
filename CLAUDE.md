@@ -84,7 +84,7 @@ Section backgrounds alternate: warm → cream → warm → cream → warm → wa
 
 ## Domain context
 
-**Nurture** is a preschool learning platform for NTUC First Campus (Singapore), aligned to the Ministry of Education's NEL Framework 2022. Key domain terms:
+**Nurture** is a preschool learning platform for NTUC First Campus (Singapore), aligned to the Ministry of Education's NEL Framework. Key domain terms:
 
 - **NEL** — Nurturing Early Learners framework; defines learning goals for ages 4–6
 - **Beginning / Developing / Secure** — the three developmental levels used throughout the UI

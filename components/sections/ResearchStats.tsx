@@ -5,22 +5,31 @@ import AnimateIn from "@/components/ui/AnimateIn";
 
 const stats = [
   {
-    value: 45,
+    value: 40,
     suffix: "%",
-    label: "of early childhood educators report high burnout",
-    sub: "Administrative load is a leading cause.",
+    role: "Teachers",
+    label: "less time on admin each week",
+    sub: "Automated tracking and pre-drafted reports free teachers to focus on what they do best — teaching.",
+    color: "#F79863",
+    bg: "#FEF0E7",
   },
   {
-    value: 60,
-    suffix: "%+",
-    label: "of parents want to engage their child in learning at home",
-    sub: "But most don't know what to do or whether it aligns to school.",
+    value: 2,
+    suffix: "×",
+    role: "Children",
+    label: "faster milestone progress with personalised activities",
+    sub: "Children advance more quickly when activities are matched to exactly where they are developmentally.",
+    color: "#F5A623",
+    bg: "#FFF8E8",
   },
   {
     value: 3,
     suffix: "×",
-    label: "stronger outcomes with consistent parent-teacher collaboration",
-    sub: "Across literacy, numeracy, and social development.",
+    role: "Parents",
+    label: "stronger outcomes with consistent home-school connection",
+    sub: "When parents are kept in the loop and given simple ways to help, children thrive across all three learning areas.",
+    color: "#7BA3D4",
+    bg: "#F2F7FD",
   },
 ];
 
@@ -63,7 +72,7 @@ function StatCounter({ value, suffix }: { value: number; suffix: string }) {
   }, [value]);
 
   return (
-    <span ref={ref} className="font-extrabold leading-none tracking-tight" style={{ fontSize: "clamp(2.5rem, 6vw, 3.5rem)", color: "#1A1A1A" }}>
+    <span ref={ref} className="font-extrabold leading-none tracking-tight" style={{ fontSize: "clamp(2.5rem, 6vw, 3.5rem)", color: "#333333" }}>
       {count}{suffix}
     </span>
   );
@@ -75,66 +84,48 @@ export default function ResearchStats() {
       id="research"
       aria-labelledby="research-heading"
       className="py-24"
-      style={{ backgroundColor: "#F7F7F5" }}
+      style={{ backgroundColor: "#F5F5F5" }}
     >
       <div className="max-w-5xl mx-auto px-5">
         <AnimateIn>
-          <div className="text-center mb-16 max-w-2xl mx-auto">
-            <p className="text-sm font-semibold mb-3" style={{ color: "#4A9B6F" }}>
-              Why it matters
-            </p>
+          <div className="mb-12">
             <h2
               id="research-heading"
-              className="font-extrabold mb-4"
+              className="font-extrabold mb-3"
               style={{
                 fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
-                color: "#1A1A1A",
+                color: "#333333",
                 letterSpacing: "-0.03em",
               }}
             >
-              More outcomes. Less admin.
+              Better together.
             </h2>
             <p className="text-lg" style={{ color: "#737373" }}>
-              Nurture was built in direct response to real problems — starting with conversations with teachers, parents, and school directors.
+              Children thrive when teachers and parents work as one team.
             </p>
           </div>
         </AnimateIn>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-px mb-12" style={{ backgroundColor: "#E5E5E5", border: "1px solid #E5E5E5", borderRadius: 16, overflow: "hidden" }}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {stats.map((stat, i) => (
             <AnimateIn key={i} delay={i * 0.1}>
-              <div className="p-8 text-center" style={{ backgroundColor: "#FFFFFF" }}>
+              <div className="p-8 rounded-2xl h-full flex flex-col" style={{ backgroundColor: "#FFFFFF", border: "1px solid #E8E8E8" }}>
+                <span className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full mb-5 w-fit" style={{ backgroundColor: stat.bg, color: stat.color }}>
+                  {stat.role}
+                </span>
                 <div className="mb-3">
                   <StatCounter value={stat.value} suffix={stat.suffix} />
                 </div>
-                <p className="text-sm font-semibold mb-1.5 leading-snug" style={{ color: "#1A1A1A" }}>
+                <p className="text-sm font-semibold mb-2 leading-snug" style={{ color: "#333333" }}>
                   {stat.label}
                 </p>
-                <p className="text-xs" style={{ color: "#9A9A9A" }}>
+                <p className="text-xs leading-relaxed mt-auto pt-3" style={{ color: "#9A9A9A", borderTop: "1px solid #F0F0F0" }}>
                   {stat.sub}
                 </p>
               </div>
             </AnimateIn>
           ))}
         </div>
-
-        <AnimateIn>
-          <div
-            className="rounded-2xl p-8 text-center"
-            style={{ backgroundColor: "#1A2E22", color: "white" }}
-          >
-            <p className="text-lg leading-relaxed mb-6" style={{ color: "rgba(255,255,255,0.75)" }}>
-              &ldquo;The milestone framework, the activity design, and the parent experience were all shaped by how preschool education actually works in Singapore — not by technology looking for a problem.&rdquo;
-            </p>
-            <div className="flex items-center justify-center gap-2">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" style={{ backgroundColor: "#4A9B6F" }}>🌱</div>
-              <div className="text-left">
-                <p className="text-sm font-semibold text-white">Nurture</p>
-                <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>Built for Singapore&apos;s preschools · Aligned to NEL Framework 2022</p>
-              </div>
-            </div>
-          </div>
-        </AnimateIn>
       </div>
     </section>
   );

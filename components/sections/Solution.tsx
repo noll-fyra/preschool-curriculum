@@ -7,16 +7,16 @@ const pillars = [
     color: "#F5A623",
     bg: "#FFFBF2",
     border: "#FDE8B0",
-    label: "For children",
+    label: "Children",
     title: "Learning that feels like play.",
     body: "Each child gets their own personalised activity queue — based on where they are right now, not where the curriculum says they should be. Activities are short, audio-guided, and genuinely fun.",
     items: ["Personalised activity queue per child", "Audio-guided — no reading required", "Earns stickers, not scores"],
   },
   {
-    color: "#4A9B6F",
-    bg: "#F0FAF5",
-    border: "#B8DEC8",
-    label: "For teachers",
+    color: "#F79863",
+    bg: "#FEF0E7",
+    border: "#C8E8E2",
+    label: "Teachers",
     title: "Less paperwork. Same professional judgment.",
     body: "Milestone progress is recorded as children play. Observation logging takes two taps. Report time means reviewing a pre-drafted summary — not starting from a blank page.",
     items: ["Class dashboard with every child at a glance", "Observation log in two taps", "Pre-drafted progress reports"],
@@ -25,7 +25,7 @@ const pillars = [
     color: "#7BA3D4",
     bg: "#F2F7FD",
     border: "#B8D4E8",
-    label: "For parents",
+    label: "Parents",
     title: "Never miss a milestone.",
     body: "Instead of waiting for the next parent-teacher conference, parents get a real-time view of what their child is working on and what it means. Active parents also get suggested at-home activities.",
     items: ["Real-time progress feed", "Plain-language milestone context", "Suggested at-home activities"],
@@ -38,12 +38,12 @@ export default function Solution() {
       id="solution"
       aria-labelledby="solution-heading"
       className="py-24"
-      style={{ backgroundColor: "#F7F7F5" }}
+      style={{ backgroundColor: "#F3ECE4" }}
     >
       <div className="max-w-5xl mx-auto px-5">
         <AnimateIn>
           <div className="text-center mb-14 max-w-2xl mx-auto">
-            <p className="text-sm font-semibold mb-3" style={{ color: "#4A9B6F" }}>
+            <p className="text-sm font-semibold mb-3" style={{ color: "#F79863" }}>
               Built for every role
             </p>
             <h2
@@ -51,7 +51,7 @@ export default function Solution() {
               className="font-extrabold mb-4"
               style={{
                 fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
-                color: "#1A1A1A",
+                color: "#333333",
                 letterSpacing: "-0.03em",
               }}
             >
@@ -78,7 +78,7 @@ export default function Solution() {
                 </div>
                 <h3
                   className="font-bold text-lg mb-3 leading-snug"
-                  style={{ color: "#1A1A1A", letterSpacing: "-0.02em" }}
+                  style={{ color: "#333333", letterSpacing: "-0.02em" }}
                 >
                   {p.title}
                 </h3>
@@ -87,7 +87,7 @@ export default function Solution() {
                 </p>
                 <ul className="space-y-2">
                   {p.items.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm" style={{ color: "#4A4A4A" }}>
+                    <li key={item} className="flex items-start gap-2 text-sm" style={{ color: "#555555" }}>
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0" aria-hidden="true">
                         <circle cx="8" cy="8" r="7" fill={p.color} fillOpacity="0.15"/>
                         <path d="M5 8l2 2 4-4" stroke={p.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>

@@ -5,24 +5,27 @@ import AnimateIn from "@/components/ui/AnimateIn";
 const testimonials = [
   {
     quote: "Finally, a platform that respects teachers' professional judgment instead of replacing it. The observation logging alone saves us hours every week.",
-    name: "Preschool Director",
-    org: "NTUC First Campus, Singapore",
-    initial: "P",
+    name: "Sarah Lim",
+    role: "K2 Teacher",
+    org: "My First Skool, Tampines",
+    image: "https://www.myfirstskool.com/wp-content/uploads/2025/08/MFS-Sengkang-Shoot-29-May-202400515.webp",
   },
   {
-    quote: "As a parent, I used to wait until term reports to understand how my child was really doing. Now I know what she worked on today and what it means for her development.",
-    name: "Parent",
-    org: "K2, Caterpillar Class",
-    initial: "S",
+    quote: "I love doing my activities! I got a new sticker today because I know all my letter sounds now.",
+    name: "Aiden, age 5",
+    role: "Student",
+    org: "K1, Caterpillar Class",
+    image: "https://www.myfirstskool.com/wp-content/uploads/2025/07/about-us-children.webp",
+  },
+  {
+    quote: "My son asks to do his activities every evening now. He shows me his stickers and explains what he learnt. I never expected him to be so excited about learning.",
+    name: "Wei Ming Tan",
+    role: "Parent",
+    org: "N2, Butterfly Class",
+    image: "https://www.myfirstskool.com/wp-content/uploads/2025/10/MFS-Sumang-June-202502607-cropped-mobile2.jpg",
   },
 ];
 
-const badges = [
-  "NEL Framework 2022 aligned",
-  "Adaptable milestone schema",
-  "Built for Singapore's preschools",
-  "Skill-based & behaviour-based tracking",
-];
 
 export default function ForProviders() {
   return (
@@ -34,32 +37,26 @@ export default function ForProviders() {
     >
       <div className="max-w-5xl mx-auto px-5">
         <AnimateIn>
-          <div className="text-center mb-14 max-w-2xl mx-auto">
-            <p className="text-sm font-semibold mb-3" style={{ color: "#4A9B6F" }}>
-              Trusted by schools that put children first
-            </p>
-            <h2
-              id="providers-heading"
-              className="font-extrabold mb-5"
-              style={{
-                fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
-                color: "#1A1A1A",
-                letterSpacing: "-0.03em",
-              }}
-            >
-              &ldquo;Your AI everything app&rdquo; —{" "}
-              <span style={{ color: "#4A9B6F" }}>for preschools.</span>
-            </h2>
-          </div>
+          <h2
+            id="providers-heading"
+            className="font-extrabold mb-10"
+            style={{
+              fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
+              color: "#333333",
+              letterSpacing: "-0.03em",
+            }}
+          >
+            Loved by teachers, children and parents.
+          </h2>
         </AnimateIn>
 
         {/* Testimonial cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-14">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-14">
           {testimonials.map((t, i) => (
             <AnimateIn key={i} delay={i * 0.1}>
               <div
                 className="p-7 rounded-2xl h-full flex flex-col"
-                style={{ backgroundColor: "#F7F7F5", border: "1px solid #E5E5E5" }}
+                style={{ backgroundColor: "#F5F5F5", border: "1px solid #E5E5E5" }}
               >
                 {/* Stars */}
                 <div className="flex gap-1 mb-4">
@@ -70,20 +67,19 @@ export default function ForProviders() {
                   ))}
                 </div>
 
-                <p className="text-sm leading-relaxed flex-1 mb-5" style={{ color: "#4A4A4A" }}>
+                <p className="text-sm leading-relaxed flex-1 mb-6" style={{ color: "#555555" }}>
                   &ldquo;{t.quote}&rdquo;
                 </p>
 
                 <div className="flex items-center gap-3">
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
-                    style={{ backgroundColor: "#E8F5EE", color: "#4A9B6F" }}
-                  >
-                    {t.initial}
-                  </div>
+                  <img
+                    src={t.image}
+                    alt={t.name}
+                    className="w-10 h-10 rounded-full object-cover shrink-0"
+                  />
                   <div>
-                    <p className="text-sm font-semibold" style={{ color: "#1A1A1A" }}>{t.name}</p>
-                    <p className="text-xs" style={{ color: "#737373" }}>{t.org}</p>
+                    <p className="text-sm font-semibold" style={{ color: "#333333" }}>{t.name}</p>
+                    <p className="text-xs" style={{ color: "#737373" }}>{t.role} · {t.org}</p>
                   </div>
                 </div>
               </div>
@@ -91,47 +87,6 @@ export default function ForProviders() {
           ))}
         </div>
 
-        {/* For school operators */}
-        <AnimateIn>
-          <div
-            className="rounded-2xl p-8 text-center"
-            style={{ border: "1px solid #E5E5E5" }}
-          >
-            <p className="text-sm font-semibold mb-3" style={{ color: "#4A9B6F" }}>For education providers</p>
-            <h3 className="font-extrabold mb-4" style={{ fontSize: "clamp(1.25rem, 3vw, 1.75rem)", color: "#1A1A1A", letterSpacing: "-0.02em" }}>
-              Interested in building this for your school?
-            </h3>
-            <p className="text-base mb-7 max-w-xl mx-auto" style={{ color: "#737373" }}>
-              Nurture&apos;s milestone schema is grounded in the NEL Framework but can be extended to reflect any school&apos;s curriculum emphasis. We&apos;d like to talk.
-            </p>
-
-            <div className="flex flex-wrap gap-2 justify-center mb-7">
-              {badges.map((b) => (
-                <div
-                  key={b}
-                  className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-full"
-                  style={{ backgroundColor: "#F7F7F5", color: "#4A4A4A", border: "1px solid #E5E5E5" }}
-                >
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                    <circle cx="6" cy="6" r="5.5" fill="#E8F5EE"/>
-                    <path d="M3.5 6l1.7 1.7 3.3-3.4" stroke="#4A9B6F" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  {b}
-                </div>
-              ))}
-            </div>
-
-            <a
-              href="mailto:hello@nurture.edu.sg"
-              className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-lg transition-all duration-150"
-              style={{ backgroundColor: "#1A1A1A", color: "white" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#2D2D2D"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#1A1A1A"; }}
-            >
-              Get in touch →
-            </a>
-          </div>
-        </AnimateIn>
       </div>
     </section>
   );

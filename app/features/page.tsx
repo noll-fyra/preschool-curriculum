@@ -228,8 +228,8 @@ const FEATURES_BY_PERSONA = [
     ],
   },
   {
-    persona: "Administrators",
-    description: "School setup and curriculum management.",
+    persona: "Schools",
+    description: "School setup, curriculum management, and network-wide visibility.",
     subgroups: [
       {
         name: "School setup",
@@ -333,21 +333,30 @@ export default function FeaturesPage() {
                     >
                       {persona.persona}
                     </h2>
-                    {persona.persona !== "Administrators" && (
-                      <Link
-                        href={
-                          persona.persona === "Teachers"
-                            ? "/for-teachers"
-                            : persona.persona === "Parents"
-                              ? "/for-parents"
-                              : "/for-students"
-                        }
-                        className="text-sm font-medium"
-                        style={{ color: "#4A9B6F" }}
-                      >
-                        Learn more →
-                      </Link>
-                    )}
+                    {(() => {
+                      const href =
+                        persona.persona === "Teachers"
+                          ? "/teachers"
+                          : persona.persona === "Parents"
+                            ? "/parents"
+                            : persona.persona === "Children"
+                              ? "/children"
+                              : persona.persona === "Schools"
+                                ? "/schools"
+                                : undefined;
+
+                      if (!href) return null;
+
+                      return (
+                        <Link
+                          href={href}
+                          className="text-sm font-medium"
+                          style={{ color: "#4A9B6F" }}
+                        >
+                          Learn more →
+                        </Link>
+                      );
+                    })()}
                   </div>
                   <p
                     className="mb-8 text-sm max-w-2xl"
@@ -357,7 +366,7 @@ export default function FeaturesPage() {
                   </p>
 
                   <div className="space-y-8">
-                    {persona.subgroups.map((subgroup, subIdx) => (
+                    {persona.subgroups.map((subgroup) => (
                       <div key={subgroup.name}>
                         <h3
                           className="font-semibold mb-4 text-sm uppercase tracking-wider"
@@ -366,7 +375,7 @@ export default function FeaturesPage() {
                           {subgroup.name}
                         </h3>
                         <div className="space-y-3">
-                          {subgroup.features.map((feature, featIdx) => (
+                          {subgroup.features.map((feature) => (
                             <div
                               key={feature.name}
                               className="rounded-xl p-4"
@@ -417,7 +426,7 @@ export default function FeaturesPage() {
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <Link
-                  href="/teacher/class"
+                  href="/demo/teacher"
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2"
                   style={{
                     backgroundColor: "#4A9B6F",
@@ -427,7 +436,7 @@ export default function FeaturesPage() {
                   Teacher demo →
                 </Link>
                 <Link
-                  href="/parent"
+                  href="/demo/parent"
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 border-2"
                   style={{
                     borderColor: "#4A9B6F",
@@ -437,7 +446,7 @@ export default function FeaturesPage() {
                   Parent demo →
                 </Link>
                 <Link
-                  href="/student"
+                  href="/demo/student"
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 border-2"
                   style={{
                     borderColor: "#4A9B6F",

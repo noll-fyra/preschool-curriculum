@@ -1,25 +1,36 @@
 @import "tailwindcss";
 
 @theme {
-  /* Colors */
-  --color-primary: #4A9B6F;
-  --color-primary-light: #6BBF8E;
-  --color-primary-pale: #A8D9BC;
-  --color-primary-wash: #E8F5EE;
+  /* Brand — primary action */
+  --color-primary: #F79863;
+  --color-primary-hover: #E06B4A;
+  --color-primary-wash: #FEF0E7;
 
-  --color-bg-warm: #FFFDF8;
-  --color-bg-cream: #FDF6E8;
-  --color-bg-deep: #F5EFE0;
+  /* Brand — secondary */
+  --color-secondary: #ACD9CD;
+  --color-secondary-dark: #1C2B29;
+  --color-secondary-wash: #E5F4F1;
 
-  --color-text-dark: #2D3A2E;
-  --color-text-mid: #5C6B5D;
-  --color-text-muted: #9DAE9E;
+  /* Brand — accent / warm background */
+  --color-accent: #F3ECE4;
 
-  --color-accent-amber: #F5A623;
-  --color-accent-coral: #E8745A;
-  --color-accent-blue: #7BA3D4;
+  /* Text */
+  --color-text-dark: #333333;
+  --color-text-mid: #666666;
+  --color-text-muted: #999999;
 
-  --color-border: #D8E8DC;
+  /* Surfaces */
+  --color-bg-warm: #F5F5F5;
+  --color-bg-white: #FFFFFF;
+
+  /* Learning area accents (unchanged) */
+  --color-area-ll: #F5A623;
+  --color-area-num: #7BA3D4;
+  --color-area-sed: #E8745A;
+
+  /* Borders */
+  --color-border: #E5E5E5;
+  --color-border-warm: #C8E8E2;
 }
 
 /* Global resets */
@@ -36,8 +47,8 @@ html {
 }
 
 body {
-  background-color: #FFFDF8;
-  color: #2D3A2E;
+  background-color: #F5F5F5;
+  color: #333333;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -46,7 +57,7 @@ body {
   position: absolute;
   top: -100%;
   left: 1rem;
-  background: #4A9B6F;
+  background: #F79863;
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 0 0 8px 8px;

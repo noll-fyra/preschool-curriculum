@@ -3,13 +3,13 @@ import Link from "next/link";
 const ROLES = [
   {
     label: "Teacher",
-    href: "/for-teachers",
+    href: "/teachers",
     icon: (
       <svg width="40" height="40" viewBox="0 0 48 48" fill="none" className="mx-auto" aria-hidden>
         {/* Person: head */}
         <circle cx="16" cy="14" r="6" fill="#FEE9E5" stroke="#E8745A" strokeWidth="2" />
         {/* Person: body */}
-        <rect x="8" y="24" width="16" height="18" rx="2" fill="#E8F5EE" stroke="#4A9B6F" strokeWidth="2" />
+        <rect x="8" y="24" width="16" height="18" rx="2" fill="#FEF0E7" stroke="#F79863" strokeWidth="2" />
         {/* Open book */}
         <rect x="26" y="18" width="14" height="20" rx="1" fill="#FEF3D7" stroke="#F5A623" strokeWidth="1.5" />
         <path d="M33 18v20" stroke="#F5A623" strokeWidth="1" />
@@ -20,7 +20,7 @@ const ROLES = [
   },
   {
     label: "Parent",
-    href: "/for-parents",
+    href: "/parents",
     icon: (
       <svg width="40" height="40" viewBox="0 0 48 48" fill="none" className="mx-auto" aria-hidden>
         {/* Roof */}
@@ -35,13 +35,13 @@ const ROLES = [
   },
   {
     label: "Student",
-    href: "/for-students",
+    href: "/children",
     icon: (
       <svg width="40" height="40" viewBox="0 0 48 48" fill="none" className="mx-auto" aria-hidden>
         {/* Backpack body */}
-        <path d="M14 18h20v22H14V18z" fill="#E8F5EE" stroke="#4A9B6F" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M14 18h20v22H14V18z" fill="#FEF0E7" stroke="#F79863" strokeWidth="2" strokeLinejoin="round" />
         {/* Top flap */}
-        <path d="M14 18c0-5.5 4.5-10 10-10s10 4.5 10 10" fill="none" stroke="#4A9B6F" strokeWidth="2" strokeLinecap="round" />
+        <path d="M14 18c0-5.5 4.5-10 10-10s10 4.5 10 10" fill="none" stroke="#F79863" strokeWidth="2" strokeLinecap="round" />
         {/* Front pocket */}
         <rect x="18" y="24" width="12" height="10" rx="2" fill="#FEF3D7" stroke="#F5A623" strokeWidth="1.5" />
         {/* Straps */}
@@ -49,7 +49,7 @@ const ROLES = [
       </svg>
     ),
     bgColor: "#EAF3DE",
-    borderColor: "#B8DEC8",
+    borderColor: "#C8E8E2",
   },
 ];
 
@@ -64,7 +64,7 @@ export default function GetStartedAs() {
         <h2
           id="get-started-heading"
           className="font-bold mb-5 text-base"
-          style={{ color: "#2D3A2E" }}
+          style={{ color: "#333333" }}
         >
           Get started as a...
         </h2>
@@ -84,7 +84,7 @@ export default function GetStartedAs() {
               </div>
               <span
                 className="font-bold"
-                style={{ color: "#2D3A2E", fontSize: 18 }}
+                style={{ color: "#333333", fontSize: 18 }}
               >
                 {role.label}
               </span>

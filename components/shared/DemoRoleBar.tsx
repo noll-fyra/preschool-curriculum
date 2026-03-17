@@ -9,9 +9,9 @@ interface DemoRoleBarProps {
 }
 
 const ROLES = [
-  { id: "teacher" as Role, label: "Teacher", href: "/teacher/class" },
-  { id: "student" as Role, label: "Student", href: "/student" },
-  { id: "parent"  as Role, label: "Parent",  href: "/parent"       },
+  { id: "teacher" as Role, label: "Teacher", href: "/demo/teacher" },
+  { id: "student" as Role, label: "Student", href: "/demo/student" },
+  { id: "parent"  as Role, label: "Parent",  href: "/demo/parent"  },
   { id: "admin"   as Role, label: "Admin",   href: "/admin"        },
 ];
 
