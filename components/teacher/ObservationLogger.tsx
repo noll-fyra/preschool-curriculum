@@ -6,7 +6,7 @@ import { getChildDisplayName } from "@/lib/display-name";
 import { ChildAvatar } from "./ChildAvatar";
 
 interface ObservationLoggerProps {
-  children: Child[];
+  students: Child[];
   sedMilestones: Milestone[];
   // milestoneIds already logged today: childId → milestoneId[]
   todayLog: Record<string, string[]>;
@@ -16,7 +16,7 @@ interface ObservationLoggerProps {
 }
 
 export function ObservationLogger({
-  children,
+  students,
   sedMilestones,
   todayLog,
   obsCounts,
@@ -28,7 +28,7 @@ export function ObservationLogger({
     milestone: string;
   } | null>(null);
 
-  const selectedChild = children.find((c) => c.id === selectedChildId);
+  const selectedChild = students.find((c) => c.id === selectedChildId);
 
   function handleLog(milestoneId: string) {
     if (!selectedChildId || !selectedChild) return;
@@ -75,7 +75,7 @@ export function ObservationLogger({
           {selectedChildId ? "1. Child selected" : "1. Select a child"}
         </h2>
         <div className="flex flex-wrap gap-2">
-          {children.map((child) => {
+          {students.map((child) => {
             const isSelected = child.id === selectedChildId;
             return (
               <button

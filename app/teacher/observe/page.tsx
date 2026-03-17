@@ -49,7 +49,7 @@ export default function ObservePage() {
       </div>
 
       <ObservationLogger
-        children={activeChildren}
+        students={activeChildren}
         sedMilestones={sedMilestones}
         todayLog={todayLog}
         obsCounts={obsCounts}

@@ -12,7 +12,7 @@ const AREAS: { id: LearningAreaId; label: string; bg: string; text: string }[] =
 ];
 
 interface ActivityCreatorProps {
-  children: Child[];
+  students: Child[];
   milestones: Milestone[];
   defaultDate: string; // YYYY-MM-DD pre-selected in the date picker
   onSave: (activity: Omit<PlannedActivity, "id" | "createdAt" | "classId">) => void;
@@ -20,7 +20,7 @@ interface ActivityCreatorProps {
 }
 
 export function ActivityCreator({
-  children,
+  students,
   milestones,
   defaultDate,
   onSave,
@@ -32,7 +32,7 @@ export function ActivityCreator({
   const [areaId, setAreaId] = useState<LearningAreaId>("LL");
   const [milestoneId, setMilestoneId] = useState<string>("");
   const [selectedChildIds, setSelectedChildIds] = useState<string[]>(
-    children.map((c) => c.id) // default: all children
+    students.map((c) => c.id) // default: all children
   );
 
   const filteredMilestones = milestones.filter((m) => m.areaId === areaId);
@@ -44,10 +44,10 @@ export function ActivityCreator({
   }
 
   function toggleAll() {
-    if (selectedChildIds.length === children.length) {
+    if (selectedChildIds.length === students.length) {
       setSelectedChildIds([]);
     } else {
-      setSelectedChildIds(children.map((c) => c.id));
+      setSelectedChildIds(students.map((c) => c.id));
     }
   }
 
@@ -175,11 +175,11 @@ export function ActivityCreator({
             className="text-xs"
             style={{ color: "var(--color-primary)" }}
           >
-            {selectedChildIds.length === children.length ? "Deselect all" : "Select all"}
+            {selectedChildIds.length === students.length ? "Deselect all" : "Select all"}
           </button>
         </div>
         <div className="flex flex-wrap gap-2">
-          {children.map((child) => {
+          {students.map((child) => {
             const selected = selectedChildIds.includes(child.id);
             return (
               <button

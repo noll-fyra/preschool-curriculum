@@ -213,7 +213,7 @@ export default function ActivitiesPage() {
           <DayView
             activities={activitiesFor(selectedDate)}
             store={store}
-            children={activeChildren}
+            students={activeChildren}
           />
         )}
       </div>
@@ -228,7 +228,7 @@ export default function ActivitiesPage() {
           <div className="w-full max-w-lg max-h-[92vh] overflow-auto rounded-2xl bg-white shadow-2xl">
             <div className="p-5">
               <ActivityCreator
-                children={activeChildren}
+                students={activeChildren}
                 milestones={store.milestones}
                 defaultDate={selectedDate}
                 onSave={(activity) => {
@@ -438,11 +438,11 @@ function WeekView({
 function DayView({
   activities,
   store,
-  children,
+  students,
 }: {
   activities: PlannedActivity[];
   store: NurtureStore;
-  children: ReturnType<typeof getActiveClassChildren>;
+  students: ReturnType<typeof getActiveClassChildren>;
 }) {
   if (activities.length === 0) {
     return (
@@ -466,7 +466,7 @@ function DayView({
         <ActivityCard
           key={activity.id}
           activity={activity}
-          children={children}
+          students={students}
           milestones={store.milestones}
           feedback={store.activityFeedback}
           onDelete={store.deleteActivity}

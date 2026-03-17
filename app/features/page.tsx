@@ -446,7 +446,7 @@ export default function FeaturesPage() {
                   Parent demo →
                 </Link>
                 <Link
-                  href="/demo/student"
+                  href="/demo/child"
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 border-2"
                   style={{
                     borderColor: "#4A9B6F",

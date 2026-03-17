@@ -18,7 +18,6 @@ import { getActivityConfig } from "./activity-data";
 
 function subj(p: Pronoun) { return p === "he" ? "he" : p === "she" ? "she" : "they"; }
 function poss(p: Pronoun) { return p === "he" ? "his" : p === "she" ? "her" : "their"; }
-function obj(p: Pronoun)  { return p === "he" ? "him" : p === "she" ? "her" : "them"; }
 function Subj(p: Pronoun) { const s = subj(p); return s[0].toUpperCase() + s.slice(1); }
 function Poss(p: Pronoun) { const s = poss(p); return s[0].toUpperCase() + s.slice(1); }
 

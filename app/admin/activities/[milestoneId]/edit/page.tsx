@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { getActivityConfig } from "@/lib/activity-data";
@@ -20,18 +20,13 @@ function deepCloneConfig(config: ActivityConfig): ActivityConfig {
 
 export default function EditActivityPage() {
   const params = useParams();
-  const router = useRouter();
   const milestoneId = params.milestoneId as string;
   const { activityConfigOverrides, setActivityConfig, clearActivityConfigOverride, milestones } = useStore();
-  const [config, setConfig] = useState<ActivityConfig | null>(null);
-  const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
+  const [config, setConfig] = useState<ActivityConfig | null>(() => {
     const base = activityConfigOverrides[milestoneId] ?? getActivityConfig(milestoneId);
-    if (base) {
-      setConfig(deepCloneConfig(base));
-    }
-  }, [milestoneId, activityConfigOverrides]);
+    return base ? deepCloneConfig(base) : null;
+  });
+  const [saved, setSaved] = useState(false);
 
   if (!config) {
     return (

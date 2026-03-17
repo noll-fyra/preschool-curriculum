@@ -46,11 +46,7 @@ export default function ForTeachersPage() {
           subheadline="Nurture automatically tracks what every child knows and generates your report drafts for you — so you can spend your time on what only you can do."
           primaryCTA={{
             label: "See how it works",
-            href: "mailto:hello@nurture.edu.sg",
-          }}
-          secondaryCTA={{
-            label: "Request early access",
-            href: "mailto:hello@nurture.edu.sg",
+            href: "/demo/teacher",
           }}
           visual={<HeroDashboardMockup />}
         />
@@ -251,7 +247,7 @@ export default function ForTeachersPage() {
               title: "Get started free",
               desc: "Full teacher dashboard. No credit card required.",
               ctaLabel: "Open on web →",
-              ctaHref: "mailto:hello@nurture.edu.sg",
+              ctaHref: "/demo/teacher",
               primary: true,
             },
             {

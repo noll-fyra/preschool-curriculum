@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
@@ -26,37 +26,19 @@ export default function EditStudentPage() {
   const { children, classes, updateChild, setChildClass } = useStore();
   const child = children.find((c) => c.id === childId);
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [gender, setGender] = useState<Gender>("non-binary");
-  const [classId, setClassId] = useState("");
-  const [yearLevel, setYearLevel] = useState<YearLevelId>("K1");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [guardianName, setGuardianName] = useState("");
-  const [guardianPhone, setGuardianPhone] = useState("");
-  const [guardianEmail, setGuardianEmail] = useState("");
-  const [flagAllergy, setFlagAllergy] = useState("");
-  const [flagMedical, setFlagMedical] = useState("");
-  const [flagSpecialNeed, setFlagSpecialNeed] = useState("");
-  const [flagWelfare, setFlagWelfare] = useState("");
-
-  useEffect(() => {
-    if (child) {
-      setFirstName(child.firstName);
-      setLastName(child.lastName);
-      setGender(child.gender);
-      setClassId(child.classId);
-      setYearLevel(child.yearLevel ?? "K1");
-      setDateOfBirth(child.dateOfBirth ?? "");
-      setGuardianName(child.primaryGuardian?.name ?? "");
-      setGuardianPhone(child.primaryGuardian?.phone ?? "");
-      setGuardianEmail(child.primaryGuardian?.email ?? "");
-      setFlagAllergy(child.flags?.allergy ?? "");
-      setFlagMedical(child.flags?.medicalNote ?? "");
-      setFlagSpecialNeed(child.flags?.specialNeed ?? "");
-      setFlagWelfare(child.flags?.welfareConcern ?? "");
-    }
-  }, [child]);
+  const [firstName, setFirstName] = useState(() => child?.firstName ?? "");
+  const [lastName, setLastName] = useState(() => child?.lastName ?? "");
+  const [gender, setGender] = useState<Gender>(() => child?.gender ?? "non-binary");
+  const [classId, setClassId] = useState(() => child?.classId ?? "");
+  const [yearLevel, setYearLevel] = useState<YearLevelId>(() => child?.yearLevel ?? "K1");
+  const [dateOfBirth, setDateOfBirth] = useState(() => child?.dateOfBirth ?? "");
+  const [guardianName, setGuardianName] = useState(() => child?.primaryGuardian?.name ?? "");
+  const [guardianPhone, setGuardianPhone] = useState(() => child?.primaryGuardian?.phone ?? "");
+  const [guardianEmail, setGuardianEmail] = useState(() => child?.primaryGuardian?.email ?? "");
+  const [flagAllergy, setFlagAllergy] = useState(() => child?.flags?.allergy ?? "");
+  const [flagMedical, setFlagMedical] = useState(() => child?.flags?.medicalNote ?? "");
+  const [flagSpecialNeed, setFlagSpecialNeed] = useState(() => child?.flags?.specialNeed ?? "");
+  const [flagWelfare, setFlagWelfare] = useState(() => child?.flags?.welfareConcern ?? "");
 
   if (!child) {
     return (

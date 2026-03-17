@@ -11,7 +11,6 @@ import {
 } from "@/lib/selectors";
 import { ChildAvatar } from "@/components/teacher/ChildAvatar";
 import { StatusBadge } from "@/components/teacher/StatusBadge";
-import { MilestoneProgressGroup } from "@/components/teacher/MilestoneProgressGroup";
 import { ReportEditor } from "@/components/teacher/ReportEditor";
 import { getCurrentLevel } from "@/lib/mastery";
 import { LEARNING_AREAS, LEVEL_LABELS } from "@/lib/types";

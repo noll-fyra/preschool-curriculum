@@ -316,7 +316,7 @@ export default function Problem() {
               },
               {
                 label: "Try demo",
-                href: "/teachers",
+                href: "/demo",
                 dark: true,
                 icon: (
                   <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">

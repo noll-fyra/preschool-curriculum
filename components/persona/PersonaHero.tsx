@@ -7,12 +7,76 @@ interface CTAProps {
   primary?: boolean;
 }
 
+function CTAButton({
+  cta,
+  variant,
+}: {
+  cta: CTAProps;
+  variant: "primary" | "secondary";
+}) {
+  const className =
+    "inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-xl";
+
+  const style: React.CSSProperties =
+    variant === "primary"
+      ? { backgroundColor: "#F79863", color: "white" }
+      : {
+          backgroundColor: "#FFFFFF",
+          color: "#333333",
+          border: "1px solid #E5E5E5",
+        };
+
+  const onMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
+    if (variant === "primary") {
+      (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#E06B4A";
+      return;
+    }
+    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#F5F5F5";
+  };
+
+  const onMouseLeave = (e: React.MouseEvent<HTMLElement>) => {
+    if (variant === "primary") {
+      (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#F79863";
+      return;
+    }
+    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#FFFFFF";
+  };
+
+  const isInternal = cta.href.startsWith("/");
+
+  if (isInternal) {
+    return (
+      <Link
+        href={cta.href}
+        className={className}
+        style={style}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+      >
+        {cta.label}
+      </Link>
+    );
+  }
+
+  return (
+    <a
+      href={cta.href}
+      className={className}
+      style={style}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      {cta.label}
+    </a>
+  );
+}
+
 interface PersonaHeroProps {
   badgeLabel: string;
   headline: ReactNode;
   subheadline: string;
   primaryCTA: CTAProps;
-  secondaryCTA: CTAProps;
+  secondaryCTA?: CTAProps;
   visual: ReactNode;
 }
 
@@ -59,24 +123,8 @@ export default function PersonaHero({
 
         {/* CTAs */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-14">
-          <a
-            href={primaryCTA.href}
-            className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-xl"
-            style={{ backgroundColor: "#F79863", color: "white" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#E06B4A"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#F79863"; }}
-          >
-            {primaryCTA.label}
-          </a>
-          <a
-            href={secondaryCTA.href}
-            className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-xl"
-            style={{ backgroundColor: "#FFFFFF", color: "#333333", border: "1px solid #E5E5E5" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#F5F5F5"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#FFFFFF"; }}
-          >
-            {secondaryCTA.label}
-          </a>
+          <CTAButton cta={primaryCTA} variant="primary" />
+          {secondaryCTA && <CTAButton cta={secondaryCTA} variant="secondary" />}
         </div>
 
         {/* Hero visual */}

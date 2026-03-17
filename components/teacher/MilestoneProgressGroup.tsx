@@ -1,5 +1,5 @@
 import type { MilestoneWithProgress, LevelId } from "@/lib/types";
-import { DEVELOPMENTAL_LEVELS, LEVEL_LABELS } from "@/lib/types";
+import { LEVEL_LABELS } from "@/lib/types";
 import { MasteryBar } from "./MasteryBar";
 
 interface MilestoneProgressGroupProps {

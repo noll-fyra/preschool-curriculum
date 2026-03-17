@@ -42,7 +42,7 @@ export default function TeacherUpdatesPage() {
         <UpdateComposer
           classId={activeClass.id}
           teacherId={activeTeacher?.id ?? "teacher-1"}
-          children={classChildren}
+          students={classChildren}
           onClose={() => setComposerOpen(false)}
           onSubmit={() => setComposerOpen(false)}
         />
@@ -158,13 +158,13 @@ function MediaPreview({ media }: { media: TeacherUpdateMedia }) {
 function UpdateComposer({
   classId,
   teacherId,
-  children,
+  students,
   onClose,
   onSubmit,
 }: {
   classId: string;
   teacherId: string;
-  children: import("@/lib/types").Child[];
+  students: import("@/lib/types").Child[];
   onClose: () => void;
   onSubmit: () => void;
 }) {
@@ -289,7 +289,7 @@ function UpdateComposer({
 
             {scope === "students" && (
               <div className="flex flex-wrap gap-2">
-                {children.map((child) => (
+                {students.map((child) => (
                   <button
                     key={child.id}
                     onClick={() => toggleChild(child.id)}

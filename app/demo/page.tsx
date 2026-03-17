@@ -4,3 +4,4 @@ export default function DemoIndexPage() {
   redirect("/demo/teacher");
 }
 
+

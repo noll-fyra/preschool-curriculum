@@ -39,12 +39,8 @@ export default function ForStudentsPage() {
           headline="Learning that feels like play."
           subheadline="Nurture gives every child a companion, a queue of activities matched to exactly where they are, and a celebration every time they finish — whether they got every answer right or not."
           primaryCTA={{
-            label: "See the child experience",
-            href: "/demo/student",
-          }}
-          secondaryCTA={{
-            label: "Get early access",
-            href: "mailto:hello@nurture.edu.sg",
+            label: "See how it works",
+            href: "/demo/child",
           }}
           visual={<HeroPhoneMockup />}
         />

@@ -75,8 +75,8 @@ export default function Header() {
 
         {/* Desktop CTAs */}
         <div className="hidden md:flex items-center gap-2 shrink-0">
-          <a
-            href="mailto:hello@nurture.edu.sg"
+          <Link
+            href="/demo"
             className="text-sm font-semibold px-4 py-1.5 rounded-md transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2"
             style={{
               backgroundColor: "#F79863",
@@ -92,17 +92,17 @@ export default function Header() {
             }}
           >
             Get started free
-          </a>
+          </Link>
         </div>
 
         {/* Mobile CTA */}
-        <a
-          href="mailto:hello@nurture.edu.sg"
+        <Link
+          href="/demo"
           className="md:hidden text-sm font-semibold px-3 py-1.5 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2"
           style={{ backgroundColor: "#F79863", color: "white" }}
         >
           Get started
-        </a>
+        </Link>
       </div>
     </header>
   );

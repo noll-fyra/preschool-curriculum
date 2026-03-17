@@ -20,10 +20,10 @@ const DEFAULT_COLUMNS: FooterColumn[] = [
   {
     heading: "Product",
     links: [
-      { label: "For Teachers", href: "/teachers" },
-      { label: "For Parents", href: "/parents" },
-      { label: "For Children", href: "/children" },
-      { label: "For Schools", href: "/schools" },
+      { label: "Teachers", href: "/teachers" },
+      { label: "Children", href: "/children" },
+      { label: "Parents", href: "/parents" },
+      { label: "Schools", href: "/schools" },
     ],
   },
   {
@@ -77,7 +77,7 @@ export default function PersonaFooter({
               >
                 🌱
               </div>
-              nurture
+              Nurture
             </Link>
             <p className="text-xs leading-relaxed" style={{ color: "#999999" }}>
               {tagline}

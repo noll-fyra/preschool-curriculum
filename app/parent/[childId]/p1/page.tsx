@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { getChildDisplayName, getPronounFromGender } from "@/lib/display-name";
-import { LEARNING_AREAS, type LearningAreaId } from "@/lib/types";
+import { LEARNING_AREAS } from "@/lib/types";
 
 export default function P1ReadinessPage() {
   const params = useParams();
@@ -45,9 +45,6 @@ export default function P1ReadinessPage() {
 
   // On-track check: ≥50% of total milestones achieved
   const isOnTrack = achievedAll / totalMilestones >= 0.5;
-
-  const pronoun =
-    getPronounFromGender(child.gender) === "he" ? "He" : getPronounFromGender(child.gender) === "she" ? "She" : "They";
 
   return (
     <div className="px-4 py-5 max-w-lg mx-auto">

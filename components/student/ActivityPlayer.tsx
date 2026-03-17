@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { ActivityConfig, ActivityQuestion } from "@/lib/activity-data";
 import { generateNameCardQuestions } from "@/lib/activity-data";
@@ -23,6 +23,17 @@ const C = {
 };
 
 const CONFETTI_COLOURS = ["#F5C518", "#7DC873", "#E8604A", "#7BA3D4", "#F4A8C4", "#C5B3E6"];
+
+function mulberry32(seed: number) {
+  let a = seed >>> 0;
+  return () => {
+    a |= 0;
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 
 interface ActivityPlayerProps {
   childId: string;
@@ -113,12 +124,13 @@ function HomeButton({ onExit }: { onExit: () => void }) {
 
 // Confetti: 28 CSS-animated squares (spec §Screen 6)
 function Confetti() {
+  const rng = mulberry32(0xC0FFEE);
   const pieces = Array.from({ length: 28 }, (_, i) => ({
     id: i,
-    left: `${Math.random() * 100}%`,
+    left: `${(rng() * 100).toFixed(2)}%`,
     color: CONFETTI_COLOURS[i % CONFETTI_COLOURS.length],
-    delay: `${(Math.random() * 0.6).toFixed(2)}s`,
-    duration: `${(0.9 + Math.random() * 0.6).toFixed(2)}s`,
+    delay: `${(rng() * 0.6).toFixed(2)}s`,
+    duration: `${(0.9 + rng() * 0.6).toFixed(2)}s`,
   }));
 
   return (
@@ -142,7 +154,7 @@ function Confetti() {
   );
 }
 
-export function ActivityPlayer({ childId: _childId, childName, config, onComplete }: ActivityPlayerProps) {
+export function ActivityPlayer({ childName, config, onComplete }: ActivityPlayerProps) {
   const router = useRouter();
   const [questions] = useState<ActivityQuestion[]>(() => pickQuestions(config, childName));
   const [questionIndex, setQuestionIndex] = useState(0);

@@ -10,6 +10,12 @@ import EcosystemGrid from "@/components/persona/EcosystemGrid";
 import PersonaFinalCTA from "@/components/persona/PersonaFinalCTA";
 import PersonaQA from "@/components/persona/PersonaQA";
 import PersonaFooter from "@/components/persona/PersonaFooter";
+import {
+  HeroDashboardMockup,
+  NELAlignmentMockup,
+  MessagingMockup,
+  BreadthHeroMockup,
+} from "@/components/persona/teacher/Mockups";
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
@@ -24,13 +30,10 @@ export default function ForSchoolsPage() {
           headline="The learning platform built for Singapore preschools."
           subheadline="Nurture closes the gap between your curriculum and your data — aligning every classroom activity, every milestone, and every parent update to the NEL Framework, automatically."
           primaryCTA={{
-            label: "Request a demo",
-            href: "mailto:hello@nurture.edu.sg",
+            label: "See how it works",
+            href: "/demo/teacher",
           }}
-          secondaryCTA={{
-            label: "Download the product overview",
-            href: "mailto:hello@nurture.edu.sg",
-          }}
+          visual={<HeroDashboardMockup />}
         />
 
         {/* Section 2: Positioning line */}
@@ -58,6 +61,8 @@ export default function ForSchoolsPage() {
               "Observable, sequenced levels (Beginning / Developing / Secure)",
               "Curriculum team starts from a trusted baseline, not a blank page",
             ],
+            visual: <NELAlignmentMockup />,
+            visualBg: "#E5F4F1",
           }}
           gridFeatures={[
             {
@@ -102,6 +107,8 @@ export default function ForSchoolsPage() {
               "Focuses purely on learning delivery and measurement",
               "Closes the gap between curriculum plans and real data",
             ],
+            visual: <MessagingMockup />,
+            visualBg: "#F0F5FC",
           }}
           halfFeatures={[
             {
@@ -137,6 +144,8 @@ export default function ForSchoolsPage() {
               "Real-time views for teachers, directors, and parents",
               "No separate data entry for reporting or inspection",
             ],
+            visual: <BreadthHeroMockup />,
+            visualBg: "#E5F4F1",
           }}
           thirdFeatures={[
             {

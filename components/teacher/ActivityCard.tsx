@@ -13,7 +13,7 @@ const AREA_STYLES: Record<string, { bg: string; text: string; label: string }> =
 
 interface ActivityCardProps {
   activity: PlannedActivity;
-  children: Child[];
+  students: Child[];
   milestones: Milestone[];
   feedback: ActivityFeedback[];
   onDelete: (activityId: string) => void;
@@ -23,7 +23,7 @@ interface ActivityCardProps {
 
 export function ActivityCard({
   activity,
-  children,
+  students,
   milestones,
   feedback,
   onDelete,
@@ -38,7 +38,7 @@ export function ActivityCard({
   const linkedMilestone = activity.milestoneId
     ? milestones.find((m) => m.id === activity.milestoneId)
     : null;
-  const assignedChildren = children.filter((c) => activity.childIds.includes(c.id));
+  const assignedChildren = students.filter((c) => activity.childIds.includes(c.id));
 
   function openFeedback(childId: string) {
     const existing = feedback.find(

@@ -83,7 +83,7 @@ export default function ClassPage() {
       {/* ── Grouped by proficiency ───────────────────────────────────────── */}
       {activeFilter !== "all" && (
         <GroupedView
-          children={children}
+          students={children}
           areaId={activeFilter}
           areaName={LEARNING_AREAS.find((a) => a.id === activeFilter)!.name}
         />
@@ -93,17 +93,19 @@ export default function ClassPage() {
 }
 
 function GroupedView({
-  children,
+  students,
   areaId,
   areaName,
 }: {
-  children: ChildWithLevels[];
+  students: ChildWithLevels[];
   areaId: LearningAreaId;
   areaName: string;
 }) {
   const grouped = LEVELS.map((level) => ({
     ...level,
-    children: children.filter((c) => c.levels[areaId] === level.id).sort((a, b) => getChildDisplayName(a).localeCompare(getChildDisplayName(b))),
+    students: students
+      .filter((c) => c.levels[areaId] === level.id)
+      .sort((a, b) => getChildDisplayName(a).localeCompare(getChildDisplayName(b))),
   }));
 
   return (
@@ -115,7 +117,7 @@ function GroupedView({
 
       {/* Three columns on md+, stacked on mobile */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {grouped.map(({ id, label, bg, text, border, children: groupChildren }) => (
+        {grouped.map(({ id, label, bg, text, border, students: groupStudents }) => (
           <div key={id} className="rounded-2xl overflow-hidden border" style={{ borderColor: border }}>
             {/* Group header */}
             <div className="px-4 py-3 flex items-center justify-between" style={{ background: bg }}>
@@ -124,18 +126,18 @@ function GroupedView({
                 className="text-xs font-medium px-2 py-0.5 rounded-full"
                 style={{ background: "rgba(255,255,255,0.6)", color: text }}
               >
-                {groupChildren.length}
+                {groupStudents.length}
               </span>
             </div>
 
             {/* Children in this group */}
             <div className="bg-white divide-y divide-border">
-              {groupChildren.length === 0 ? (
+              {groupStudents.length === 0 ? (
                 <p className="px-4 py-4 text-sm" style={{ color: "var(--color-text-muted)" }}>
                   No students at this level
                 </p>
               ) : (
-                groupChildren.map((child) => (
+                groupStudents.map((child) => (
                   <Link
                     key={child.id}
                     href={`/teacher/child/${child.id}`}

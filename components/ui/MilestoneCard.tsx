@@ -74,7 +74,7 @@ export default function MilestoneCard() {
         className="mt-5 rounded-xl p-3 text-xs"
         style={{ backgroundColor: "#E8F5EE", color: "#4A9B6F" }}
       >
-        <span className="font-bold">Teacher note:</span> "Counted to 10 independently during circle time — unprompted."
+        <span className="font-bold">Teacher note:</span> &ldquo;Counted to 10 independently during circle time — unprompted.&rdquo;
       </div>
 
       <p className="text-xs mt-3" style={{ color: "#9DAE9E" }}>

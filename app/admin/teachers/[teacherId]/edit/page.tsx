@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
@@ -12,19 +12,10 @@ export default function EditTeacherPage() {
   const { teachers, classes, updateTeacher, setTeacherClasses } = useStore();
   const teacher = teachers.find((t) => t.id === teacherId);
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [classIds, setClassIds] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (teacher) {
-      setFirstName(teacher.firstName);
-      setLastName(teacher.lastName);
-      setEmail(teacher.email ?? "");
-      setClassIds(teacher.classIds);
-    }
-  }, [teacher]);
+  const [firstName, setFirstName] = useState(() => teacher?.firstName ?? "");
+  const [lastName, setLastName] = useState(() => teacher?.lastName ?? "");
+  const [email, setEmail] = useState(() => teacher?.email ?? "");
+  const [classIds, setClassIds] = useState<string[]>(() => teacher?.classIds ?? []);
 
   if (!teacher) {
     return (

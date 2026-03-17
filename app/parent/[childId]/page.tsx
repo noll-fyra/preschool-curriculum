@@ -14,7 +14,7 @@ import {
 } from "@/lib/parent-summary";
 import { getChildLevelPerArea } from "@/lib/selectors";
 import { getWeekStart } from "@/lib/assignments";
-import { LEARNING_AREAS, LEVEL_LABELS, type LearningAreaId, type LevelId } from "@/lib/types";
+import { LEARNING_AREAS, LEVEL_LABELS, type LevelId } from "@/lib/types";
 
 // ─── Spec colour system ───────────────────────────────────────────────────────
 

@@ -206,12 +206,8 @@ export default function ForParentsPage() {
           headline="Always know how your child is doing."
           subheadline="Nurture gives you a live window into your child's learning — what they're working on, what they've just achieved, and exactly how you can help — updated every time they complete an activity."
           primaryCTA={{
-            label: "Get early access",
-            href: "mailto:hello@nurture.edu.sg",
-          }}
-          secondaryCTA={{
             label: "See how it works",
-            href: "mailto:hello@nurture.edu.sg",
+            href: "/demo/parent",
           }}
           visual={<ParentHomeMockup />}
         />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
@@ -13,17 +13,11 @@ export default function EditClassPage() {
   const { classes, teachers, updateClass, setTeacherClasses, deleteClass } = useStore();
   const cls = classes.find((c) => c.id === classId);
 
-  const [name, setName] = useState("");
-  const [termLabel, setTermLabel] = useState("");
-  const [assignedTeacherIds, setAssignedTeacherIds] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (cls) {
-      setName(cls.name);
-      setTermLabel(cls.termLabel);
-      setAssignedTeacherIds(teachers.filter((t) => t.classIds.includes(classId)).map((t) => t.id));
-    }
-  }, [cls, classId, teachers]);
+  const [name, setName] = useState(() => (cls ? cls.name : ""));
+  const [termLabel, setTermLabel] = useState(() => (cls ? cls.termLabel : ""));
+  const [assignedTeacherIds, setAssignedTeacherIds] = useState<string[]>(() =>
+    cls ? teachers.filter((t) => t.classIds.includes(classId)).map((t) => t.id) : []
+  );
 
   if (!cls) {
     return (

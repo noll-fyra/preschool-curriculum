@@ -49,7 +49,7 @@ export default function Hero() {
         <AnimateIn delay={0.15}>
           <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
             <Link
-              href="/teachers"
+              href="/demo"
               className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-3 rounded-lg transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2"
               style={{ backgroundColor: "#F79863", color: "#FFFFFF" }}
               onMouseEnter={(e) => {
