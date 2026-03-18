@@ -53,7 +53,7 @@ export default function PersonaFinalCTA({
               <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.55)" }}>{opt.desc}</p>
               <a
                 href={opt.ctaHref}
-                className="block w-full text-center text-sm font-bold py-3 rounded-xl"
+                className="block w-full text-center text-sm font-bold py-3 rounded-full"
                 style={
                   opt.primary
                     ? { backgroundColor: "#F79863", color: "white" }

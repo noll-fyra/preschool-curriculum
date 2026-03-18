@@ -12,11 +12,49 @@ const NAV_ITEMS = [
     href: "/teacher/class",
     label: "Class",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-        <rect x="2" y="3" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.8"/>
-        <rect x="11" y="3" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.8"/>
-        <rect x="2" y="12" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.4"/>
-        <rect x="11" y="12" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.4"/>
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        aria-hidden="true"
+      >
+        <rect
+          x="2"
+          y="3"
+          width="7"
+          height="7"
+          rx="1.5"
+          fill="currentColor"
+          opacity="0.8"
+        />
+        <rect
+          x="11"
+          y="3"
+          width="7"
+          height="7"
+          rx="1.5"
+          fill="currentColor"
+          opacity="0.8"
+        />
+        <rect
+          x="2"
+          y="12"
+          width="7"
+          height="7"
+          rx="1.5"
+          fill="currentColor"
+          opacity="0.4"
+        />
+        <rect
+          x="11"
+          y="12"
+          width="7"
+          height="7"
+          rx="1.5"
+          fill="currentColor"
+          opacity="0.4"
+        />
       </svg>
     ),
   },
@@ -24,9 +62,26 @@ const NAV_ITEMS = [
     href: "/teacher/updates",
     label: "Updates",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-        <path d="M2 14v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-        <path d="M10 2v12M6 6l4-4 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M2 14v2a2 2 0 002 2h12a2 2 0 002-2v-2"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        <path
+          d="M10 2v12M6 6l4-4 4 4"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     ),
   },
@@ -34,9 +89,29 @@ const NAV_ITEMS = [
     href: "/teacher/assignments",
     label: "Activities",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-        <rect x="3" y="2" width="14" height="16" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-        <path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        aria-hidden="true"
+      >
+        <rect
+          x="3"
+          y="2"
+          width="14"
+          height="16"
+          rx="2"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          fill="none"
+        />
+        <path
+          d="M7 7h6M7 10h6M7 13h4"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
       </svg>
     ),
   },
@@ -44,11 +119,36 @@ const NAV_ITEMS = [
     href: "/teacher/reports",
     label: "Reports",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-        <rect x="3" y="2" width="14" height="16" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-        <path d="M7 7h6M7 10h6M7 13h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-        <circle cx="15" cy="14" r="3" fill="currentColor"/>
-        <path d="M14 14h2M15 13v2" stroke="white" strokeWidth="1" strokeLinecap="round"/>
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        aria-hidden="true"
+      >
+        <rect
+          x="3"
+          y="2"
+          width="14"
+          height="16"
+          rx="2"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          fill="none"
+        />
+        <path
+          d="M7 7h6M7 10h6M7 13h3"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        <circle cx="15" cy="14" r="3" fill="currentColor" />
+        <path
+          d="M14 14h2M15 13v2"
+          stroke="white"
+          strokeWidth="1"
+          strokeLinecap="round"
+        />
       </svg>
     ),
   },
@@ -56,12 +156,48 @@ const NAV_ITEMS = [
     href: "/teacher/calendar",
     label: "Calendar",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-        <rect x="2" y="4" width="16" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-        <path d="M2 8h16" stroke="currentColor" strokeWidth="1.5"/>
-        <path d="M6 2v4M14 2v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-        <rect x="5" y="11" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.5"/>
-        <rect x="9" y="11" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.5"/>
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        aria-hidden="true"
+      >
+        <rect
+          x="2"
+          y="4"
+          width="16"
+          height="14"
+          rx="2"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          fill="none"
+        />
+        <path d="M2 8h16" stroke="currentColor" strokeWidth="1.5" />
+        <path
+          d="M6 2v4M14 2v4"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        <rect
+          x="5"
+          y="11"
+          width="3"
+          height="3"
+          rx="0.5"
+          fill="currentColor"
+          opacity="0.5"
+        />
+        <rect
+          x="9"
+          y="11"
+          width="3"
+          height="3"
+          rx="0.5"
+          fill="currentColor"
+          opacity="0.5"
+        />
       </svg>
     ),
   },
@@ -69,12 +205,32 @@ const NAV_ITEMS = [
     href: "/teacher/rubric",
     label: "Rubric",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-        <rect x="3" y="2" width="14" height="16" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-        <path d="M7 6h6M7 9h6M7 12h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-        <circle cx="5.5" cy="6" r="0.75" fill="currentColor"/>
-        <circle cx="5.5" cy="9" r="0.75" fill="currentColor"/>
-        <circle cx="5.5" cy="12" r="0.75" fill="currentColor"/>
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        aria-hidden="true"
+      >
+        <rect
+          x="3"
+          y="2"
+          width="14"
+          height="16"
+          rx="2"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          fill="none"
+        />
+        <path
+          d="M7 6h6M7 9h6M7 12h4"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        <circle cx="5.5" cy="6" r="0.75" fill="currentColor" />
+        <circle cx="5.5" cy="9" r="0.75" fill="currentColor" />
+        <circle cx="5.5" cy="12" r="0.75" fill="currentColor" />
       </svg>
     ),
   },
@@ -84,7 +240,9 @@ export function TeacherNav() {
   const pathname = usePathname();
   const { classes, teachers, activeClassId, setActiveClass } = useStore();
   const activeClass = classes.find((c) => c.id === activeClassId) ?? classes[0];
-  const activeTeacher = teachers.find((t) => t.classIds.includes(activeClass.id));
+  const activeTeacher = teachers.find((t) =>
+    t.classIds.includes(activeClass.id),
+  );
   const [classMenuOpen, setClassMenuOpen] = useState(false);
 
   return (
@@ -116,16 +274,27 @@ export function TeacherNav() {
               style={{
                 color: "var(--color-text-mid)",
                 borderColor: "var(--color-border)",
-                background: classMenuOpen ? "var(--color-bg-cream)" : "transparent",
+                background: classMenuOpen
+                  ? "var(--color-bg-cream)"
+                  : "transparent",
               }}
             >
               <span className="truncate">{activeClass.name}</span>
               <svg
-                width="12" height="12" viewBox="0 0 12 12" fill="none"
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
                 className="shrink-0 transition-transform"
                 style={{ transform: classMenuOpen ? "rotate(180deg)" : "none" }}
               >
-                <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M2 4l4 4 4-4"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </button>
 
@@ -137,16 +306,37 @@ export function TeacherNav() {
                 {classes.map((cls) => (
                   <button
                     key={cls.id}
-                    onClick={() => { setActiveClass(cls.id); setClassMenuOpen(false); }}
+                    onClick={() => {
+                      setActiveClass(cls.id);
+                      setClassMenuOpen(false);
+                    }}
                     className="w-full text-left px-3 py-2 text-xs font-medium flex items-center gap-2 transition-colors hover:bg-bg-cream"
                     style={{
-                      color: cls.id === activeClassId ? "var(--color-primary)" : "var(--color-text-dark)",
-                      background: cls.id === activeClassId ? "var(--color-primary-wash)" : "transparent",
+                      color:
+                        cls.id === activeClassId
+                          ? "var(--color-primary)"
+                          : "var(--color-text-dark)",
+                      background:
+                        cls.id === activeClassId
+                          ? "var(--color-primary-wash)"
+                          : "transparent",
                     }}
                   >
                     {cls.id === activeClassId && (
-                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="shrink-0">
-                        <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      <svg
+                        width="10"
+                        height="10"
+                        viewBox="0 0 10 10"
+                        fill="none"
+                        className="shrink-0"
+                      >
+                        <path
+                          d="M1.5 5l2.5 2.5 4.5-4.5"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
                       </svg>
                     )}
                     {cls.id !== activeClassId && <span className="w-[10px]" />}
@@ -168,7 +358,8 @@ export function TeacherNav() {
           {NAV_ITEMS.map((item) => {
             const active =
               pathname === item.href ||
-              (item.href !== "/teacher/class" && pathname.startsWith(item.href));
+              (item.href !== "/teacher/class" &&
+                pathname.startsWith(item.href));
             return (
               <Link
                 key={item.href}
@@ -178,7 +369,9 @@ export function TeacherNav() {
                   color: active
                     ? "var(--color-primary)"
                     : "var(--color-text-mid)",
-                  background: active ? "var(--color-primary-wash)" : "transparent",
+                  background: active
+                    ? "var(--color-primary-wash)"
+                    : "transparent",
                 }}
               >
                 {item.icon}
@@ -193,7 +386,10 @@ export function TeacherNav() {
           className="px-5 py-4 border-t border-[var(--color-border)]"
           style={{ color: "var(--color-text-muted)" }}
         >
-          <p className="text-xs font-medium" style={{ color: "var(--color-text-mid)" }}>
+          <p
+            className="text-xs font-medium"
+            style={{ color: "var(--color-text-mid)" }}
+          >
             {activeTeacher ? getTeacherDisplayName(activeTeacher) : "—"}
           </p>
           <p className="text-xs">My First Skool</p>
@@ -212,7 +408,9 @@ export function TeacherNav() {
               href={item.href}
               className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-[10px] font-medium"
               style={{
-                color: active ? "var(--color-primary)" : "var(--color-text-muted)",
+                color: active
+                  ? "var(--color-primary)"
+                  : "var(--color-text-muted)",
               }}
             >
               {item.icon}

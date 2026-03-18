@@ -73,7 +73,7 @@ export default function GetStartedAs() {
             <Link
               key={role.label}
               href={role.href}
-              className="group flex flex-col items-center rounded-xl p-4 transition-all duration-200 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2"
+              className="group flex flex-col items-center rounded-full p-4 transition-all duration-200 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2"
               style={{
                 backgroundColor: role.bgColor,
                 border: `2px solid ${role.borderColor}`,

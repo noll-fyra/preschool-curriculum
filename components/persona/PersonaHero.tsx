@@ -15,7 +15,7 @@ function CTAButton({
   variant: "primary" | "secondary";
 }) {
   const className =
-    "inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-xl";
+    "inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-full";
 
   const style: React.CSSProperties =
     variant === "primary"

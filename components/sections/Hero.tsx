@@ -40,8 +40,9 @@ export default function Hero() {
               fontWeight: 400,
             }}
           >
-            Personalised learning activities, real-time parent updates, and less
-            admin — all in one platform built for Singapore&apos;s preschools.
+            Personalised learning activities, real-time progress updates, and
+            way less paperwork — all in one platform built for Singapore&apos;s
+            preschools.
           </p>
         </AnimateIn>
 
@@ -50,7 +51,7 @@ export default function Hero() {
           <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
             <Link
               href="/demo"
-              className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-3 rounded-lg transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2"
+              className="inline-flex items-center gap-2 text-base font-semibold px-5 py-3 rounded-full transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2"
               style={{ backgroundColor: "#F79863", color: "#FFFFFF" }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLAnchorElement).style.backgroundColor =

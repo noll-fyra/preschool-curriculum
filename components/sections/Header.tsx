@@ -77,7 +77,7 @@ export default function Header() {
         <div className="hidden md:flex items-center gap-2 shrink-0">
           <Link
             href="/demo"
-            className="text-sm font-semibold px-4 py-1.5 rounded-md transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2"
+            className="text-sm font-semibold px-4 py-1.5 rounded-full transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2"
             style={{
               backgroundColor: "#F79863",
               color: "white",
@@ -98,7 +98,7 @@ export default function Header() {
         {/* Mobile CTA */}
         <Link
           href="/demo"
-          className="md:hidden text-sm font-semibold px-3 py-1.5 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2"
+          className="md:hidden text-sm font-semibold px-3 py-1.5 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2"
           style={{ backgroundColor: "#F79863", color: "white" }}
         >
           Get started

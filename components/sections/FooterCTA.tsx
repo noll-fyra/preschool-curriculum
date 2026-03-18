@@ -36,7 +36,7 @@ export default function FooterCTA() {
               <div className="flex flex-wrap gap-3">
                 <Link
                   href="/demo"
-                  className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-lg transition-all duration-150"
+                  className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-full transition-all duration-150"
                   style={{ backgroundColor: "#333333", color: "white" }}
                   onMouseEnter={(e) => {
                     (
@@ -53,7 +53,7 @@ export default function FooterCTA() {
                 </Link>
                 <a
                   href="mailto:hello@nurture.edu.sg"
-                  className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-lg transition-all duration-150"
+                  className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-full transition-all duration-150"
                   style={{
                     backgroundColor: "transparent",
                     color: "#1C2B29",

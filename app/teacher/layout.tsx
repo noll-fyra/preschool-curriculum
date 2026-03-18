@@ -28,37 +28,69 @@ export default function TeacherLayout({
         style={{ borderColor: "var(--color-border)" }}
       >
         <div className="flex items-center gap-1.5">
-          <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>Class:</span>
+          <span
+            className="text-xs"
+            style={{ color: "var(--color-text-muted)" }}
+          >
+            Class:
+          </span>
           <button
             onClick={() => setMobileMenuOpen((o) => !o)}
             className="flex items-center gap-1 text-xs font-semibold"
             style={{ color: "var(--color-text-dark)" }}
           >
             {activeClass.name}
-            <svg width="11" height="11" viewBox="0 0 11 11" fill="none"
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 11 11"
+              fill="none"
               style={{ transform: mobileMenuOpen ? "rotate(180deg)" : "none" }}
             >
-              <path d="M2 3.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M2 3.5l3.5 3.5 3.5-3.5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
         </div>
 
         {/* Search icon */}
         <button
-          onClick={() => { setMobileSearchOpen(true); setMobileMenuOpen(false); }}
+          onClick={() => {
+            setMobileSearchOpen(true);
+            setMobileMenuOpen(false);
+          }}
           className="ml-auto p-1.5 rounded-lg transition-colors hover:bg-bg-cream"
           aria-label="Search students"
           style={{ color: "var(--color-text-mid)" }}
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.5" />
-            <path d="M11 11l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <circle
+              cx="7"
+              cy="7"
+              r="4.5"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
+            <path
+              d="M11 11l3 3"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
           </svg>
         </button>
 
         {mobileMenuOpen && (
           <>
-            <div className="fixed inset-0 z-30" onClick={() => setMobileMenuOpen(false)} />
+            <div
+              className="fixed inset-0 z-30"
+              onClick={() => setMobileMenuOpen(false)}
+            />
             <div
               className="absolute top-full left-4 mt-1 rounded-xl border bg-white shadow-lg z-50 overflow-hidden min-w-[180px]"
               style={{ borderColor: "var(--color-border)" }}
@@ -66,16 +98,37 @@ export default function TeacherLayout({
               {classes.map((cls) => (
                 <button
                   key={cls.id}
-                  onClick={() => { setActiveClass(cls.id); setMobileMenuOpen(false); }}
+                  onClick={() => {
+                    setActiveClass(cls.id);
+                    setMobileMenuOpen(false);
+                  }}
                   className="w-full text-left px-4 py-2.5 text-sm font-medium flex items-center gap-2 transition-colors hover:bg-bg-cream"
                   style={{
-                    color: cls.id === activeClassId ? "var(--color-primary)" : "var(--color-text-dark)",
-                    background: cls.id === activeClassId ? "var(--color-primary-wash)" : "transparent",
+                    color:
+                      cls.id === activeClassId
+                        ? "var(--color-primary)"
+                        : "var(--color-text-dark)",
+                    background:
+                      cls.id === activeClassId
+                        ? "var(--color-primary-wash)"
+                        : "transparent",
                   }}
                 >
                   {cls.id === activeClassId && (
-                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" className="shrink-0">
-                      <path d="M1.5 5.5l2.5 2.5 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <svg
+                      width="11"
+                      height="11"
+                      viewBox="0 0 11 11"
+                      fill="none"
+                      className="shrink-0"
+                    >
+                      <path
+                        d="M1.5 5.5l2.5 2.5 5-5"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   )}
                   {cls.id !== activeClassId && <span className="w-[11px]" />}
@@ -117,11 +170,12 @@ export default function TeacherLayout({
         </div>
       )}
 
-      <div className="flex flex-1 min-h-0" style={{ background: "var(--color-bg-warm)" }}>
+      <div
+        className="flex flex-1 min-h-0"
+        style={{ background: "var(--color-bg-warm)" }}
+      >
         <TeacherNav />
-        <main className="flex-1 min-w-0 pb-20 md:pb-0">
-          {children}
-        </main>
+        <main className="flex-1 min-w-0 pb-20 md:pb-0">{children}</main>
       </div>
     </div>
   );
