@@ -23,10 +23,13 @@
   --color-bg-warm: #F5F5F5;
   --color-bg-white: #FFFFFF;
 
-  /* Learning area accents (unchanged) */
+  /* Learning area accents */
   --color-area-ll: #F5A623;
   --color-area-num: #7BA3D4;
   --color-area-sed: #E8745A;
+  --color-area-ace: #4A9B6F;
+  --color-area-dow: #9B84D4;
+  --color-area-hms: #4ABDB5;
 
   /* Borders */
   --color-border: #E5E5E5;

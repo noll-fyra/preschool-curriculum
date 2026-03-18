@@ -61,13 +61,9 @@ export default function StudentActivityHomePage() {
   // Only the first not-yet-done activity is "active" (spec §Screen 1 — only one tile active at a time)
   const firstActiveMilestoneId = digitalActivities.find((m) => !passedTodayIds.has(m.id))?.id ?? null;
 
-  // Teacher updates visible to this child (class-level or tagged)
-  const visibleUpdates = store.teacherUpdates
-    .filter(
-      (u) =>
-        u.classId === child.classId &&
-        (u.childIds.length === 0 || u.childIds.includes(childId))
-    )
+  // Recent teacher messages visible to this child
+  const visibleUpdates = store.chatMessages
+    .filter((m) => m.childId === childId && m.senderType === "teacher")
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 3);
 

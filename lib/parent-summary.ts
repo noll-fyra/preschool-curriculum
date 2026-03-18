@@ -6,7 +6,7 @@ import type {
   ChildMilestoneProgress,
   ActivitySession,
   TeacherObservation,
-  TeacherUpdate,
+  ChatMessage,
   LearningAreaId,
   LevelId,
   Pronoun,
@@ -167,9 +167,10 @@ export function getFeedItems(
   sessions: ActivitySession[],
   progress: ChildMilestoneProgress[],
   milestones: Milestone[],
-  teacherUpdates: TeacherUpdate[],
+  chatMessages: ChatMessage[],
   teachers: { id: string; firstName: string; lastName: string }[]
 ): FeedItem[] {
+  void classId; // classId no longer needed with per-child chatMessages
   const items: FeedItem[] = [];
 
   // Activity completions — deduplicate to 1 per milestone per day (most recent result)
@@ -220,26 +221,24 @@ export function getFeedItems(
     });
   }
 
-  // Teacher updates (class-level or tagging this child)
-  const visibleUpdates = teacherUpdates.filter(
-    (u) =>
-      u.classId === classId &&
-      (u.childIds.length === 0 || u.childIds.includes(childId))
+  // Progress updates from teacher (kind === "progress_update" only)
+  const progressUpdates = chatMessages.filter(
+    (m) => m.childId === childId && m.senderType === "teacher" && m.kind === "progress_update"
   );
-  for (const u of visibleUpdates) {
-    const teacher = teachers.find((t) => t.id === u.teacherId);
+  for (const m of progressUpdates) {
+    const teacher = teachers.find((t) => t.id === m.senderId);
     const teacherName = teacher
       ? [teacher.firstName, teacher.lastName].filter(Boolean).join(" ").trim() || "Teacher"
       : "Teacher";
-    const subtitle = u.text.length > 80 ? u.text.slice(0, 80) + "…" : u.text;
+    const subtitle = m.text.length > 80 ? m.text.slice(0, 80) + "…" : m.text;
     items.push({
-      id: u.id,
+      id: m.id,
       type: "teacher_update",
       title: `Update from ${teacherName}`,
       subtitle,
-      timestamp: u.createdAt,
+      timestamp: m.createdAt,
       icon: "teacher_update",
-      media: u.media,
+      media: m.media,
     });
   }
 

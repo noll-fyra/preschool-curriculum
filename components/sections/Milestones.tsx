@@ -14,12 +14,6 @@ export default function Milestones() {
           {/* Text side */}
           <AnimateIn>
             <div>
-              <div
-                className="inline-flex text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full mb-5"
-                style={{ backgroundColor: "#FEF0E7", color: "#F79863" }}
-              >
-                Singapore NEL Framework
-              </div>
               <h2
                 id="milestones-heading"
                 className="font-extrabold mb-5"
@@ -37,8 +31,8 @@ export default function Milestones() {
               <p className="leading-relaxed mb-6" style={{ color: "#666666" }}>
                 Nurture&apos;s milestone schema is mapped directly to the
                 Ministry of Education&apos;s Nurturing Early Learners (NEL)
-                Framework 2022. Every learning goal is translated into
-                observable, sequenced milestones — from{" "}
+                Framework. Every learning goal is translated into observable,
+                sequenced milestones — from{" "}
                 <strong style={{ color: "#333333" }}>Beginning</strong> through{" "}
                 <strong style={{ color: "#333333" }}>Developing</strong> to{" "}
                 <strong style={{ color: "#333333" }}>Secure</strong> — aligned

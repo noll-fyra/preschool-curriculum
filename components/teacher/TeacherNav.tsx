@@ -59,8 +59,8 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: "/teacher/updates",
-    label: "Updates",
+    href: "/teacher/messages",
+    label: "Messages",
     icon: (
       <svg
         width="20"
@@ -70,13 +70,7 @@ const NAV_ITEMS = [
         aria-hidden="true"
       >
         <path
-          d="M2 14v2a2 2 0 002 2h12a2 2 0 002-2v-2"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-        <path
-          d="M10 2v12M6 6l4-4 4 4"
+          d="M17.5 12.5a1.5 1.5 0 01-1.5 1.5H5.5L2 17.5V4a1.5 1.5 0 011.5-1.5h12.5A1.5 1.5 0 0117.5 5v7.5z"
           stroke="currentColor"
           strokeWidth="1.5"
           strokeLinecap="round"
@@ -198,6 +192,38 @@ const NAV_ITEMS = [
           fill="currentColor"
           opacity="0.5"
         />
+      </svg>
+    ),
+  },
+  {
+    href: "/teacher/documents",
+    label: "Documents",
+    icon: (
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        aria-hidden="true"
+      >
+        <rect
+          x="3"
+          y="2"
+          width="14"
+          height="16"
+          rx="2"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          fill="none"
+        />
+        <path
+          d="M7 6h6M7 9h6M7 12h6M7 15h3"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        <circle cx="15.5" cy="15.5" r="2.5" fill="currentColor" opacity="0.7" />
+        <path d="M14.5 15.5h2M15.5 14.5v2" stroke="white" strokeWidth="1" strokeLinecap="round" />
       </svg>
     ),
   },

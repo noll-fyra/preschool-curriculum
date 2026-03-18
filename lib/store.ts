@@ -12,7 +12,9 @@ import type {
   PlannedActivity,
   ActivityFeedback,
   Report,
-  TeacherUpdate,
+  TeacherUpdateMedia,
+  ChatMessage,
+  ChatMessageKind,
   PersonalitySnapshot,
   TeacherStrategies,
   FamilyContext,
@@ -29,6 +31,7 @@ import type {
   StudentParentLink,
   StudentEnrollment,
   EmployeeRole,
+  GeneratedDocument,
 } from "./types";
 import type { ActivityConfig } from "./activity-data";
 import {
@@ -41,7 +44,7 @@ import {
   DEMO_OBSERVATIONS,
   DEMO_PLANNED_ACTIVITIES,
   DEMO_ACTIVITY_FEEDBACK,
-  DEMO_TEACHER_UPDATES,
+  DEMO_CHAT_MESSAGES,
   DEMO_PERSONALITY_SNAPSHOTS,
   DEMO_TEACHER_STRATEGIES,
   DEMO_FAMILY_CONTEXTS,
@@ -104,7 +107,7 @@ export interface NurtureStore {
   plannedActivities: PlannedActivity[];
   activityFeedback: ActivityFeedback[];
   reports: Report[];
-  teacherUpdates: TeacherUpdate[];
+  chatMessages: ChatMessage[];
   activityConfigOverrides: Record<string, ActivityConfig>;
   personalitySnapshots: PersonalitySnapshot[];
   teacherStrategies: TeacherStrategies[];
@@ -112,6 +115,7 @@ export interface NurtureStore {
   teacherNotes: TeacherNote[];
   calendarHolidays: CalendarHoliday[];
   classSchedules: ClassSchedule[];
+  generatedDocuments: GeneratedDocument[];
 
   // Actions
   setActiveClass: (classId: string) => void;
@@ -126,12 +130,15 @@ export interface NurtureStore {
   saveReportNotes: (reportId: string, teacherNotes: string) => void;
   publishReport: (reportId: string) => void;
   generateReport: (childId: string) => void;
-  createTeacherUpdate: (update: Omit<TeacherUpdate, "id" | "createdAt">) => void;
+  postChatMessage: (msg: Omit<ChatMessage, "id" | "createdAt">) => void;
+  broadcastChatMessage: (classId: string, senderId: string, senderType: "teacher" | "parent", kind: ChatMessageKind, text: string, media: TeacherUpdateMedia[]) => void;
   savePersonalitySnapshot: (childId: string, content: string) => void;
   saveTeacherStrategies: (childId: string, whatWorks: string, whatToWatch: string) => void;
   saveFamilyContext: (childId: string, content: string) => void;
   addTeacherNote: (childId: string, content: string, tags: NoteTag[]) => void;
   deleteTeacherNote: (noteId: string) => void;
+  saveGeneratedDocument: (doc: Omit<GeneratedDocument, "id" | "createdAt">) => void;
+  deleteGeneratedDocument: (docId: string) => void;
 
   // Admin actions
   addClass: (c: Omit<Class, "id">) => void;
@@ -213,7 +220,7 @@ export const useStore = create<NurtureStore>((set, get) => ({
   plannedActivities: DEMO_PLANNED_ACTIVITIES,
   activityFeedback: DEMO_ACTIVITY_FEEDBACK,
   reports: [],
-  teacherUpdates: DEMO_TEACHER_UPDATES,
+  chatMessages: DEMO_CHAT_MESSAGES,
   activityConfigOverrides: {},
   personalitySnapshots: DEMO_PERSONALITY_SNAPSHOTS,
   teacherStrategies: DEMO_TEACHER_STRATEGIES,
@@ -221,6 +228,7 @@ export const useStore = create<NurtureStore>((set, get) => ({
   teacherNotes: DEMO_TEACHER_NOTES,
   calendarHolidays: DEMO_CALENDAR_HOLIDAYS,
   classSchedules: DEMO_CLASS_SCHEDULES,
+  generatedDocuments: [],
 
   // ── Switch active class ──────────────────────────────────────────────────
   setActiveClass: (classId) => set({ activeClassId: classId }),
@@ -405,14 +413,32 @@ export const useStore = create<NurtureStore>((set, get) => ({
     }));
   },
 
-  // ── Create a teacher update (class or student-specific) ──────────────────
-  createTeacherUpdate: (update) => {
-    const newUpdate: TeacherUpdate = {
-      ...update,
-      id: `update-${Date.now()}`,
+  // ── Post a chat message to a single child's thread ───────────────────────
+  postChatMessage: (msg) => {
+    const newMsg: ChatMessage = {
+      ...msg,
+      id: `chat-${Date.now()}`,
       createdAt: new Date().toISOString(),
     };
-    set((s) => ({ teacherUpdates: [...s.teacherUpdates, newUpdate] }));
+    set((s) => ({ chatMessages: [...s.chatMessages, newMsg] }));
+  },
+
+  // ── Broadcast a message to all children in a class ───────────────────────
+  broadcastChatMessage: (classId, senderId, senderType, kind, text, media) => {
+    const { children } = get();
+    const classChildren = children.filter((c) => c.classId === classId);
+    const createdAt = new Date().toISOString();
+    const newMessages: ChatMessage[] = classChildren.map((child, i) => ({
+      id: `chat-${Date.now()}-${i}`,
+      childId: child.id,
+      senderId,
+      senderType,
+      kind,
+      text,
+      media,
+      createdAt,
+    }));
+    set((s) => ({ chatMessages: [...s.chatMessages, ...newMessages] }));
   },
 
   // ── Generate a new report draft ─────────────────────────────────────────
@@ -501,6 +527,21 @@ export const useStore = create<NurtureStore>((set, get) => ({
     });
   },
 
+  // ── Generated documents ───────────────────────────────────────────────
+  saveGeneratedDocument: (doc) => {
+    const newDoc: GeneratedDocument = {
+      ...doc,
+      id: `doc-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+    };
+    set((state) => ({ generatedDocuments: [newDoc, ...state.generatedDocuments] }));
+  },
+  deleteGeneratedDocument: (docId) => {
+    set((state) => ({
+      generatedDocuments: state.generatedDocuments.filter((d) => d.id !== docId),
+    }));
+  },
+
   // ── Admin: classes ────────────────────────────────────────────────────
   addClass: (c) => {
     const id = `class-${Date.now()}`;
@@ -521,7 +562,10 @@ export const useStore = create<NurtureStore>((set, get) => ({
       children: s.children.map((c) =>
         c.classId === id ? { ...c, classId: "" } : c
       ),
-      teacherUpdates: s.teacherUpdates.filter((u) => u.classId !== id),
+      chatMessages: s.chatMessages.filter((m) => {
+        const child = s.children.find((c) => c.id === m.childId);
+        return child?.classId !== id;
+      }),
     }));
   },
 
@@ -568,16 +612,7 @@ export const useStore = create<NurtureStore>((set, get) => ({
       observations: s.observations.filter((x) => x.childId !== id),
       reports: s.reports.filter((r) => r.childId !== id),
       activityFeedback: s.activityFeedback.filter((f) => f.childId !== id),
-      teacherUpdates: s.teacherUpdates
-        .filter((u) => {
-          if (u.childIds.length === 0) return true;
-          const remaining = u.childIds.filter((cid) => cid !== id);
-          return remaining.length > 0;
-        })
-        .map((u) => ({
-          ...u,
-          childIds: u.childIds.length === 0 ? u.childIds : u.childIds.filter((cid) => cid !== id),
-        })),
+      chatMessages: s.chatMessages.filter((m) => m.childId !== id),
     }));
   },
   setChildClass: (childId, classId) => {

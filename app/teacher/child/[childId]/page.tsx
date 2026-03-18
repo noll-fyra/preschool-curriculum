@@ -17,8 +17,9 @@ import { LEARNING_AREAS, LEVEL_LABELS } from "@/lib/types";
 import type { NoteTag, LevelId } from "@/lib/types";
 import { ChildProfileHeader } from "@/components/teacher/ChildProfileHeader";
 import { getChildDisplayName } from "@/lib/display-name";
+import { ProgressChart } from "@/components/shared/ProgressChart";
 
-type Tab = "profile" | "observations" | "reports";
+type Tab = "profile" | "observations" | "reports" | "progress" | "portfolio";
 
 const NOTE_TAG_STYLES: Record<NoteTag, { label: string; bg: string; text: string }> = {
   learning: { label: "Learning", bg: "#EFF6FF", text: "#1D4ED8" },
@@ -91,6 +92,8 @@ export default function ChildProfilePage({
   const [noteDraft, setNoteDraft] = useState("");
   const [noteTags, setNoteTags] = useState<NoteTag[]>([]);
   const [showAllNotes, setShowAllNotes] = useState(false);
+  const [portfolioContent, setPortfolioContent] = useState<string | null>(null);
+  const [portfolioGenerating, setPortfolioGenerating] = useState(false);
 
   const child = store.children.find((c) => c.id === childId);
   if (!child) {
@@ -320,7 +323,64 @@ export default function ChildProfilePage({
     { id: "profile", label: "Profile" },
     { id: "observations", label: "Observations" },
     { id: "reports", label: "Reports" },
+    { id: "progress", label: "Progress" },
+    { id: "portfolio", label: "Portfolio" },
   ];
+
+  async function handleGeneratePortfolio() {
+    setPortfolioGenerating(true);
+    try {
+      const res = await fetch("/api/generate/portfolio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          child,
+          milestones: store.milestones,
+          progress: store.progress,
+          sessions: store.sessions,
+          observations: store.observations,
+          notes: childNotes.slice(0, 10),
+          snapshot,
+          strategies,
+          familyContext: familyCtx,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPortfolioContent(data.content ?? null);
+      }
+    } finally {
+      setPortfolioGenerating(false);
+    }
+  }
+
+  async function handleRegenerateReport(): Promise<string | null> {
+    try {
+      const res = await fetch("/api/generate/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          child,
+          milestones: store.milestones,
+          progress: store.progress,
+          sessions: store.sessions,
+          observations: store.observations,
+          notes: childNotes.slice(0, 5),
+          snapshot,
+          strategies,
+          familyContext: familyCtx,
+        }),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.content ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  const childClass = store.classes.find((c) => c.id === child.classId);
+  const academicYear = childClass?.academicYear ?? new Date().getFullYear();
 
   return (
     <div className="px-5 py-6 md:px-8 md:py-8 max-w-2xl">
@@ -1222,8 +1282,130 @@ export default function ChildProfilePage({
               childName={displayName}
               onSaveNotes={saveReportNotes}
               onPublish={publishReport}
+              onRegenerateDraft={handleRegenerateReport}
             />
           )}
+        </div>
+      )}
+
+      {/* ── Tab: Progress ─────────────────────────────────────────────────── */}
+      {activeTab === "progress" && (
+        <div
+          className="rounded-2xl p-5"
+          style={{ background: "white", border: "1px solid var(--color-border)" }}
+        >
+          <h2 className="text-base font-semibold mb-1" style={{ color: "var(--color-text-dark)" }}>
+            Milestone progress
+          </h2>
+          <p className="text-sm mb-4" style={{ color: "var(--color-text-muted)" }}>
+            Cumulative milestones achieved vs. expected linear progress.
+            Tap a dot to see which milestone was reached.
+          </p>
+          <ProgressChart childId={childId} academicYear={academicYear} />
+        </div>
+      )}
+
+      {/* ── Tab: Portfolio ─────────────────────────────────────────────────── */}
+      {activeTab === "portfolio" && (
+        <div className="flex flex-col gap-5">
+          <div
+            className="rounded-2xl border overflow-hidden"
+            style={{ borderColor: "var(--color-border)" }}
+          >
+            <div
+              className="px-5 py-3 border-b flex items-center justify-between gap-3"
+              style={{ background: "var(--color-bg-cream)", borderColor: "var(--color-border)" }}
+            >
+              <div>
+                <h2 className="text-sm font-semibold" style={{ color: "var(--color-text-dark)" }}>
+                  Learning portfolio
+                </h2>
+                <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>
+                  AI-generated narrative celebrating {displayName}&apos;s learning journey
+                </p>
+              </div>
+              <button
+                onClick={handleGeneratePortfolio}
+                disabled={portfolioGenerating}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg text-white font-medium transition-opacity disabled:opacity-50 shrink-0"
+                style={{ background: "var(--color-primary)" }}
+              >
+                {portfolioGenerating ? (
+                  <>
+                    <svg width="12" height="12" viewBox="0 0 12 12" className="animate-spin" fill="none">
+                      <circle cx="6" cy="6" r="4" stroke="white" strokeWidth="1.5" strokeDasharray="20" strokeDashoffset="5" />
+                    </svg>
+                    Generating…
+                  </>
+                ) : portfolioContent ? (
+                  <>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M10 6A4 4 0 112 6" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                      <path d="M10 3v3h-3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Regenerate
+                  </>
+                ) : (
+                  <>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M6 1v10M1 6h10" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                    Generate portfolio
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="px-5 py-4">
+              {portfolioGenerating ? (
+                <div className="flex flex-col gap-3">
+                  {[90, 75, 85, 60, 80].map((w, i) => (
+                    <div
+                      key={i}
+                      className="h-4 rounded animate-pulse"
+                      style={{ background: "var(--color-bg-deep)", width: `${w}%` }}
+                    />
+                  ))}
+                </div>
+              ) : portfolioContent ? (
+                <div className="prose prose-sm max-w-none">
+                  {portfolioContent.split("\n").map((line, i) => {
+                    if (line.startsWith("## ")) {
+                      return (
+                        <h3 key={i} className="text-sm font-bold mt-4 mb-1 first:mt-0" style={{ color: "var(--color-text-dark)" }}>
+                          {line.replace("## ", "")}
+                        </h3>
+                      );
+                    }
+                    if (line.trim() === "") return <div key={i} className="h-2" />;
+                    return (
+                      <p key={i} className="text-sm leading-relaxed" style={{ color: "var(--color-text-dark)" }}>
+                        {line}
+                      </p>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-10">
+                  <div
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3"
+                    style={{ background: "var(--color-primary-wash)" }}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <rect x="3" y="3" width="18" height="18" rx="3" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" />
+                      <path d="M7 8h10M7 12h10M7 16h6" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                  </div>
+                  <p className="text-sm font-medium mb-1" style={{ color: "var(--color-text-dark)" }}>
+                    No portfolio yet
+                  </p>
+                  <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                    Generate an AI-written narrative of {displayName}&apos;s learning journey this term.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

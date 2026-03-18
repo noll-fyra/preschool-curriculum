@@ -7,7 +7,7 @@ function ArrowButton({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-150 hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2"
+      className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all duration-150 hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2"
       style={{ backgroundColor: "#333333" }}
       aria-label={label}
     >
@@ -172,18 +172,19 @@ export default function ExperienceCards() {
               <div className="grid grid-cols-1 lg:grid-cols-2">
                 {/* Text */}
                 <div className="p-8 lg:p-10 flex flex-col gap-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-semibold mb-3" style={{ color: "#999999" }}>Teachers</p>
-                      <h2
-                        className="font-extrabold leading-tight"
-                        style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", color: "#333333", letterSpacing: "-0.02em" }}
-                      >
-                        Less paperwork.{" "}
-                        <span style={{ color: "#F79863" }}>More time to teach.</span>
-                      </h2>
+                  <div className="grid grid-cols-[1fr_auto] gap-x-4 items-start">
+                    <p className="text-sm font-semibold mb-3" style={{ color: "#999999" }}>Teachers</p>
+                    <div aria-hidden="true" />
+                    <h2
+                      className="font-extrabold leading-tight"
+                      style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", color: "#333333", letterSpacing: "-0.02em" }}
+                    >
+                      Less paperwork.{" "}
+                      <span style={{ color: "#F79863" }}>More time to teach.</span>
+                    </h2>
+                    <div className="pt-1">
+                      <ArrowButton href="/teachers" label="Explore teacher tools" />
                     </div>
-                    <ArrowButton href="/teachers" label="Explore teacher tools" />
                   </div>
                   <p className="text-sm leading-relaxed" style={{ color: "#666666" }}>
                     Your dashboard shows each child&apos;s milestone status at a glance. Log a behaviour observation in two taps. Reports are pre-drafted from activity and observation data.
@@ -206,9 +207,10 @@ export default function ExperienceCards() {
                 className="rounded-2xl overflow-hidden h-full flex flex-col"
                 style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E5E5", boxShadow: "0 2px 24px rgba(0,0,0,0.04)" }}
               >
-                <div className="p-6 flex items-start justify-between gap-4">
-                  <div>
+                <div className="p-6">
+                  <div className="grid grid-cols-[1fr_auto] gap-x-4 items-start">
                     <p className="text-sm font-semibold mb-2" style={{ color: "#999999" }}>Children</p>
+                    <div aria-hidden="true" />
                     <h2
                       className="font-extrabold leading-tight"
                       style={{ fontSize: "clamp(1.25rem, 2.5vw, 1.6rem)", color: "#333333", letterSpacing: "-0.02em" }}
@@ -216,8 +218,10 @@ export default function ExperienceCards() {
                       Learning that feels{" "}
                       <span style={{ color: "#F79863" }}>like play.</span>
                     </h2>
+                    <div className="pt-1">
+                      <ArrowButton href="/children" label="See what children experience" />
+                    </div>
                   </div>
-                  <ArrowButton href="/children" label="See what children experience" />
                 </div>
                 <div className="flex-1 px-6 pb-6" style={{ backgroundColor: "#E5F4F1", paddingTop: "1.25rem" }}>
                   <StudentMockup />
@@ -231,9 +235,10 @@ export default function ExperienceCards() {
                 className="rounded-2xl overflow-hidden h-full flex flex-col"
                 style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E5E5", boxShadow: "0 2px 24px rgba(0,0,0,0.04)" }}
               >
-                <div className="p-6 flex items-start justify-between gap-4">
-                  <div>
+                <div className="p-6">
+                  <div className="grid grid-cols-[1fr_auto] gap-x-4 items-start">
                     <p className="text-sm font-semibold mb-2" style={{ color: "#999999" }}>Parents</p>
+                    <div aria-hidden="true" />
                     <h2
                       className="font-extrabold leading-tight"
                       style={{ fontSize: "clamp(1.25rem, 2.5vw, 1.6rem)", color: "#333333", letterSpacing: "-0.02em" }}
@@ -241,8 +246,10 @@ export default function ExperienceCards() {
                       Never miss a milestone.{" "}
                       <span style={{ color: "#F79863" }}>Every day.</span>
                     </h2>
+                    <div className="pt-1">
+                      <ArrowButton href="/parents" label="Explore parent experience" />
+                    </div>
                   </div>
-                  <ArrowButton href="/parents" label="Explore parent experience" />
                 </div>
                 <div className="flex-1 px-6 pb-6" style={{ backgroundColor: "#EAF2FB", paddingTop: "1.25rem" }}>
                   <ParentMockup />

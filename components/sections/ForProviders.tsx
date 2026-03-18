@@ -16,7 +16,7 @@ const testimonials = [
     name: "Aiden, age 5",
     role: "Student",
     org: "K1, Caterpillar Class",
-    image: "https://www.myfirstskool.com/wp-content/uploads/2025/07/about-us-children.webp",
+    image: "/images/testimonials/aiden.jpg",
   },
   {
     quote: "My son asks to do his activities every evening now. He shows me his stickers and explains what he learnt. I never expected him to be so excited about learning.",

@@ -27,6 +27,31 @@ export default function ReportDetailPage({
     );
   }
 
+  async function handleRegenerateDraft(): Promise<string | null> {
+    try {
+      const res = await fetch("/api/generate/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          child,
+          milestones: store.milestones,
+          progress: store.progress,
+          sessions: store.sessions,
+          observations: store.observations,
+          notes: store.teacherNotes.filter((n) => n.childId === childId && !n.deletedAt),
+          snapshot: store.personalitySnapshots.find((s) => s.childId === childId),
+          strategies: store.teacherStrategies.find((s) => s.childId === childId),
+          familyContext: store.familyContexts.find((f) => f.childId === childId),
+        }),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.content ?? null;
+    } catch {
+      return null;
+    }
+  }
+
   return (
     <div className="px-5 py-6 md:px-8 md:py-8 max-w-2xl">
       {/* Back */}
@@ -89,6 +114,7 @@ export default function ReportDetailPage({
           childName={getChildDisplayName(child)}
           onSaveNotes={saveReportNotes}
           onPublish={publishReport}
+          onRegenerateDraft={handleRegenerateDraft}
         />
       )}
     </div>

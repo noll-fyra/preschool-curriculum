@@ -8,7 +8,7 @@ import type {
   TeacherObservation,
   PlannedActivity,
   ActivityFeedback,
-  TeacherUpdate,
+  ChatMessage,
   PersonalitySnapshot,
   TeacherStrategies,
   FamilyContext,
@@ -1179,44 +1179,44 @@ function session(
 }
 
 export const DEMO_SESSIONS: ActivitySession[] = [
-  // Rayan — LL-B-01: achieved (3 consecutive passes)
-  session("s001", "child-rayan", "LL-B-01", true, 3, 14),
-  session("s002", "child-rayan", "LL-B-01", true, 2, 12),
-  session("s003", "child-rayan", "LL-B-01", true, 3, 10),
+  // Rayan — LL-B-01: achieved early Jan (3 consecutive passes)
+  session("s001", "child-rayan", "LL-B-01", true, 3, 80),
+  session("s002", "child-rayan", "LL-B-01", true, 2, 76),
+  session("s003", "child-rayan", "LL-B-01", true, 3, 72), // achieved ~Jan 6
 
-  // Rayan — LL-B-02: achieved (3 consecutive passes)
-  session("s004", "child-rayan", "LL-B-02", true, 3, 13),
-  session("s005", "child-rayan", "LL-B-02", true, 2, 11),
-  session("s006", "child-rayan", "LL-B-02", true, 3, 9),
+  // Rayan — LL-B-02: achieved mid-Jan (3 consecutive passes)
+  session("s004", "child-rayan", "LL-B-02", true, 3, 70),
+  session("s005", "child-rayan", "LL-B-02", true, 2, 66),
+  session("s006", "child-rayan", "LL-B-02", true, 3, 62), // achieved ~Jan 16
 
-  // Rayan — LL-B-03: achieved (5 of 7 passes)
-  session("s007", "child-rayan", "LL-B-03", false, 1, 20),
-  session("s008", "child-rayan", "LL-B-03", true,  2, 18),
-  session("s009", "child-rayan", "LL-B-03", false, 1, 16),
-  session("s010", "child-rayan", "LL-B-03", true,  3, 14),
-  session("s011", "child-rayan", "LL-B-03", true,  2, 12),
-  session("s012", "child-rayan", "LL-B-03", true,  2, 10),
-  session("s013", "child-rayan", "LL-B-03", true,  3,  8),
+  // Rayan — LL-B-03: achieved late Jan (5 of 7 passes)
+  session("s007", "child-rayan", "LL-B-03", false, 1, 82),
+  session("s008", "child-rayan", "LL-B-03", true,  2, 76),
+  session("s009", "child-rayan", "LL-B-03", false, 1, 72),
+  session("s010", "child-rayan", "LL-B-03", true,  3, 68),
+  session("s011", "child-rayan", "LL-B-03", true,  2, 62),
+  session("s012", "child-rayan", "LL-B-03", true,  2, 57),
+  session("s013", "child-rayan", "LL-B-03", true,  3, 52), // achieved ~Jan 26
 
   // Rayan — LL-D-01: in_progress (2 passing sessions, not 3 consecutive)
   session("s014", "child-rayan", "LL-D-01", false, 1,  7),
   session("s015", "child-rayan", "LL-D-01", true,  2,  5),
   session("s016", "child-rayan", "LL-D-01", true,  3,  3),
 
-  // Rayan — NUM-B-01: achieved (3 consecutive passes)
-  session("s017", "child-rayan", "NUM-B-01", true, 3, 15),
-  session("s018", "child-rayan", "NUM-B-01", true, 2, 13),
-  session("s019", "child-rayan", "NUM-B-01", true, 3, 11),
+  // Rayan — NUM-B-01: achieved early Feb (3 consecutive passes)
+  session("s017", "child-rayan", "NUM-B-01", true, 3, 55),
+  session("s018", "child-rayan", "NUM-B-01", true, 2, 50),
+  session("s019", "child-rayan", "NUM-B-01", true, 3, 45), // achieved ~Feb 1
 
-  // Rayan — NUM-B-02: achieved (3 consecutive passes)
-  session("s020", "child-rayan", "NUM-B-02", true, 2, 14),
-  session("s021", "child-rayan", "NUM-B-02", true, 3, 12),
-  session("s022", "child-rayan", "NUM-B-02", true, 2, 10),
+  // Rayan — NUM-B-02: achieved mid-Feb (3 consecutive passes)
+  session("s020", "child-rayan", "NUM-B-02", true, 2, 44),
+  session("s021", "child-rayan", "NUM-B-02", true, 3, 40),
+  session("s022", "child-rayan", "NUM-B-02", true, 2, 35), // achieved ~Feb 11
 
-  // Rayan — NUM-B-03: achieved (3 consecutive passes)
-  session("s023", "child-rayan", "NUM-B-03", true, 3, 13),
-  session("s024", "child-rayan", "NUM-B-03", true, 3, 11),
-  session("s025", "child-rayan", "NUM-B-03", true, 3,  9),
+  // Rayan — NUM-B-03: achieved late Feb (3 consecutive passes)
+  session("s023", "child-rayan", "NUM-B-03", true, 3, 34),
+  session("s024", "child-rayan", "NUM-B-03", true, 3, 30),
+  session("s025", "child-rayan", "NUM-B-03", true, 3, 25), // achieved ~Feb 21
 
   // Aisha — LL-B-01: achieved (3 consecutive passes)
   session("s026", "child-aisha", "LL-B-01", true, 3, 16),
@@ -1420,12 +1420,12 @@ function obs(
 }
 
 export const DEMO_OBSERVATIONS: TeacherObservation[] = [
-  // Rayan — SED-B-01: achieved (5 observations on 5 separate days)
-  obs("o001", "child-rayan", "SED-B-01", 20),
-  obs("o002", "child-rayan", "SED-B-01", 16),
-  obs("o003", "child-rayan", "SED-B-01", 12),
-  obs("o004", "child-rayan", "SED-B-01",  8),
-  obs("o005", "child-rayan", "SED-B-01",  4),
+  // Rayan — SED-B-01: achieved early Feb (5 observations on 5 separate days)
+  obs("o001", "child-rayan", "SED-B-01", 60),
+  obs("o002", "child-rayan", "SED-B-01", 52),
+  obs("o003", "child-rayan", "SED-B-01", 46),
+  obs("o004", "child-rayan", "SED-B-01", 43),
+  obs("o005", "child-rayan", "SED-B-01", 40), // achieved ~Feb 7
 
   // Rayan — SED-B-02: in_progress (3 of 5 observations)
   obs("o006", "child-rayan", "SED-B-02", 18),
@@ -1606,59 +1606,91 @@ export const DEMO_ACTIVITY_FEEDBACK: ActivityFeedback[] = [
 
 // ─── Demo teacher updates ───────────────────────────────────────────────────
 
-function update(
+function chatMsg(
   id: string,
-  teacherId: string,
-  classId: string,
-  childIds: string[],
+  childId: string,
+  senderId: string,
+  senderType: ChatMessage["senderType"],
+  kind: ChatMessage["kind"],
   text: string,
-  media: TeacherUpdate["media"],
-  daysAgo: number
-): TeacherUpdate {
+  media: ChatMessage["media"],
+  daysAgo: number,
+  hoursOffset = 0
+): ChatMessage {
   const d = new Date();
   d.setDate(d.getDate() - daysAgo);
-  return {
-    id,
-    teacherId,
-    classId,
-    childIds,
-    text,
-    media,
-    createdAt: d.toISOString(),
-  };
+  d.setHours(d.getHours() - hoursOffset);
+  return { id, childId, senderId, senderType, kind, text, media, createdAt: d.toISOString() };
 }
 
-export const DEMO_TEACHER_UPDATES: TeacherUpdate[] = [
-  update(
-    "update-001",
+// Class-1 children IDs for broadcast messages
+const CLASS_1_CHILDREN = [
+  "child-rayan", "child-aisha", "child-mei", "child-omar",
+  "child-priya", "child-kai", "child-sara", "child-darius",
+  "child-aryan", "child-fatimah", "child-jingwei",
+];
+
+function broadcast(
+  idPrefix: string,
+  senderId: string,
+  kind: ChatMessage["kind"],
+  text: string,
+  media: ChatMessage["media"],
+  daysAgo: number
+): ChatMessage[] {
+  return CLASS_1_CHILDREN.map((childId, i) =>
+    chatMsg(`${idPrefix}-${i}`, childId, senderId, "teacher", kind, text, media, daysAgo)
+  );
+}
+
+export const DEMO_CHAT_MESSAGES: ChatMessage[] = [
+  // Broadcast: art session (whole class, progress update)
+  ...broadcast(
+    "chat-art",
     "teacher-1",
-    "class-1",
-    [], // whole class
-    "We had a wonderful art session today! The children painted butterflies and practiced their fine motor skills. So proud of everyone's creativity! 🦋",
+    "progress_update",
+    "We had a wonderful art session today! The children painted butterflies and practiced their fine motor skills. So proud of everyone's creativity!",
     [{ type: "photo", url: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400" }],
     1
   ),
-  update(
-    "update-002",
+
+  // Broadcast: story time (whole class, regular message)
+  ...broadcast(
+    "chat-story",
     "teacher-1",
-    "class-1",
-    ["child-rayan", "child-aisha"],
-    "Rayan and Aisha worked beautifully together during our letter hunt activity. They helped each other find letters around the classroom!",
-    [],
-    2
-  ),
-  update(
-    "update-003",
-    "teacher-1",
-    "class-1",
-    [], // whole class
+    "message",
     "Story time with our favourite book today. The children loved predicting what happens next!",
-    [
-      { type: "photo", url: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400" },
-      { type: "video", url: "https://example.com/video-placeholder" },
-    ],
+    [{ type: "photo", url: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400" }],
     3
   ),
+
+  // Per-child: progress update for Rayan
+  chatMsg("chat-rayan-pu1", "child-rayan", "teacher-1", "teacher", "progress_update",
+    "Rayan reached a new milestone today — he was able to identify and write all the letters in his name independently! His letter recognition is really coming along.",
+    [], 2),
+
+  // Per-child: regular message for Rayan
+  chatMsg("chat-rayan-m1", "child-rayan", "teacher-1", "teacher", "message",
+    "Rayan had a great day today. He was very engaged during our counting activity and helped his friends when they were unsure of the answers.",
+    [], 4),
+
+  // Parent reply for Rayan
+  chatMsg("chat-rayan-p1", "child-rayan", "parent-ahmed", "parent", "message",
+    "Thank you for sharing! He's been practicing his letters at home too. Great to hear he's making progress.",
+    [], 4, 2),
+
+  // Per-child: messages for Aisha
+  chatMsg("chat-aisha-pu1", "child-aisha", "teacher-1", "teacher", "progress_update",
+    "Aisha completed the letter tracing activity with excellent control today. She's developing strong fine motor skills and pencil grip.",
+    [], 2),
+  chatMsg("chat-aisha-m1", "child-aisha", "teacher-1", "teacher", "message",
+    "Aisha and Rayan worked beautifully together during our letter hunt activity. They helped each other find letters around the classroom!",
+    [], 2, 3),
+
+  // Per-child: messages for Mei
+  chatMsg("chat-mei-m1", "child-mei", "teacher-1", "teacher", "message",
+    "Mei was quietly observant during group time today — she asked a really thoughtful question about the story that impressed the whole class.",
+    [], 5),
 ];
 
 // ─── Demo personality snapshots ─────────────────────────────────────────────

@@ -34,6 +34,8 @@ export function ActivityCreator({
   const [selectedChildIds, setSelectedChildIds] = useState<string[]>(
     students.map((c) => c.id) // default: all children
   );
+  const [lessonPlan, setLessonPlan] = useState<string | null>(null);
+  const [generatingPlan, setGeneratingPlan] = useState(false);
 
   const filteredMilestones = milestones.filter((m) => m.areaId === areaId);
 
@@ -61,6 +63,33 @@ export function ActivityCreator({
       childIds: selectedChildIds,
       date,
     });
+  }
+
+  async function handleGenerateLessonPlan() {
+    if (!title.trim()) return;
+    setGeneratingPlan(true);
+    const selectedMilestone = milestones.find((m) => m.id === milestoneId);
+    const levelId = selectedMilestone?.levelId ?? "B";
+    try {
+      const res = await fetch("/api/generate/lesson-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: title.trim(),
+          description: description.trim(),
+          areaId,
+          milestoneStatement: selectedMilestone?.statement,
+          levelId,
+          childCount: selectedChildIds.length,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setLessonPlan(data.content ?? null);
+      }
+    } finally {
+      setGeneratingPlan(false);
+    }
   }
 
   const isValid = title.trim() && description.trim() && date && selectedChildIds.length > 0;
@@ -205,6 +234,72 @@ export function ActivityCreator({
         )}
       </div>
 
+      {/* Lesson plan generator */}
+      <div
+        className="rounded-xl border overflow-hidden"
+        style={{ borderColor: "var(--color-border)" }}
+      >
+        <div
+          className="px-4 py-2.5 flex items-center justify-between gap-2"
+          style={{ background: "var(--color-bg-cream)" }}
+        >
+          <span className="text-xs font-semibold" style={{ color: "var(--color-text-mid)" }}>
+            Lesson plan
+          </span>
+          <button
+            type="button"
+            onClick={handleGenerateLessonPlan}
+            disabled={generatingPlan || !title.trim()}
+            className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-lg border transition-colors disabled:opacity-40"
+            style={{
+              borderColor: "var(--color-primary)",
+              color: "var(--color-primary)",
+              background: "white",
+            }}
+          >
+            {generatingPlan ? (
+              <>
+                <svg width="11" height="11" viewBox="0 0 12 12" className="animate-spin" fill="none">
+                  <circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1.5" strokeDasharray="20" strokeDashoffset="5" />
+                </svg>
+                Generating…
+              </>
+            ) : lessonPlan ? "Regenerate" : "Generate with AI"}
+          </button>
+        </div>
+        {generatingPlan && (
+          <div className="px-4 py-3 flex flex-col gap-2">
+            {[80, 60, 75].map((w, i) => (
+              <div key={i} className="h-3 rounded animate-pulse" style={{ background: "var(--color-bg-deep)", width: `${w}%` }} />
+            ))}
+          </div>
+        )}
+        {!generatingPlan && lessonPlan && (
+          <div className="px-4 py-3 max-h-64 overflow-y-auto">
+            {lessonPlan.split("\n").map((line, i) => {
+              if (line.startsWith("## ")) {
+                return (
+                  <p key={i} className="text-xs font-bold mt-3 mb-1 first:mt-0" style={{ color: "var(--color-text-dark)" }}>
+                    {line.replace("## ", "")}
+                  </p>
+                );
+              }
+              if (line.trim() === "") return <div key={i} className="h-1.5" />;
+              return (
+                <p key={i} className="text-xs leading-relaxed" style={{ color: "var(--color-text-mid)" }}>
+                  {line}
+                </p>
+              );
+            })}
+          </div>
+        )}
+        {!generatingPlan && !lessonPlan && (
+          <p className="px-4 py-3 text-xs" style={{ color: "var(--color-text-muted)" }}>
+            Enter a title above, then generate a detailed lesson plan with objectives, materials, and facilitation notes.
+          </p>
+        )}
+      </div>
+
       {/* Actions */}
       <div className="flex gap-2 pt-1">
         <button
@@ -226,3 +321,4 @@ export function ActivityCreator({
     </div>
   );
 }
+

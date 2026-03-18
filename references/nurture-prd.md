@@ -22,13 +22,13 @@ _Version 1.0 | Status: In Progress | Owner: Director, NTUC First Campus_
 
 ### About the school
 
-The director leading this initiative is from NTUC First Campus, Singapore's largest preschool network, operating over 170 centres under the My First Skool and Little Skool-House brands and serving approximately 28,800 children annually. My First Skool uses the PETAL© pedagogical approach — Playing, Exploring, Thinking, and Applying Learning — rooted in the Ministry of Education's Nurturing Early Learners (NEL) Framework 2022.
+The director leading this initiative is from NTUC First Campus, Singapore's largest preschool network, operating over 170 centres under the My First Skool and Little Skool-House brands and serving approximately 28,800 children annually. My First Skool uses the PETAL© pedagogical approach — Playing, Exploring, Thinking, and Applying Learning — rooted in the Ministry of Education's Nurturing Early Learners (NEL) Framework.
 
 In 2021, My First Skool ran a Home Learning Programme for 22,000 children that included guided video sessions and parent-accessible activities. A 2019 Nielsen survey commissioned by the organisation found that over 60% of parents want to engage their children in learning at home, and one in two parents prefer a preschool that offers home-based learning. The product described in this PRD builds directly on this validated demand.
 
 ### The NEL Framework
 
-The Nurturing Early Learners (NEL) Framework 2022, published by Singapore's Ministry of Education, is the national curriculum framework for preschool children aged four to six (Nursery 2, Kindergarten 1, and Kindergarten 2). It defines five learning areas — Aesthetics & Creative Expression, Discovery of the World, Health, Safety & Motor Skills Development, Language & Literacy (English and Mother Tongue), and Numeracy — along with values, social and emotional competencies, and learning dispositions.
+The Nurturing Early Learners (NEL) Framework, published by Singapore's Ministry of Education, is the national curriculum framework for preschool children aged four to six (Nursery 2, Kindergarten 1, and Kindergarten 2). It defines five learning areas — Aesthetics & Creative Expression, Discovery of the World, Health, Safety & Motor Skills Development, Language & Literacy (English and Mother Tongue), and Numeracy — along with values, social and emotional competencies, and learning dispositions.
 
 The framework specifies end-of-K2 learning goals but does not publish the intermediate milestone progressions that teachers use to track children along the way. Translating those learning goals into observable, sequenced milestones is a curriculum design task each school undertakes independently. Nurture's milestone schema (see `milestone-schema.md`) performs this translation for the MVP's three active learning areas.
 

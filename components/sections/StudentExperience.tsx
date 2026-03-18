@@ -1,18 +1,13 @@
 import AnimateIn from "@/components/ui/AnimateIn";
 import Link from "next/link";
 
-function ArrowButton({ href, label }: { href: string; label: string }) {
+function ArrowIcon() {
   return (
-    <Link
-      href={href}
-      className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all duration-150 hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2"
-      style={{ backgroundColor: "#333333" }}
-      aria-label={label}
-    >
+    <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "#333333" }} aria-hidden="true">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
         <path d="M3 8h10M9 4l4 4-4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
-    </Link>
+    </div>
   );
 }
 
@@ -106,64 +101,87 @@ export default function StudentExperience() {
 
           {/* Feature 1 — large card, button below text */}
           <AnimateIn delay={0.05}>
-            <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E5E5" }}>
-              <div className="grid grid-cols-1 lg:grid-cols-2">
+            <Link
+              href="/children"
+              aria-label="See the activity queue"
+              className="block rounded-2xl overflow-hidden transition-transform duration-150 hover:scale-[1.01] focus-visible:outline-2 focus-visible:outline-offset-4"
+              style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E5E5" }}
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
                 <div className="p-8 flex flex-col gap-4">
-                  <div>
-                    <p className="text-sm font-semibold mb-2" style={{ color: "#999999" }}>Activity queue</p>
+                  <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-2 items-start">
+                    <p className="text-sm font-semibold mb-2 col-span-2" style={{ color: "#999999" }}>Activity queue</p>
                     <p className="font-extrabold leading-tight" style={{ fontSize: "clamp(1.25rem, 2.5vw, 1.75rem)", color: "#333333", letterSpacing: "-0.02em" }}>
                       Personalised sessions, every day.
                     </p>
+                    <div className="pt-1 self-start">
+                      <ArrowIcon />
+                    </div>
                   </div>
                   <p className="text-sm leading-relaxed" style={{ color: "#666666" }}>
                     Each child gets a short queue of tap-to-answer activities matched to their current milestone level. No reading required.
                   </p>
-                  <div>
-                    <ArrowButton href="/children" label="See the activity queue" />
-                  </div>
                 </div>
                 <div className="p-6 lg:p-8" style={{ backgroundColor: "#FEF0E7" }}>
                   <ActivityMockup />
                 </div>
               </div>
-            </div>
+            </Link>
           </AnimateIn>
 
           {/* Features 2 + 3 — equal-height small cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
 
             <AnimateIn delay={0.08} className="h-full">
-              <div className="rounded-2xl overflow-hidden h-full flex flex-col" style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E5E5" }}>
-                <div className="p-6 flex flex-col gap-3">
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="text-sm font-semibold" style={{ color: "#999999" }}>Audio guidance</p>
-                    <ArrowButton href="/children" label="Learn about audio guidance" />
+              <Link
+                href="/children"
+                aria-label="Learn about audio guidance"
+                className="block rounded-2xl overflow-hidden h-full transition-transform duration-150 hover:scale-[1.01] focus-visible:outline-2 focus-visible:outline-offset-4"
+                style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E5E5" }}
+              >
+                <div className="h-full flex flex-col">
+                  <div className="p-6 flex flex-col gap-3">
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-2 items-start">
+                      <p className="text-sm font-semibold col-span-2" style={{ color: "#999999" }}>Audio guidance</p>
+                      <p className="font-extrabold leading-tight" style={{ fontSize: "clamp(1.1rem, 2vw, 1.4rem)", color: "#333333", letterSpacing: "-0.02em" }}>
+                        A friendly voice guides every step.
+                      </p>
+                      <div className="pt-1 self-start">
+                        <ArrowIcon />
+                      </div>
+                    </div>
                   </div>
-                  <p className="font-extrabold leading-tight" style={{ fontSize: "clamp(1.1rem, 2vw, 1.4rem)", color: "#333333", letterSpacing: "-0.02em" }}>
-                    A friendly voice guides every step.
-                  </p>
+                  <div className="flex-1 px-6 pb-6" style={{ backgroundColor: "#E5F4F1", paddingTop: "1.25rem" }}>
+                    <AudioMockup />
+                  </div>
                 </div>
-                <div className="flex-1 px-6 pb-6" style={{ backgroundColor: "#E5F4F1", paddingTop: "1.25rem" }}>
-                  <AudioMockup />
-                </div>
-              </div>
+              </Link>
             </AnimateIn>
 
             <AnimateIn delay={0.12} className="h-full">
-              <div className="rounded-2xl overflow-hidden h-full flex flex-col" style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E5E5" }}>
-                <div className="p-6 flex flex-col gap-3">
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="text-sm font-semibold" style={{ color: "#999999" }}>Rewards</p>
-                    <ArrowButton href="/children" label="Learn about rewards" />
+              <Link
+                href="/children"
+                aria-label="Learn about rewards"
+                className="block rounded-2xl overflow-hidden h-full transition-transform duration-150 hover:scale-[1.01] focus-visible:outline-2 focus-visible:outline-offset-4"
+                style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E5E5" }}
+              >
+                <div className="h-full flex flex-col">
+                  <div className="p-6 flex flex-col gap-3">
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-2 items-start">
+                      <p className="text-sm font-semibold col-span-2" style={{ color: "#999999" }}>Rewards</p>
+                      <p className="font-extrabold leading-tight" style={{ fontSize: "clamp(1.1rem, 2vw, 1.4rem)", color: "#333333", letterSpacing: "-0.02em" }}>
+                        Earn stickers, not scores.
+                      </p>
+                      <div className="pt-1 self-start">
+                        <ArrowIcon />
+                      </div>
+                    </div>
                   </div>
-                  <p className="font-extrabold leading-tight" style={{ fontSize: "clamp(1.1rem, 2vw, 1.4rem)", color: "#333333", letterSpacing: "-0.02em" }}>
-                    Earn stickers, not scores.
-                  </p>
+                  <div className="flex-1 px-6 pb-6" style={{ backgroundColor: "#EAF2FB", paddingTop: "1.25rem" }}>
+                    <StickerMockup />
+                  </div>
                 </div>
-                <div className="flex-1 px-6 pb-6" style={{ backgroundColor: "#EAF2FB", paddingTop: "1.25rem" }}>
-                  <StickerMockup />
-                </div>
-              </div>
+              </Link>
             </AnimateIn>
 
           </div>

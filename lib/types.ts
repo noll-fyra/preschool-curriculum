@@ -245,6 +245,20 @@ export interface TeacherUpdate {
   createdAt: string;
 }
 
+export type ChatMessageKind = "message" | "progress_update";
+
+export interface ChatMessage {
+  id: string;
+  childId: string;
+  senderId: string;
+  senderType: "teacher" | "parent";
+  /** "progress_update" is teacher-only; tagged visually and surfaced in the parent home feed */
+  kind: ChatMessageKind;
+  text: string;
+  media: TeacherUpdateMedia[];
+  createdAt: string;
+}
+
 export type NoteTag =
   | "learning"
   | "milestone_moment"
@@ -352,3 +366,26 @@ export const LEVEL_LABELS: Record<LevelId, string> = {
   D: "Developing",
   S: "Secure",
 };
+
+// ─── AI-generated documents ────────────────────────────────────────────────
+
+export type GeneratedDocType =
+  | "report"
+  | "portfolio"
+  | "lesson_plan"
+  | "curriculum"
+  | "evaluation"
+  | "proposal";
+
+export interface GeneratedDocument {
+  id: string;
+  type: GeneratedDocType;
+  /** For child-specific documents (report, portfolio, evaluation) */
+  childId?: string;
+  /** For class-level documents (curriculum) */
+  classId?: string;
+  title: string;
+  /** Markdown content */
+  content: string;
+  createdAt: string;
+}

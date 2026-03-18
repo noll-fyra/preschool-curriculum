@@ -15,6 +15,7 @@ import {
 import { getChildLevelPerArea } from "@/lib/selectors";
 import { getWeekStart } from "@/lib/assignments";
 import { LEARNING_AREAS, LEVEL_LABELS, type LevelId } from "@/lib/types";
+import { ProgressChart } from "@/components/shared/ProgressChart";
 
 // ─── Spec colour system ───────────────────────────────────────────────────────
 
@@ -96,13 +97,15 @@ export default function ParentHomePage() {
 
   const levels = getChildLevelPerArea(childId, store);
   const weekStart = getWeekStart();
+  const childClass = store.classes.find((c) => c.id === child.classId);
+  const academicYear = childClass?.academicYear ?? new Date().getFullYear();
   const feedItems = getFeedItems(
     childId,
     child.classId,
     store.sessions,
     store.progress,
     store.milestones,
-    store.teacherUpdates,
+    store.chatMessages,
     store.teachers
   );
   const heroText = getHeroSummary(
@@ -234,7 +237,24 @@ export default function ParentHomePage() {
         })}
       </div>
 
-      {/* 4. Activity feed */}
+      {/* 4. Progress chart */}
+      <div
+        className="rounded-2xl p-5 mb-5"
+        style={{ background: "white", border: "1px solid var(--color-border)" }}
+      >
+        <p
+          className="font-semibold mb-0.5"
+          style={{ color: "var(--color-text-dark)" }}
+        >
+          Progress over time
+        </p>
+        <p className="text-sm mb-4" style={{ color: "var(--color-text-muted)" }}>
+          Milestones achieved vs. expected this year. Tap a dot to see the milestone.
+        </p>
+        <ProgressChart childId={childId} academicYear={academicYear} />
+      </div>
+
+      {/* 5. Activity feed */}
       <p
         className="font-medium uppercase tracking-wide mb-3"
         style={{ fontSize: 11, letterSpacing: "0.06em", color: "var(--color-text-muted)" }}

@@ -149,6 +149,51 @@ export function getCurrentLevel(
   return "S";
 }
 
+// ─── Historical achievement date from raw data ─────────────────────────────
+// Replays events chronologically to find the exact point mastery was first reached
+
+export function computeSkillAchievedAt(
+  allSessions: ActivitySession[],
+  childId: string,
+  milestoneId: string
+): string | undefined {
+  const sessions = allSessions
+    .filter((s) => s.childId === childId && s.milestoneId === milestoneId)
+    .sort(
+      (a, b) =>
+        new Date(a.attemptedAt).getTime() - new Date(b.attemptedAt).getTime()
+    );
+
+  for (let i = 0; i < sessions.length; i++) {
+    const prefix = sessions.slice(0, i + 1);
+    if (prefix.length >= 3 && prefix.slice(-3).every((s) => s.passed))
+      return sessions[i].attemptedAt;
+    if (
+      prefix.length >= 5 &&
+      prefix.slice(-7).filter((s) => s.passed).length >= 5
+    )
+      return sessions[i].attemptedAt;
+  }
+  return undefined;
+}
+
+export function computeBehaviourAchievedAt(
+  allObservations: TeacherObservation[],
+  childId: string,
+  milestoneId: string
+): string | undefined {
+  const obs = allObservations
+    .filter((o) => o.childId === childId && o.milestoneId === milestoneId)
+    .sort((a, b) => a.observedAt.localeCompare(b.observedAt));
+
+  const seen = new Set<string>();
+  for (const o of obs) {
+    seen.add(o.observedAt);
+    if (seen.size >= 5) return o.observedAt;
+  }
+  return undefined;
+}
+
 // ─── Compute progress status from raw data ─────────────────────────────────
 // Used when rebuilding progress after a mutation
 
