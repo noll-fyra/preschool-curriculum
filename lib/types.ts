@@ -1,11 +1,101 @@
-export type LearningAreaId = "LL" | "NUM" | "SED";
+export type LearningAreaId = "LL" | "NUM" | "SED" | "ACE" | "DOW" | "HMS";
 export type LevelId = "B" | "D" | "S";
 export type MilestoneStatus = "not_started" | "in_progress" | "achieved";
 export type ReportStatus = "draft" | "published";
 export type Pronoun = "he" | "she" | "they";
 export type Gender = "male" | "female" | "non-binary";
 
+// N1 = Nursery 1 (~age 3–4), N2 = Nursery 2 (~age 4–5)
+// K1 = Kindergarten 1 (~age 5–6), K2 = Kindergarten 2 (~age 6–7)
 export type YearLevelId = "N1" | "N2" | "K1" | "K2";
+
+export type EmployeeRole = "teacher" | "specialist" | "school_admin" | "org_admin";
+export type ParentRelationship = "parent" | "guardian";
+export type ParentType = "active" | "passive";
+
+// ─── Organisation ────────────────────────────────────────────────────────────
+
+export interface Organisation {
+  id: string;
+  name: string;
+  logoUrl?: string;
+}
+
+// ─── School ──────────────────────────────────────────────────────────────────
+
+export interface School {
+  id: string;
+  organisationId: string;
+  name: string;
+  address: string;
+  openingHours: string; // e.g. "7:00am – 7:00pm"
+  supportedYears: YearLevelId[];
+}
+
+// ─── Employee & Roles ─────────────────────────────────────────────────────────
+
+export interface Employee {
+  id: string;
+  organisationId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  photoUrl?: string;
+}
+
+export interface EmployeeSchoolRole {
+  id: string;
+  employeeId: string;
+  /** null for org_admin (access spans all schools) */
+  schoolId: string | null;
+  role: EmployeeRole;
+  isPrimary: boolean;
+  startDate: string; // YYYY-MM-DD
+  endDate?: string;  // YYYY-MM-DD; undefined = currently active
+}
+
+// ─── Parent / Guardian ────────────────────────────────────────────────────────
+
+export interface Parent {
+  id: string;
+  organisationId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  photoUrl?: string;
+}
+
+export interface StudentParentLink {
+  id: string;
+  childId: string;
+  parentId: string;
+  /** Label only — no functional permission difference */
+  relationship: ParentRelationship;
+  /** passive = progress feed only; active = feed + co-activity suggestions */
+  parentType: ParentType;
+}
+
+// ─── Student Enrollment ───────────────────────────────────────────────────────
+
+export interface StudentEnrollment {
+  id: string;
+  childId: string;
+  classId: string;
+  startDate: string; // YYYY-MM-DD
+  endDate?: string;  // YYYY-MM-DD; undefined = currently active
+  isActive: boolean;
+}
+
+// ─── Class Teacher Assignment ─────────────────────────────────────────────────
+
+export interface ClassTeacherAssignment {
+  id: string;
+  classId: string;
+  employeeId: string;
+  /** Exactly one primary teacher per class */
+  isPrimary: boolean;
+}
 
 export interface ChildGuardian {
   name: string;
@@ -36,6 +126,8 @@ export interface Milestone {
   id: string; // e.g. "LL-B-01"
   statement: string;
   parentDescription: string;
+  /** Observable criteria for teacher/admin rubric reference — "what to look for" */
+  teacherNotes: string;
   areaId: LearningAreaId;
   levelId: LevelId;
   sequence: number;
@@ -43,10 +135,14 @@ export interface Milestone {
 
 export interface Class {
   id: string;
+  schoolId: string;
   name: string;
-  termLabel: string;
+  preschoolYear: YearLevelId;
+  academicYear: number; // e.g. 2025
+  termLabel: string;    // display only, e.g. "Term 1 2025"
 }
 
+/** @deprecated Use Employee + EmployeeSchoolRole + ClassTeacherAssignment instead. Kept for MVP compatibility. */
 export interface Teacher {
   id: string;
   firstName: string;
@@ -57,9 +153,13 @@ export interface Teacher {
 
 export interface Child {
   id: string;
+  organisationId: string;
+  /** Current school — denormalised for quick lookup. Source of truth is StudentEnrollment. */
+  schoolId: string;
   firstName: string;
   lastName: string;
   gender: Gender;
+  /** @deprecated Use StudentEnrollment for class membership. Kept for MVP compatibility. */
   classId: string;
   dateOfBirth?: string; // ISO date string (YYYY-MM-DD)
   yearLevel?: YearLevelId;
@@ -182,6 +282,43 @@ export interface TeacherNote {
   deletedAt?: string; // welfare notes cannot be soft-deleted
 }
 
+// ─── Calendar ─────────────────────────────────────────────────────────────────
+
+export interface CalendarHoliday {
+  id: string;
+  organisationId: string;
+  /** null = org-wide (all schools); non-null = school-specific */
+  schoolId: string | null;
+  title: string;
+  startDate: string; // YYYY-MM-DD
+  endDate: string;   // YYYY-MM-DD (inclusive; same as startDate for single-day)
+  createdAt: string;
+}
+
+export type RecurrenceType = "weekly" | "monthly";
+export type ScheduleScope = "year_level" | "class";
+
+export interface ClassSchedule {
+  id: string;
+  organisationId: string;
+  schoolId: string;
+  scope: ScheduleScope;
+  yearLevel?: YearLevelId;  // when scope === "year_level"
+  classId?: string;          // when scope === "class"
+  title: string;
+  description?: string;
+  recurrence: RecurrenceType;
+  /** 1=Mon … 7=Sun; used when recurrence === "weekly" */
+  daysOfWeek?: number[];
+  /** 1–31; used when recurrence === "monthly" */
+  dayOfMonth?: number;
+  startDate: string; // YYYY-MM-DD
+  endDate: string;   // YYYY-MM-DD
+  startTime?: string; // "HH:MM" 24h
+  endTime?: string;   // "HH:MM" 24h
+  createdAt: string;
+}
+
 // Derived / view types
 
 export interface MilestoneWithProgress extends Milestone {
@@ -199,6 +336,9 @@ export const LEARNING_AREAS: LearningArea[] = [
   { id: "LL", name: "Language & Literacy", assessmentType: "skill" },
   { id: "NUM", name: "Numeracy", assessmentType: "skill" },
   { id: "SED", name: "Social & Emotional Development", assessmentType: "behaviour" },
+  { id: "ACE", name: "Aesthetics & Creative Expression", assessmentType: "behaviour" },
+  { id: "DOW", name: "Discovery of the World", assessmentType: "behaviour" },
+  { id: "HMS", name: "Health, Safety & Motor Skills", assessmentType: "behaviour" },
 ];
 
 export const DEVELOPMENTAL_LEVELS: DevelopmentalLevel[] = [

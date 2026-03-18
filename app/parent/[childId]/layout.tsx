@@ -44,6 +44,19 @@ function ReportsIcon({ active }: { active: boolean }) {
   );
 }
 
+function CalendarIcon({ active }: { active: boolean }) {
+  const c = active ? "var(--color-primary)" : "var(--color-text-muted)";
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <path d="M3 9h18" />
+      <path d="M8 2v4M16 2v4" />
+      <rect x="7" y="13" width="3" height="3" rx="0.5" fill={c} stroke="none" />
+      <rect x="11" y="13" width="3" height="3" rx="0.5" fill={c} stroke="none" />
+    </svg>
+  );
+}
+
 // ─── Layout ───────────────────────────────────────────────────────────────────
 
 export default function ChildParentLayout({
@@ -58,7 +71,8 @@ export default function ChildParentLayout({
   const isActivities = pathname.includes("/activities");
   const isMessages = pathname.includes("/messages");
   const isReports = pathname.includes("/reports");
-  const isHome = !isActivities && !isMessages && !isReports;
+  const isCalendar = pathname.includes("/calendar");
+  const isHome = !isActivities && !isMessages && !isReports && !isCalendar;
 
   const tabs = [
     {
@@ -84,6 +98,12 @@ export default function ChildParentLayout({
       href: `/parent/${childId}/reports`,
       active: isReports,
       Icon: ReportsIcon,
+    },
+    {
+      label: "Calendar",
+      href: `/parent/${childId}/calendar`,
+      active: isCalendar,
+      Icon: CalendarIcon,
     },
   ];
 

@@ -6,7 +6,13 @@ import { getChildDisplayName } from "@/lib/display-name";
 import { ChildAvatar } from "@/components/teacher/ChildAvatar";
 
 export default function ParentHomePage() {
-  const { children } = useStore();
+  const { children, studentParentLinks, demoPersona } = useStore();
+
+  // Show only children linked to the active parent persona
+  const linkedChildIds = studentParentLinks
+    .filter((l) => l.parentId === demoPersona.parentId)
+    .map((l) => l.childId);
+  const visibleChildren = children.filter((c) => linkedChildIds.includes(c.id));
 
   return (
     <div className="px-5 py-8 max-w-lg mx-auto">
@@ -21,7 +27,7 @@ export default function ParentHomePage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        {children.map((child) => (
+        {visibleChildren.map((child) => (
           <Link
             key={child.id}
             href={`/parent/${child.id}`}

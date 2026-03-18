@@ -1,6 +1,7 @@
 "use client";
 
 import { DemoRoleBar } from "@/components/shared/DemoRoleBar";
+import { DemoPersonaBar } from "@/components/shared/DemoPersonaBar";
 
 export default function StudentLayout({
   children,
@@ -10,6 +11,7 @@ export default function StudentLayout({
   return (
     <div className="flex flex-col min-h-screen" style={{ background: "var(--color-bg-warm)" }}>
       <DemoRoleBar activeRole="student" />
+      <DemoPersonaBar role="student" />
       <main className="flex-1">
         {children}
       </main>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { TeacherNav } from "@/components/teacher/TeacherNav";
 import { DemoRoleBar } from "@/components/shared/DemoRoleBar";
+import { DemoPersonaBar } from "@/components/shared/DemoPersonaBar";
 import { StudentSearch } from "@/components/teacher/StudentSearch";
 import { useStore } from "@/lib/store";
 
@@ -19,6 +20,7 @@ export default function TeacherLayout({
   return (
     <div className="flex flex-col min-h-screen">
       <DemoRoleBar activeRole="teacher" />
+      <DemoPersonaBar role="teacher" />
 
       {/* Mobile class switcher bar */}
       <div

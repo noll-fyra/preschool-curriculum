@@ -271,6 +271,32 @@ export default function AreaDetailPage() {
       {renderLevel(bMilestones, "B")}
       {renderLevel(dMilestones, "D")}
       {renderLevel(sMilestones, "S")}
+
+      {/* Rubric link */}
+      <div
+        className="mt-4 pt-4 border-t"
+        style={{ borderColor: "var(--color-border)" }}
+      >
+        <Link
+          href={`/parent/${childId}/area/${areaId}/rubric`}
+          className="flex items-center justify-between px-4 py-3 rounded-xl border transition-colors"
+          style={{
+            borderColor: "var(--color-border)",
+            background: "var(--color-bg-cream)",
+            color: "var(--color-text-dark)",
+          }}
+        >
+          <div>
+            <p className="text-sm font-medium">View full rubric</p>
+            <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>
+              See all milestones across every level with plain-language descriptions
+            </p>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 ml-2">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </Link>
+      </div>
     </div>
   );
 }

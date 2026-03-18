@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
   {
-    href: "/admin/classes",
+    href: "/school/classes",
     label: "Classes",
     icon: (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -17,7 +17,7 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: "/admin/teachers",
+    href: "/school/teachers",
     label: "Teachers",
     icon: (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -27,7 +27,7 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: "/admin/students",
+    href: "/school/students",
     label: "Students",
     icon: (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -39,12 +39,38 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: "/admin/activities",
+    href: "/school/activities",
     label: "Activities",
     icon: (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
         <rect x="3" y="2" width="14" height="16" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none" />
         <path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    href: "/school/calendar",
+    label: "Calendar",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <rect x="2" y="4" width="16" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none" />
+        <path d="M2 8h16" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M6 2v4M14 2v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <rect x="5" y="11" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.5" />
+        <rect x="9" y="11" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.5" />
+      </svg>
+    ),
+  },
+  {
+    href: "/school/rubric",
+    label: "Rubric",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <rect x="3" y="2" width="14" height="16" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none" />
+        <path d="M7 6h6M7 9h6M7 12h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <circle cx="5.5" cy="6" r="0.75" fill="currentColor" />
+        <circle cx="5.5" cy="9" r="0.75" fill="currentColor" />
+        <circle cx="5.5" cy="12" r="0.75" fill="currentColor" />
       </svg>
     ),
   },
@@ -57,7 +83,7 @@ export function AdminNav() {
     <>
       <aside className="hidden md:flex flex-col w-[220px] min-h-screen border-r border-[var(--color-border)] bg-white flex-shrink-0">
         <div className="px-6 py-5 border-b border-[var(--color-border)]">
-          <Link href="/admin/classes" className="flex items-center gap-2">
+          <Link href="/school/classes" className="flex items-center gap-2">
             <span
               className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-sm font-bold"
               style={{ background: "var(--color-primary)" }}
@@ -65,7 +91,7 @@ export function AdminNav() {
               N
             </span>
             <span className="font-bold text-base" style={{ color: "var(--color-text-dark)" }}>
-              Nurture Admin
+              Nurture School
             </span>
           </Link>
         </div>
@@ -73,7 +99,7 @@ export function AdminNav() {
           {NAV_ITEMS.map((item) => {
             const active =
               pathname === item.href ||
-              (item.href !== "/admin/classes" && pathname.startsWith(item.href));
+              (item.href !== "/school/classes" && pathname.startsWith(item.href));
             return (
               <Link
                 key={item.href}
@@ -96,7 +122,7 @@ export function AdminNav() {
         {NAV_ITEMS.map((item) => {
           const active =
             pathname === item.href ||
-            (item.href !== "/admin/classes" && pathname.startsWith(item.href));
+            (item.href !== "/school/classes" && pathname.startsWith(item.href));
           return (
             <Link
               key={item.href}

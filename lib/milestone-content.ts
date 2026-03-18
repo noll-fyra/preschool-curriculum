@@ -295,6 +295,294 @@ const CONTENT: Record<string, MilestoneContent> = {
     celebration:
       "Your child takes responsibility for group tasks without being reminded. They're showing the kind of character that makes them a great classmate — and a great person.",
   },
+
+  // ── Aesthetics & Creative Expression — Beginning ────────────────────────
+
+  "ACE-B-01": {
+    whyMatters:
+      "Freely exploring art materials — mixing colours, pressing clay, making marks with a brush — is where creative development begins. At this stage, the process matters far more than the product. When a child squishes paint between their fingers or smears colours across a page, they are developing sensory awareness, fine motor skills, and the deep understanding that they can change things in the world through their own actions. This is the creative impulse in its earliest, purest form.",
+    tryAtHome:
+      "Set out a piece of paper and whatever you have — crayons, chalk, finger paints — and let your child make whatever they want with no instructions. Don't ask 'what is it?' — just say 'tell me about this!'",
+    celebration:
+      "Your child dives in and explores art materials freely. They're not waiting to be shown what to do — they're creating. That's where all artistic confidence begins.",
+  },
+
+  "ACE-B-02": {
+    whyMatters:
+      "Joining in with songs, rhythm, and music-making is one of the earliest forms of belonging. Children who participate in group music activities are developing listening skills, memory, language, and social synchrony — the ability to do something at the same time as others. Research shows that musical participation in early childhood is linked to stronger language development, better phonological awareness, and a greater sense of community.",
+    tryAtHome:
+      "Sing a favourite song together on the way to school or at bathtime. It doesn't matter if it's out of tune — what matters is that you're doing it together and your child joins in.",
+    celebration:
+      "Your child joins in with songs and music activities. They're learning to listen, synchronise, and belong — through music.",
+  },
+
+  "ACE-B-03": {
+    whyMatters:
+      "Pretending — playing house, being a doctor, using a block as a phone — is one of the most cognitively rich things a young child can do. Role play requires the ability to hold two realities at once (this block IS a phone, but it's also a block), which is a precursor to abstract thinking. It also develops language, empathy (seeing the world from another character's perspective), and narrative understanding. Children who engage in rich imaginative play consistently demonstrate stronger reading comprehension later.",
+    tryAtHome:
+      "Set aside 10 minutes for unstructured play with a few props — a scarf, some cups, a toy animal. Resist directing the story. Let your child take the lead and follow along if they invite you in.",
+    celebration:
+      "Your child can lose themselves in imaginative play. That's not just fun — it's some of the most valuable learning they can do.",
+  },
+
+  // ── Aesthetics & Creative Expression — Developing ───────────────────────
+
+  "ACE-D-01": {
+    whyMatters:
+      "When a child draws 'our house' or makes a sculpture 'that's a rocket', they have crossed from pure sensory exploration into intentional expression. They are now using art as a language — choosing marks, shapes, and materials to represent something they have in mind. This is a significant shift: the child is thinking ahead, making decisions, and communicating meaning. These are the same cognitive processes used in writing, where the goal is to encode what you mean into a form others can understand.",
+    tryAtHome:
+      "Ask your child to draw something they love — a favourite food, their bedroom, a superhero. When they're done, ask: 'Tell me about what you made.' Listen to what they say — the idea is as important as the drawing.",
+    celebration:
+      "Your child creates artwork with a clear idea in mind. They're using art as a language — and that means they have something to say.",
+  },
+
+  "ACE-D-02": {
+    whyMatters:
+      "Singing a whole song correctly — with the right tune and most of the words — shows musical memory, phonological processing, and language development all working together. The ability to hold a melody and lyrics simultaneously in working memory while producing them in sequence is genuinely demanding. Children who can do this are also typically stronger at sequencing in other areas, including narrative comprehension and early reading.",
+    tryAtHome:
+      "Choose a favourite song from class or a film and practise it together at home. Focus on getting the full song — including verses that are easy to skip. Sing it through from start to finish.",
+    celebration:
+      "Your child can sing a whole song with the right tune and words. That's memory, music, and language all in one.",
+  },
+
+  "ACE-D-03": {
+    whyMatters:
+      "Combining materials — adding collage to a drawing, mixing paint colours deliberately, using clay alongside found objects — shows that a child is thinking about art as a set of tools that can be used together. This is multi-modal thinking: the ability to draw on different resources and modes of expression and combine them purposefully. It's the artistic equivalent of using vocabulary and grammar together to construct meaning — rather than just individual words.",
+    tryAtHome:
+      "Offer two art materials at once — crayons and torn paper for collage, or paint and leaves. Invite your child to use both in the same picture. Talk about why they chose to combine them.",
+    celebration:
+      "Your child combines different materials in a single creation. They're thinking like an artist — using whatever tools serve the idea.",
+  },
+
+  "ACE-D-04": {
+    whyMatters:
+      "Moving differently to fast versus slow music shows that a child is genuinely listening — not just hearing. This kind of active musical engagement develops auditory discrimination, rhythmic sensitivity, and the ability to translate sound into physical response. It is also the foundation of performance: understanding that music has character and mood, and that the body and voice can reflect that. Children who respond to music this way tend to engage more deeply with all art forms as they grow.",
+    tryAtHome:
+      "At home, play two contrasting pieces of music — something fast and energetic, then something slow and gentle. Ask your child to show you what the music feels like through movement. There's no wrong answer.",
+    celebration:
+      "Your child moves with the music — fast when it's fast, slow when it's slow. They're not just hearing it; they're feeling it.",
+  },
+
+  // ── Aesthetics & Creative Expression — Secure ───────────────────────────
+
+  "ACE-S-01": {
+    whyMatters:
+      "Talking about why they made a creative choice — 'I used dark blue because it looked like night' — shows that a child is not just making, but reflecting. This metacognitive layer — thinking about thinking, or in this case, thinking about creating — is the same skill that underlies self-correction in writing, reasoning in maths, and critical thinking in science. Arts education that includes reflection builds some of the most transferable skills in all of learning.",
+    tryAtHome:
+      "After your child finishes a drawing or craft, ask one specific question: 'Why did you choose that colour?' or 'What was the hardest part to make?' One good question beats a dozen vague ones.",
+    celebration:
+      "Your child can talk about the choices they made in their artwork. They're not just creating — they're thinking about creating. That's artistic maturity.",
+  },
+
+  "ACE-S-02": {
+    whyMatters:
+      "Performing for others — even just for the class — builds confidence, public communication, and a positive relationship with being seen. Children who can hold an audience's attention, vary their voice or expression, and sustain a performance to completion are developing skills that serve them in presentations, debates, interviews, and leadership throughout their education. The arts are one of the few school contexts where emotional expression is not just allowed but required.",
+    tryAtHome:
+      "Create a small 'stage' at home — a cleared space, maybe a makeshift curtain. Let your child perform a song, a story, or a dance for the family. Applaud warmly and ask what their favourite part was.",
+    celebration:
+      "Your child performs with expression and confidence. Whatever they do next in life, being comfortable in front of others will help them do it better.",
+  },
+
+  "ACE-S-03": {
+    whyMatters:
+      "Collaborative storytelling — where children build a shared narrative across many turns, negotiate roles, and maintain a consistent imaginary world together — is among the most sophisticated social and cognitive activities a preschooler can engage in. It requires active listening, flexible thinking, negotiation, and creative improvisation. Children who do this well are practising the very skills that underlie collaborative writing, group projects, and teamwork throughout their school lives.",
+    tryAtHome:
+      "Start a story together with your child: 'Once upon a time there was a small dragon who lived in the park...' Then let your child continue. Take turns adding one sentence at a time. See where the story goes.",
+    celebration:
+      "Your child can build a story together with others — taking turns, adding ideas, and keeping the world alive. That's creativity, language, and social skill all at once.",
+  },
+
+  // ── Discovery of the World — Beginning ─────────────────────────────────
+
+  "DOW-B-01": {
+    whyMatters:
+      "Noticing that the puddle dried up, the plant grew taller, or the sky changed colour is the first act of scientific observation. Before a child can experiment or reason about the world, they must first notice that the world changes — and that some changes are worth paying attention to. This attentiveness to observable change is the precursor to all inquiry-based learning. Children who are taught to notice become children who ask questions.",
+    tryAtHome:
+      "On a walk, ask your child: 'What looks different from last week?' Or watch a puddle over the course of a day and ask: 'What do you think will happen to it?' Wondering together counts.",
+    celebration:
+      "Your child notices changes in the world around them. That watchfulness is the very beginning of scientific thinking.",
+  },
+
+  "DOW-B-02": {
+    whyMatters:
+      "Asking 'why does the moon follow us?' or 'how does the bird know where to go?' shows a mind that is actively trying to make sense of the world. Curiosity is not something that can be taught — but it can be either nurtured or suppressed. Children who ask questions freely, and whose questions are treated as valuable, build the motivation to keep investigating. Curiosity is the engine of all learning, in science and far beyond.",
+    tryAtHome:
+      "When your child asks a 'why' question, resist looking it up immediately. Ask: 'What do you think? What's your guess?' First ideas — even wrong ones — are valuable. Then look it up together.",
+    celebration:
+      "Your child asks big questions about how and why things work. That curiosity is one of the most valuable things they can have.",
+  },
+
+  "DOW-B-03": {
+    whyMatters:
+      "Sorting rocks as rough or smooth, or leaves as big or small, is the beginning of empirical classification — the foundation of all scientific taxonomy, data organisation, and logical thinking. Before children can reason about categories, they must first be able to observe properties directly and group things accordingly. This skill, developed with natural materials, transfers directly to mathematical sorting, data handling in primary school, and scientific classification in later years.",
+    tryAtHome:
+      "Collect a small handful of objects from a walk — leaves, pebbles, sticks. Ask your child to sort them into two groups any way they choose, then name the rule they used. There's no wrong answer.",
+    celebration:
+      "Your child can group objects by what they observe. They're thinking like a scientist — sorting the world into patterns that make sense.",
+  },
+
+  // ── Discovery of the World — Developing ────────────────────────────────
+
+  "DOW-D-01": {
+    whyMatters:
+      "Making a prediction before testing something — 'I think the heavy one will sink' — is the first act of hypothesis formation. It shows that a child is not just reacting to the world but actively reasoning about it before the evidence arrives. This predictive thinking is the core of the scientific method, but it also develops mathematical reasoning, reading comprehension (predicting what happens next), and planning skills. Children who predict are children who think ahead.",
+    tryAtHome:
+      "Before any household experiment — a recipe, mixing drinks, anything that changes — ask your child: 'What do you think will happen?' Write it down if you can. Then check after. Being wrong is fine and interesting.",
+    celebration:
+      "Your child makes predictions before testing things. They're thinking like a scientist — forming ideas before they see the answer.",
+  },
+
+  "DOW-D-02": {
+    whyMatters:
+      "Comparing two materials — noticing that one is hard and light while the other is soft and heavy — requires simultaneous observation across multiple dimensions. This multi-attribute comparison is far more cognitively demanding than naming a single property, and it is the foundation of controlled experiments, where the goal is to isolate one variable at a time. It also builds precise descriptive language, which directly supports writing across all subject areas.",
+    tryAtHome:
+      "Give your child two objects from the kitchen — a wooden spoon and a metal spoon, a plastic cup and a glass. Ask: 'How are these the same? How are they different?' Go for at least two differences.",
+    celebration:
+      "Your child can compare two objects and describe how they're both similar and different. That's careful scientific thinking.",
+  },
+
+  "DOW-D-03": {
+    whyMatters:
+      "Remembering and describing what was found out — not just what was done — shows that learning actually happened during the investigation. Many children can describe the activity ('we put things in water') but not the observation ('the rubber duck floated and the metal spoon sank'). The ability to recall and communicate findings is the bridge between doing and understanding, and it directly mirrors what scientists do when they record and report results.",
+    tryAtHome:
+      "After a class experiment your child tells you about, ask: 'What did you actually find out? What did you notice?' Follow up with 'why do you think that happened?' — and be curious, not testing.",
+    celebration:
+      "Your child can recall what they found out — not just what they did. Real learning has happened, and they can talk about it.",
+  },
+
+  "DOW-D-04": {
+    whyMatters:
+      "Understanding that a tree is alive and a rock isn't — and being able to explain why — introduces children to one of science's most fundamental classifications. Knowing that living things grow, need food and water, and respond to their environment gives children a framework for understanding biology, ecology, and ultimately what it means to be alive. This concept is visited and revisited throughout all science education, and establishing a correct intuition now prevents misconceptions that are hard to unlearn later.",
+    tryAtHome:
+      "On a walk, point to different things — a plant, a cloud, a bird, a car — and ask: 'Is that living or not living? How do you know?' Let your child reason it out and explain their thinking.",
+    celebration:
+      "Your child can tell living from non-living things and explain why. That's a foundational science concept — and they've got it.",
+  },
+
+  // ── Discovery of the World — Secure ────────────────────────────────────
+
+  "DOW-S-01": {
+    whyMatters:
+      "Following the steps of a simple experiment — setting it up, observing what happens, and describing the process — is the complete scientific cycle in miniature. A child who can do this has understood that knowledge is produced through deliberate, ordered action and careful observation: not just told, not guessed, but found out. This procedural understanding underpins science education at every level, from primary school to university.",
+    tryAtHome:
+      "Try a simple experiment at home: dissolve salt vs. sand in water, or float different objects. Ask your child to explain to you what you did and what you found — as if you were telling a friend who wasn't there.",
+    celebration:
+      "Your child can conduct a simple experiment and explain what happened step by step. They're doing science — not just learning about it.",
+  },
+
+  "DOW-S-02": {
+    whyMatters:
+      "Stating a cause-and-effect relationship — 'the ice melted because the room got warm' — is one of the most cognitively demanding things a young child can do. It requires connecting two separate events in time, understanding that one caused the other, and expressing that relationship in language. Causal reasoning is foundational to science, maths problem-solving, reading comprehension (understanding story motivation), and everyday logical thinking.",
+    tryAtHome:
+      "During any change you observe together — ice melting, bread toasting, plants wilting — ask: 'What happened? And why do you think that happened?' Encourage full sentences with 'because'.",
+    celebration:
+      "Your child can explain why something happened, not just what happened. Cause-and-effect reasoning — that's scientific thinking fully in motion.",
+  },
+
+  "DOW-S-03": {
+    whyMatters:
+      "Connecting what was learned at school to something in their own life — 'that's like when our bread went mouldy' — is how knowledge becomes truly owned. This transfer of learning, from one context to another, is the deepest form of understanding. It shows that the concept has not just been memorised but genuinely internalised. Children who make these connections tend to have stronger long-term retention and a more positive relationship with learning because knowledge feels relevant and alive.",
+    tryAtHome:
+      "When you hear about something your child is learning at school, ask: 'Can you think of anything at home that's like that?' Give them time to think. Even a loose connection shows real thinking.",
+    celebration:
+      "Your child can connect what they learned at school to their own life. That's the deepest kind of understanding — when learning becomes personal.",
+  },
+
+  // ── Health, Safety & Motor Skills — Beginning ───────────────────────────
+
+  "HMS-B-01": {
+    whyMatters:
+      "Moving confidently in space — running without tripping, jumping over a step, climbing a low structure — builds the physical foundation for everything from PE to handwriting. Gross motor development underlies fine motor development: children who struggle with large body movements often struggle with the precise small ones too. Confident physical movers tend to be more willing to take risks in learning and to engage in active play, which has consistent benefits for cognitive development, attention, and wellbeing.",
+    tryAtHome:
+      "Spend 15 minutes at a playground or open space. Watch how your child moves — encourage jumping over cracks, hopping along a line, or climbing where it's safe. Physical confidence is built through opportunity.",
+    celebration:
+      "Your child moves with coordination and confidence. A strong body is a foundation for a strong mind — and they're building both.",
+  },
+
+  "HMS-B-02": {
+    whyMatters:
+      "A functional pencil grip — holding a pencil between the thumb and first two fingers — allows for the controlled, efficient marks that drawing and eventually writing require. Children who grip with their whole fist can make marks but cannot produce the fine motor movements needed for letter formation. Getting the grip right early prevents compensatory habits that become harder to correct with age. This is one physical skill worth addressing gently and consistently before formal writing begins.",
+    tryAtHome:
+      "Offer pencils and paper for free drawing at home. If you notice a full-fist grip, try a short, chunky pencil or a triangular grip — these make the correct hold more natural. Don't force it; just offer.",
+    celebration:
+      "Your child is holding their pencil correctly. That might seem small, but it will make drawing and writing so much easier for them.",
+  },
+
+  "HMS-B-03": {
+    whyMatters:
+      "Following basic safety rules — walking inside, not pushing on stairs, telling an adult about injuries — shows that a child understands the purpose of rules, not just the content. Children who follow safety rules are also learning to self-regulate impulses, to anticipate consequences, and to take responsibility for their own wellbeing. These are the same cognitive capacities involved in following classroom academic rules, managing behaviour during lessons, and eventually self-managing study.",
+    tryAtHome:
+      "At home, have a short conversation about two or three safety rules — and the reason behind each one. 'We walk inside because the floor is hard and we could hurt ourselves.' Understanding the why makes the rule much more likely to stick.",
+    celebration:
+      "Your child follows safety rules without being reminded. They understand that rules protect — and they're taking responsibility for their own safety.",
+  },
+
+  // ── Health, Safety & Motor Skills — Developing ──────────────────────────
+
+  "HMS-D-01": {
+    whyMatters:
+      "Hopping on one foot and skipping with alternating feet are bilateral coordination skills — they require both sides of the body to work in a coordinated sequence. This kind of cross-lateral movement is strongly associated with brain development, particularly the development of the corpus callosum, which connects the brain's two hemispheres. Children who develop bilateral coordination well tend to show stronger reading and writing skills, as these tasks also require the two halves of the brain to work together efficiently.",
+    tryAtHome:
+      "Practise hopping and skipping in the corridor or at the park. Make it a game — hop 5 times on one foot, then the other. Skipping takes most children a while to get right; celebrate every attempt.",
+    celebration:
+      "Your child can hop and skip. These movements seem playful but they reflect coordination in the brain as well as the body.",
+  },
+
+  "HMS-D-02": {
+    whyMatters:
+      "Using scissors correctly — thumb up, moving the paper not just the scissors, cutting along a line — requires both hands to work together doing different jobs simultaneously. This bilateral fine motor coordination is also used in buttoning clothes, tying laces, and eventually in using a keyboard. Children who develop scissor skills on time tend to have stronger overall fine motor control, which directly affects the ease and quality of their handwriting in Primary 1.",
+    tryAtHome:
+      "Set up simple cutting activities at home — straight lines drawn on paper, then curved ones. Hold the paper for your child at first if needed. The key habits to build: thumb up, and move the paper toward the scissors.",
+    celebration:
+      "Your child can cut along a line. Their hands are working together skillfully — and that coordination will serve them in writing and so much more.",
+  },
+
+  "HMS-D-03": {
+    whyMatters:
+      "Washing hands correctly and independently — at the right times, with soap, for long enough — is one of the highest-impact health habits a young child can develop. It directly reduces the transmission of gastrointestinal illness, respiratory illness, and skin infections. Teaching the habit now, when children are in a critical period for habit formation, means it becomes automatic rather than something that needs reminding. The habit of good handwashing in early childhood has been shown to reduce sick days throughout the school years.",
+    tryAtHome:
+      "Make handwashing a consistent part of the home routine — before eating and after the toilet, every time. Sing the 'Happy Birthday' song twice to time it (about 20 seconds). Make it a habit, not a negotiation.",
+    celebration:
+      "Your child washes their hands correctly without being told. That one habit will keep them healthier throughout their life.",
+  },
+
+  "HMS-D-04": {
+    whyMatters:
+      "Identifying a hazard and explaining why it's dangerous — 'running near the pool means you could slip and fall in' — shows that safety knowledge has moved from rule-following to genuine understanding. A child who understands why something is dangerous will generalise that understanding to new situations they haven't been specifically told about. This kind of risk reasoning is the basis of lifelong safety, from road sense to fire safety to online safety as they grow.",
+    tryAtHome:
+      "At home and outdoors, ask your child: 'Can you see anything here that could be dangerous? Why?' Treat every answer as thoughtful — the reasoning matters, not the perfect answer.",
+    celebration:
+      "Your child can spot danger and explain why it's risky. They're thinking about safety — not just following rules — and that will protect them their whole life.",
+  },
+
+  // ── Health, Safety & Motor Skills — Secure ──────────────────────────────
+
+  "HMS-S-01": {
+    whyMatters:
+      "Catching a thrown ball reliably requires the eyes and hands to work together in real time — a skill called hand-eye coordination. This visual-motor integration is also used in reading (tracking text across a page), writing (controlling a pen while looking at what you're producing), and many team sports and activities throughout school life. Physical confidence with a ball also contributes to social inclusion: children who can participate in playground ball games are more likely to be included in peer groups.",
+    tryAtHome:
+      "Practise catching at home — start close and close-range, with a large soft ball, and increase distance gradually. Five minutes of catching practice is meaningful. Celebrate near-catches as well as successful ones.",
+    celebration:
+      "Your child can catch a ball! Eyes and hands working together — that's coordination, and it opens up so many games and activities ahead.",
+  },
+
+  "HMS-S-02": {
+    whyMatters:
+      "Drawing a recognisable person with head, body, limbs, and face details is one of the clearest indicators of fine motor development and body-schema awareness. Developmental psychologists use this measure as a standard assessment of overall development in early childhood. A complex figure drawing requires planning (where will the parts go?), fine motor control (producing the shapes), and spatial reasoning (relative size and placement of parts). These skills transfer directly to letter formation, spacing, and layout in writing.",
+    tryAtHome:
+      "Ask your child to draw a picture of your family. Afterwards, ask them to tell you who each person is and point out the different body parts. Don't correct proportions — celebrate the attempt and the detail.",
+    celebration:
+      "Your child can draw a whole person. That level of detail shows fine motor control, body awareness, and planning — all in one drawing.",
+  },
+
+  "HMS-S-03": {
+    whyMatters:
+      "Understanding why healthy habits matter — not just following them — marks the shift from compliance to agency. A child who can explain 'I need sleep so my body can rest and grow' has internalised a health concept in a way that makes them far more likely to maintain that habit independently, resist peer pressure against it, and extend the reasoning to new situations. Health literacy — understanding the why behind healthy choices — is the foundation of lifelong wellbeing.",
+    tryAtHome:
+      "During meals, bedtime, or outdoor play, ask your child: 'Why is this good for us?' Don't just accept 'it's healthy' — ask 'but why?' You'll be surprised what they know, and what they come up with.",
+    celebration:
+      "Your child understands why healthy habits matter. That knowledge is the foundation of taking care of themselves — for the rest of their life.",
+  },
 };
 
 export function getMilestoneContent(milestoneId: string): MilestoneContent | undefined {

@@ -13,6 +13,16 @@ import type {
   TeacherStrategies,
   FamilyContext,
   TeacherNote,
+  CalendarHoliday,
+  ClassSchedule,
+  Organisation,
+  School,
+  Employee,
+  EmployeeSchoolRole,
+  ClassTeacherAssignment,
+  Parent,
+  StudentParentLink,
+  StudentEnrollment,
 } from "./types";
 import { getWeekStart } from "./assignments";
 
@@ -28,6 +38,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Recognises own name in print",
     parentDescription:
       "Your child can spot their own name written down — one of the very first reading moments.",
+    teacherNotes:
+      "Child correctly picks their own name card when presented alongside 4+ classmates' name cards — without prompting.",
   },
   {
     id: "LL-B-02",
@@ -37,6 +49,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Identifies at least 10 letters of the alphabet by name",
     parentDescription:
       "Knowing letter names by sight is the foundation everything else builds on.",
+    teacherNotes:
+      "Child correctly names at least 10 letters when shown flashcards or letters pointed to in random order (not recited sequentially).",
   },
   {
     id: "LL-B-03",
@@ -46,6 +60,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Understands that text is read left to right, top to bottom",
     parentDescription:
       "Knowing how to look at a page correctly is a key early literacy concept.",
+    teacherNotes:
+      "When reading together, child moves finger left to right across a line and drops down to the next line unprompted — not randomly pointing at text.",
   },
 
   // Language & Literacy — Developing
@@ -57,6 +73,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Matches all uppercase letters to their lowercase pairs",
     parentDescription:
       "Connecting 'A' with 'a' helps children read both printed books and handwriting.",
+    teacherNotes:
+      "Child correctly matches all 26 uppercase letters to their lowercase counterparts in a pairing task — not just the most common letters.",
   },
   {
     id: "LL-D-02",
@@ -66,6 +84,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Identifies the beginning sound of familiar words",
     parentDescription:
       "Knowing that 'fish' starts with an 'f' sound is called phonemic awareness — the key to cracking reading.",
+    teacherNotes:
+      "When asked 'what sound does [word] start with?', child correctly isolates the initial phoneme across multiple familiar 3–4 letter words (e.g. cat, sun, dog).",
   },
   {
     id: "LL-D-03",
@@ -76,6 +96,8 @@ export const MILESTONES: Milestone[] = [
       "Recognises 15+ common sight words (I, a, the, is, my, he, she, we, go, and, in, it, to, on, at)",
     parentDescription:
       "Sight words are read on sight without sounding out — building a bank of them makes reading much faster.",
+    teacherNotes:
+      "Child correctly reads at least 15 of the target sight words on sight — saying the whole word immediately without sounding out letter by letter.",
   },
   {
     id: "LL-D-04",
@@ -86,6 +108,8 @@ export const MILESTONES: Milestone[] = [
       "Sequences 3–4 pictures to tell a simple story in correct order",
     parentDescription:
       "Ordering story pictures shows your child understands how events connect — a reading comprehension skill.",
+    teacherNotes:
+      "Child arranges 3–4 picture cards into a logical story sequence and can explain, in their own words, what happens at each step.",
   },
 
   // Language & Literacy — Secure
@@ -98,6 +122,8 @@ export const MILESTONES: Milestone[] = [
       "Blends consonant-vowel-consonant sounds to read simple words (e.g. cat, sun, pig)",
     parentDescription:
       "Blending sounds into words is the breakthrough moment in learning to read — a huge milestone.",
+    teacherNotes:
+      "Child hears individual phonemes (e.g. /k/–/a/–/t/) and blends them into the correct word across multiple CVC words — not just memorised examples.",
   },
   {
     id: "LL-S-02",
@@ -107,6 +133,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Reads simple sentences using known sight words and phonics",
     parentDescription:
       "Reading short sentences independently shows everything is coming together.",
+    teacherNotes:
+      "Child reads a 4–6 word sentence aloud independently, using a combination of sight-word recall and phonics decoding for unfamiliar words.",
   },
   {
     id: "LL-S-03",
@@ -117,6 +145,8 @@ export const MILESTONES: Milestone[] = [
       "Answers simple comprehension questions about a short passage read aloud",
     parentDescription:
       "Understanding what was just read — not just saying the words — is true reading comprehension.",
+    teacherNotes:
+      "After hearing a short passage, child correctly answers at least 2 of 3 'who', 'what', or 'why' questions — showing understanding, not just word-decoding.",
   },
 
   // Numeracy — Beginning
@@ -128,6 +158,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Rote counts aloud to 10 in correct sequence",
     parentDescription:
       "Counting to 10 in order is the starting point — like learning the alphabet before reading.",
+    teacherNotes:
+      "Child counts aloud from 1 to 10 in the correct sequence without prompting, skipping, or reversing — demonstrated on multiple occasions.",
   },
   {
     id: "NUM-B-02",
@@ -137,6 +169,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Counts objects 1–5 with one-to-one correspondence",
     parentDescription:
       "Matching one count to one object (not just saying numbers) is an important conceptual leap.",
+    teacherNotes:
+      "Child physically touches or moves each object once while counting a set of 1–5 objects, stopping at the correct total — not just reciting numbers.",
   },
   {
     id: "NUM-B-03",
@@ -146,6 +180,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Recognises and names written numerals 1–5",
     parentDescription:
       "Knowing what the numeral '3' looks like is different from being able to count — both matter.",
+    teacherNotes:
+      "Child correctly names written numerals 1–5 shown in random order — not counting up to identify them.",
   },
 
   // Numeracy — Developing
@@ -157,6 +193,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Counts objects 1–10 with one-to-one correspondence",
     parentDescription:
       "Counting accurately to 10 with real objects shown is solid early number sense.",
+    teacherNotes:
+      "Child counts a set of 6–10 objects with one-to-one correspondence, stating the final total correctly — demonstrated with different object types.",
   },
   {
     id: "NUM-D-02",
@@ -166,6 +204,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Recognises and names written numerals 1–10",
     parentDescription:
       "Knowing what '7' looks like and that it means seven things is a key number milestone.",
+    teacherNotes:
+      "Child correctly names written numerals 1–10 shown in random order without needing to count up from 1.",
   },
   {
     id: "NUM-D-03",
@@ -175,6 +215,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Identifies which group has more or fewer objects (up to 10)",
     parentDescription:
       "Comparing quantities ('this pile has more') is the beginning of mathematical thinking.",
+    teacherNotes:
+      "When shown two groups of objects (up to 10), child correctly identifies which has more and which has fewer — including groups of similar size (e.g. 7 vs. 8).",
   },
   {
     id: "NUM-D-04",
@@ -184,6 +226,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Sorts objects by one attribute: colour, size, or shape",
     parentDescription:
       "Sorting is how children first experience categories — a foundation for logical thinking.",
+    teacherNotes:
+      "Child sorts a mixed set of objects into consistent groups using one self-chosen or teacher-specified attribute, and can name the rule they used.",
   },
 
   // Numeracy — Secure
@@ -195,6 +239,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Counts and sequences numbers 1–20",
     parentDescription:
       "Counting to 20 correctly prepares children for addition and subtraction in Primary 1.",
+    teacherNotes:
+      "Child counts aloud to 20 correctly and can identify any numeral 1–20 when pointed to — demonstrated in both directions (ascending and from a random starting point).",
   },
   {
     id: "NUM-S-02",
@@ -204,6 +250,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Identifies and names basic 2D shapes and their properties",
     parentDescription:
       "Knowing a triangle has 3 sides and a circle has no corners is early geometry.",
+    teacherNotes:
+      "Child correctly names at least 4 basic 2D shapes (circle, square, triangle, rectangle) and states one property of each (e.g. 'a triangle has 3 sides').",
   },
   {
     id: "NUM-S-03",
@@ -213,6 +261,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Completes simple addition and subtraction within 5",
     parentDescription:
       "Sums within 5 are the first formal maths operations — exactly what Primary 1 starts with.",
+    teacherNotes:
+      "Child correctly solves simple addition and subtraction problems within 5, using objects, fingers, or mental calculation — demonstrated across multiple examples.",
   },
 
   // Social & Emotional Development — Beginning
@@ -225,6 +275,8 @@ export const MILESTONES: Milestone[] = [
       "Names at least 4 basic emotions when shown pictures or faces",
     parentDescription:
       "Naming emotions is the first step to understanding and managing them.",
+    teacherNotes:
+      "Child correctly labels happy, sad, angry, and scared when shown pictures or facial expressions — not just guessing from context clues like colour.",
   },
   {
     id: "SED-B-02",
@@ -234,6 +286,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Follows a 2–3 step classroom routine without reminders",
     parentDescription:
       "Following routines shows self-regulation — one of the most important school-readiness skills.",
+    teacherNotes:
+      "Child independently moves through a 2–3 step routine (e.g. pack up → wash hands → sit on mat) without being individually reminded each time.",
   },
   {
     id: "SED-B-03",
@@ -243,6 +297,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Takes turns with a peer during a structured activity",
     parentDescription:
       "Turn-taking is an early social contract children need for friendships to work.",
+    teacherNotes:
+      "Child waits for their turn and allows another child their go without prompting, grabbing, or persistent protest during a structured group or pair activity.",
   },
 
   // Social & Emotional Development — Developing
@@ -255,6 +311,8 @@ export const MILESTONES: Milestone[] = [
       "Identifies what caused a character's emotion in a story or situation",
     parentDescription:
       "Connecting emotions to causes shows your child is developing empathy and emotional intelligence.",
+    teacherNotes:
+      "When asked 'why is she sad?' or 'why is he happy?', child gives a plausible situational reason rather than just repeating the emotion name.",
   },
   {
     id: "SED-D-02",
@@ -265,6 +323,8 @@ export const MILESTONES: Milestone[] = [
       "Uses words to express their own feelings rather than acting out",
     parentDescription:
       "Putting feelings into words is a major step in emotional self-management.",
+    teacherNotes:
+      "Child says 'I'm angry' or 'that hurt my feelings' instead of hitting, throwing objects, or crying without explanation — observed across genuine moments of frustration.",
   },
   {
     id: "SED-D-03",
@@ -274,6 +334,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Identifies helpful vs. unhelpful behaviour in a scenario",
     parentDescription:
       "Distinguishing kind from unkind actions shows your child is developing a moral compass.",
+    teacherNotes:
+      "When shown or told about a situation, child correctly identifies whether the behaviour shown was kind or unkind, and can give a brief reason why.",
   },
   {
     id: "SED-D-04",
@@ -283,6 +345,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Shows care toward a peer who is upset or struggling",
     parentDescription:
       "Noticing and responding to a friend's feelings — this is empathy in action.",
+    teacherNotes:
+      "Child spontaneously offers comfort, checks in verbally, or tells a teacher when a friend seems distressed — not prompted by the teacher to do so.",
   },
 
   // Social & Emotional Development — Secure
@@ -295,6 +359,8 @@ export const MILESTONES: Milestone[] = [
       "Explains their own feelings and gives a reason unprompted",
     parentDescription:
       "Being able to name and explain a feeling unprompted is advanced emotional literacy.",
+    teacherNotes:
+      "Child volunteers an explanation of their emotional state without being asked — e.g. 'I feel nervous because it's my first time' — in real, naturally occurring moments.",
   },
   {
     id: "SED-S-02",
@@ -304,6 +370,8 @@ export const MILESTONES: Milestone[] = [
     statement: "Proposes a solution to a peer conflict independently",
     parentDescription:
       "Problem-solving in friendships rather than escalating — strong social competence.",
+    teacherNotes:
+      "Child suggests 'we could take turns' or 'let's ask the teacher' or another constructive solution during a real peer conflict — without adult prompting.",
   },
   {
     id: "SED-S-03",
@@ -314,14 +382,364 @@ export const MILESTONES: Milestone[] = [
       "Demonstrates responsibility toward group or classroom tasks",
     parentDescription:
       "Taking responsibility in a group shows your child is ready to thrive in Primary 1.",
+    teacherNotes:
+      "Child consistently takes ownership of shared responsibilities — packs up materials without being asked, reminds peers of rules, or helps set up — observed across multiple days.",
+  },
+
+  // Aesthetics & Creative Expression — Beginning
+  {
+    id: "ACE-B-01",
+    areaId: "ACE",
+    levelId: "B",
+    sequence: 1,
+    statement: "Explores and uses basic art materials freely (paint, crayons, clay)",
+    parentDescription:
+      "Freely exploring art materials — mixing colours, squishing clay — is how creativity first takes root.",
+    teacherNotes:
+      "Child independently picks up and experiments with art materials during free-choice time without needing encouragement to start or continue.",
+  },
+  {
+    id: "ACE-B-02",
+    areaId: "ACE",
+    levelId: "B",
+    sequence: 2,
+    statement: "Participates in group singing and music activities",
+    parentDescription:
+      "Singing along with others builds listening skills, language, and a sense of belonging.",
+    teacherNotes:
+      "Child joins in group singing, clapping, or musical activities — following the rhythm or words, even partially — rather than sitting out.",
+  },
+  {
+    id: "ACE-B-03",
+    areaId: "ACE",
+    levelId: "B",
+    sequence: 3,
+    statement: "Engages in imaginative role play with simple props",
+    parentDescription:
+      "Pretending — playing house, being a doctor — is how children develop imagination and language.",
+    teacherNotes:
+      "Child takes on a role and sustains imaginative play for at least a few minutes, using objects or space to represent something else (e.g. a block as a phone).",
+  },
+
+  // Aesthetics & Creative Expression — Developing
+  {
+    id: "ACE-D-01",
+    areaId: "ACE",
+    levelId: "D",
+    sequence: 1,
+    statement: "Creates artwork with a recognisable subject or intention",
+    parentDescription:
+      "When your child draws 'a flower' or 'our family', they are expressing ideas through art — a big creative step.",
+    teacherNotes:
+      "Child's artwork has a clear subject or intention the child can describe — the drawing or construction represents something recognisable, even if not realistic.",
+  },
+  {
+    id: "ACE-D-02",
+    areaId: "ACE",
+    levelId: "D",
+    sequence: 2,
+    statement: "Sings a familiar song with correct melody and most of the words",
+    parentDescription:
+      "Singing a whole song correctly shows musical memory, language development, and confidence.",
+    teacherNotes:
+      "Child sings a familiar song (from class repertoire) with the correct tune and most of the lyrics — not just humming or joining in on key phrases only.",
+  },
+  {
+    id: "ACE-D-03",
+    areaId: "ACE",
+    levelId: "D",
+    sequence: 3,
+    statement: "Combines different materials or art forms in one creation",
+    parentDescription:
+      "Using paint and collage together, or acting and singing in the same story — this is artistic thinking growing.",
+    teacherNotes:
+      "Child deliberately combines two or more materials or modes (e.g. draws then adds collage elements, or incorporates movement into dramatic play) in a single creative work.",
+  },
+  {
+    id: "ACE-D-04",
+    areaId: "ACE",
+    levelId: "D",
+    sequence: 4,
+    statement: "Responds to music through movement that matches the mood or tempo",
+    parentDescription:
+      "Moving differently to fast vs. slow music shows your child is really listening and feeling the music.",
+    teacherNotes:
+      "When music changes tempo or mood, child's movement adapts accordingly — e.g. moves slowly to slow music, energetically to fast — not just random movement.",
+  },
+
+  // Aesthetics & Creative Expression — Secure
+  {
+    id: "ACE-S-01",
+    areaId: "ACE",
+    levelId: "S",
+    sequence: 1,
+    statement: "Describes their own creative choices and what they made",
+    parentDescription:
+      "Talking about their own art — 'I used blue because the sea is calm' — shows creative thinking and language growing together.",
+    teacherNotes:
+      "Child can explain at least one deliberate choice in their artwork or performance (e.g. colour, shape, character, expression) rather than just naming what it is.",
+  },
+  {
+    id: "ACE-S-02",
+    areaId: "ACE",
+    levelId: "S",
+    sequence: 2,
+    statement: "Performs a song, poem, or story with expression and confidence",
+    parentDescription:
+      "Performing for others — even just the class — builds confidence, communication, and a love of the arts.",
+    teacherNotes:
+      "Child performs with clear expression (changes in voice, facial expression, or gesture) and remains engaged throughout — not just reciting flatly or needing constant prompting.",
+  },
+  {
+    id: "ACE-S-03",
+    areaId: "ACE",
+    levelId: "S",
+    sequence: 3,
+    statement: "Sustains collaborative creative play with a narrative arc",
+    parentDescription:
+      "When children create and maintain a shared story together — 'and then the dragon came' — they are building advanced social and creative skills.",
+    teacherNotes:
+      "Child participates in collaborative dramatic play where a story develops across multiple turns with other children — adding to the narrative, negotiating roles, and sustaining the play beyond a few minutes.",
+  },
+
+  // Discovery of the World — Beginning
+  {
+    id: "DOW-B-01",
+    areaId: "DOW",
+    levelId: "B",
+    sequence: 1,
+    statement: "Notices and names observable changes in the environment",
+    parentDescription:
+      "Noticing that a puddle dried up or that plants grow — these are the first steps in scientific thinking.",
+    teacherNotes:
+      "Child spontaneously or with a simple prompt ('what do you notice?') identifies a visible change in the environment (e.g. weather, plant growth, a wet surface drying).",
+  },
+  {
+    id: "DOW-B-02",
+    areaId: "DOW",
+    levelId: "B",
+    sequence: 2,
+    statement: "Asks questions about how or why things work",
+    parentDescription:
+      "Asking 'why does the moon follow us?' shows curiosity — the engine of all learning.",
+    teacherNotes:
+      "Child asks unprompted 'how' or 'why' questions about the natural or physical world — even if the questions are unanswerable or fanciful.",
+  },
+  {
+    id: "DOW-B-03",
+    areaId: "DOW",
+    levelId: "B",
+    sequence: 3,
+    statement: "Sorts objects by observable physical properties",
+    parentDescription:
+      "Sorting rocks as 'rough' or 'smooth', leaves as 'big' or 'small' — this is early science observation.",
+    teacherNotes:
+      "Child sorts a collection of natural or classroom objects into groups based on a physical property they name (e.g. smooth/rough, heavy/light, big/small).",
+  },
+
+  // Discovery of the World — Developing
+  {
+    id: "DOW-D-01",
+    areaId: "DOW",
+    levelId: "D",
+    sequence: 1,
+    statement: "Makes a simple prediction before a class experiment or activity",
+    parentDescription:
+      "Guessing what will happen before trying — 'I think it will sink' — is how scientists think.",
+    teacherNotes:
+      "Before a class experiment or sensory activity, child states what they think will happen (even if wrong) — showing they are reasoning rather than waiting to be told.",
+  },
+  {
+    id: "DOW-D-02",
+    areaId: "DOW",
+    levelId: "D",
+    sequence: 2,
+    statement: "Compares the properties of two materials or objects",
+    parentDescription:
+      "Noticing that water flows but sand doesn't, or that metal is cold and wood is warm — this is scientific observation.",
+    teacherNotes:
+      "Child compares two materials or objects using at least two observable properties (e.g. 'this one is harder and heavier') — not just naming one difference.",
+  },
+  {
+    id: "DOW-D-03",
+    areaId: "DOW",
+    levelId: "D",
+    sequence: 3,
+    statement: "Recalls and shares observations from a class investigation",
+    parentDescription:
+      "Remembering and describing what they found out — not just what they did — shows real learning happened.",
+    teacherNotes:
+      "After a class investigation, child can recall a specific observation (what they saw, heard, felt, or measured) — not just describe the activity itself.",
+  },
+  {
+    id: "DOW-D-04",
+    areaId: "DOW",
+    levelId: "D",
+    sequence: 4,
+    statement: "Identifies living vs. non-living things and gives a reason",
+    parentDescription:
+      "Knowing that a tree is alive but a rock isn't — and being able to explain why — is an important science concept.",
+    teacherNotes:
+      "Child correctly classifies at least 4 examples as living or non-living and can give a simple reason (e.g. 'it grows', 'it needs water', 'it can't move by itself').",
+  },
+
+  // Discovery of the World — Secure
+  {
+    id: "DOW-S-01",
+    areaId: "DOW",
+    levelId: "S",
+    sequence: 1,
+    statement: "Conducts a simple guided experiment and describes what they did",
+    parentDescription:
+      "Following steps to test something and then explaining it — that's the scientific method in action.",
+    teacherNotes:
+      "Child follows the steps of a simple structured experiment (e.g. sink or float, mixing colours, dissolving) and can describe in sequence what they did and what happened.",
+  },
+  {
+    id: "DOW-S-02",
+    areaId: "DOW",
+    levelId: "S",
+    sequence: 2,
+    statement: "Explains a cause-and-effect relationship they observed",
+    parentDescription:
+      "'The ice melted because it got warm' — connecting what caused something to happen is real scientific thinking.",
+    teacherNotes:
+      "Child states a cause-and-effect relationship based on a direct observation — using language like 'because', 'so', or 'when…then…' — not just describing what happened.",
+  },
+  {
+    id: "DOW-S-03",
+    areaId: "DOW",
+    levelId: "S",
+    sequence: 3,
+    statement: "Connects a class observation to something in their own life",
+    parentDescription:
+      "When your child says 'that's like when our bread went mouldy' — they're linking school learning to the real world.",
+    teacherNotes:
+      "Child draws an unprompted or lightly prompted connection between a class observation or discovery and a real-world experience from their own life.",
+  },
+
+  // Health, Safety & Motor Skills — Beginning
+  {
+    id: "HMS-B-01",
+    areaId: "HMS",
+    levelId: "B",
+    sequence: 1,
+    statement: "Runs, jumps, and climbs with basic coordination",
+    parentDescription:
+      "Moving confidently in space — running, jumping over a step — builds the body awareness children need for everything else.",
+    teacherNotes:
+      "Child runs without tripping repeatedly, jumps with both feet, and climbs low playground structures — showing basic whole-body coordination in unstructured play.",
+  },
+  {
+    id: "HMS-B-02",
+    areaId: "HMS",
+    levelId: "B",
+    sequence: 2,
+    statement: "Holds a pencil or crayon with a functional grip",
+    parentDescription:
+      "A good pencil grip makes writing and drawing easier — it's the starting point for all written work.",
+    teacherNotes:
+      "Child holds a pencil or crayon with a functional grip (tripod or equivalent) that allows controlled marks — not a full-fist grip that limits movement.",
+  },
+  {
+    id: "HMS-B-03",
+    areaId: "HMS",
+    levelId: "B",
+    sequence: 3,
+    statement: "Follows basic classroom and playground safety rules",
+    parentDescription:
+      "Knowing 'walk inside, run outside' and other basic rules keeps children safe and shows they understand why rules matter.",
+    teacherNotes:
+      "Child follows at least 3 basic safety rules consistently without individual reminders — e.g. walks indoors, doesn't push on the stairs, reports injuries to the teacher.",
+  },
+
+  // Health, Safety & Motor Skills — Developing
+  {
+    id: "HMS-D-01",
+    areaId: "HMS",
+    levelId: "D",
+    sequence: 1,
+    statement: "Hops on one foot and skips with alternating feet",
+    parentDescription:
+      "Hopping and skipping show growing balance and coordination — skills children need for PE, dance, and playground games.",
+    teacherNotes:
+      "Child hops consecutively on one foot (at least 3 times) and can skip with alternating feet — not just gallop — showing bilateral coordination.",
+  },
+  {
+    id: "HMS-D-02",
+    areaId: "HMS",
+    levelId: "D",
+    sequence: 2,
+    statement: "Uses scissors to cut along a straight line",
+    parentDescription:
+      "Cutting with scissors looks simple but requires both hands working together — a key fine motor milestone.",
+    teacherNotes:
+      "Child uses scissors correctly (thumb up, moves paper not scissors) to cut along a straight or gently curved line without large deviations.",
+  },
+  {
+    id: "HMS-D-03",
+    areaId: "HMS",
+    levelId: "D",
+    sequence: 3,
+    statement: "Washes hands correctly and independently at appropriate times",
+    parentDescription:
+      "Knowing when and how to wash hands properly is one of the most important health habits a child can build.",
+    teacherNotes:
+      "Child washes hands with soap for an adequate duration (15–20 seconds) — before eating and after the toilet — without needing individual prompting.",
+  },
+  {
+    id: "HMS-D-04",
+    areaId: "HMS",
+    levelId: "D",
+    sequence: 4,
+    statement: "Identifies unsafe situations and explains why they are dangerous",
+    parentDescription:
+      "Knowing that running near a pool or touching a hot stove is dangerous — and why — is the beginning of self-protection.",
+    teacherNotes:
+      "When shown or described a safety scenario, child correctly identifies the hazard and gives a simple reason why it is dangerous (e.g. 'you could fall', 'it's hot and could burn you').",
+  },
+
+  // Health, Safety & Motor Skills — Secure
+  {
+    id: "HMS-S-01",
+    areaId: "HMS",
+    levelId: "S",
+    sequence: 1,
+    statement: "Catches a thrown ball with two hands consistently",
+    parentDescription:
+      "Catching a ball requires eyes and hands to work together — a sign of well-developed coordination.",
+    teacherNotes:
+      "Child successfully catches a medium-sized ball thrown from a short distance (2–3 metres) using two hands — demonstrated on at least 3 of 5 attempts.",
+  },
+  {
+    id: "HMS-S-02",
+    areaId: "HMS",
+    levelId: "S",
+    sequence: 2,
+    statement: "Draws a recognisable figure of a person with key body parts",
+    parentDescription:
+      "Drawing a person with a head, body, arms, and legs shows fine motor control and how your child understands the human body.",
+    teacherNotes:
+      "Child's drawing of a person includes at least 5 recognisable body parts (e.g. head, body, two arms, two legs, or face details) — not just a circle with lines.",
+  },
+  {
+    id: "HMS-S-03",
+    areaId: "HMS",
+    levelId: "S",
+    sequence: 3,
+    statement: "Explains why healthy habits (sleep, food, exercise) matter",
+    parentDescription:
+      "Understanding why we eat vegetables and get enough sleep — not just following rules — shows health literacy is taking root.",
+    teacherNotes:
+      "Child can explain a simple reason why a healthy habit is important (e.g. 'we sleep so our body can rest and grow', 'vegetables give us energy') — in their own words, not just reciting a phrase.",
   },
 ];
 
 // ─── Classes ───────────────────────────────────────────────────────────────
 
 export const CLASSES: Class[] = [
-  { id: "class-1", name: "Kingfisher K1", termLabel: "Term 2, 2026" },
-  { id: "class-2", name: "Sparrow K2",    termLabel: "Term 2, 2026" },
+  { id: "class-1", schoolId: "school-1", name: "Kingfisher K1", preschoolYear: "K1", academicYear: 2026, termLabel: "Term 2, 2026" },
+  { id: "class-2", schoolId: "school-1", name: "Sparrow K2",    preschoolYear: "K2", academicYear: 2026, termLabel: "Term 2, 2026" },
 ];
 
 // ─── Teachers ──────────────────────────────────────────────────────────────
@@ -339,6 +757,8 @@ export const CHILDREN: Child[] = [
     firstName: "Rayan",
     lastName: "",
     gender: "male",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-04-15",
@@ -356,6 +776,8 @@ export const CHILDREN: Child[] = [
     firstName: "Aisha",
     lastName: "",
     gender: "female",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-07-02",
@@ -373,6 +795,8 @@ export const CHILDREN: Child[] = [
     firstName: "Mei",
     lastName: "",
     gender: "female",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-02-10",
@@ -387,6 +811,8 @@ export const CHILDREN: Child[] = [
     firstName: "Omar",
     lastName: "",
     gender: "male",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2020-12-05",
@@ -400,6 +826,8 @@ export const CHILDREN: Child[] = [
     firstName: "Priya",
     lastName: "",
     gender: "female",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-05-28",
@@ -417,6 +845,8 @@ export const CHILDREN: Child[] = [
     firstName: "Kai",
     lastName: "",
     gender: "male",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-09-09",
@@ -430,6 +860,8 @@ export const CHILDREN: Child[] = [
     firstName: "Sara",
     lastName: "",
     gender: "female",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-03-21",
@@ -444,6 +876,8 @@ export const CHILDREN: Child[] = [
     firstName: "Darius",
     lastName: "",
     gender: "male",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2020-11-18",
@@ -457,6 +891,8 @@ export const CHILDREN: Child[] = [
     firstName: "Aryan",
     lastName: "",
     gender: "male",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-01-30",
@@ -470,6 +906,8 @@ export const CHILDREN: Child[] = [
     firstName: "Fatimah",
     lastName: "",
     gender: "female",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-08-12",
@@ -483,6 +921,8 @@ export const CHILDREN: Child[] = [
     firstName: "Jing Wei",
     lastName: "",
     gender: "male",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2020-10-03",
@@ -496,6 +936,8 @@ export const CHILDREN: Child[] = [
     firstName: "Lakshmi",
     lastName: "",
     gender: "female",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2020-09-25",
@@ -509,6 +951,8 @@ export const CHILDREN: Child[] = [
     firstName: "Nathan",
     lastName: "",
     gender: "male",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-06-06",
@@ -522,6 +966,8 @@ export const CHILDREN: Child[] = [
     firstName: "Nurul",
     lastName: "",
     gender: "female",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-11-19",
@@ -535,6 +981,8 @@ export const CHILDREN: Child[] = [
     firstName: "Ethan",
     lastName: "",
     gender: "male",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-02-02",
@@ -548,6 +996,8 @@ export const CHILDREN: Child[] = [
     firstName: "Siti",
     lastName: "",
     gender: "female",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-12-01",
@@ -561,6 +1011,8 @@ export const CHILDREN: Child[] = [
     firstName: "Rohan",
     lastName: "",
     gender: "male",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2020-07-17",
@@ -574,6 +1026,8 @@ export const CHILDREN: Child[] = [
     firstName: "Zoe",
     lastName: "",
     gender: "female",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-04-09",
@@ -587,6 +1041,8 @@ export const CHILDREN: Child[] = [
     firstName: "Darren",
     lastName: "",
     gender: "male",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2020-06-23",
@@ -600,6 +1056,8 @@ export const CHILDREN: Child[] = [
     firstName: "Nadia",
     lastName: "",
     gender: "female",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-1",
     yearLevel: "K1",
     dateOfBirth: "2021-09-30",
@@ -617,6 +1075,8 @@ export const CHILDREN: Child[] = [
     firstName: "Amir",
     lastName: "",
     gender: "male",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-2",
     yearLevel: "K2",
     dateOfBirth: "2020-01-14",
@@ -630,6 +1090,8 @@ export const CHILDREN: Child[] = [
     firstName: "Bao",
     lastName: "",
     gender: "male",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-2",
     yearLevel: "K2",
     dateOfBirth: "2019-12-28",
@@ -643,6 +1105,8 @@ export const CHILDREN: Child[] = [
     firstName: "Clara",
     lastName: "",
     gender: "female",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-2",
     yearLevel: "K2",
     dateOfBirth: "2020-03-08",
@@ -656,6 +1120,8 @@ export const CHILDREN: Child[] = [
     firstName: "Dev",
     lastName: "",
     gender: "male",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-2",
     yearLevel: "K2",
     dateOfBirth: "2020-05-11",
@@ -669,6 +1135,8 @@ export const CHILDREN: Child[] = [
     firstName: "Elise",
     lastName: "",
     gender: "female",
+    organisationId: "org-1",
+    schoolId: "school-1",
     classId: "class-2",
     yearLevel: "K2",
     dateOfBirth: "2020-02-19",
@@ -1311,4 +1779,277 @@ export const DEMO_TEACHER_NOTES: TeacherNote[] = [
     welfare: false,
     createdAt: "2026-03-13T09:45:00.000Z",
   },
+];
+
+// ─── Demo calendar holidays ────────────────────────────────────────────────
+
+export const DEMO_CALENDAR_HOLIDAYS: CalendarHoliday[] = [
+  // Org-wide public holidays
+  {
+    id: "holiday-001",
+    organisationId: "org-1",
+    schoolId: null,
+    title: "Chinese New Year",
+    startDate: "2026-01-28",
+    endDate: "2026-01-29",
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "holiday-002",
+    organisationId: "org-1",
+    schoolId: null,
+    title: "Good Friday",
+    startDate: "2026-04-03",
+    endDate: "2026-04-03",
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "holiday-003",
+    organisationId: "org-1",
+    schoolId: null,
+    title: "Labour Day",
+    startDate: "2026-05-01",
+    endDate: "2026-05-01",
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "holiday-004",
+    organisationId: "org-1",
+    schoolId: null,
+    title: "Vesak Day",
+    startDate: "2026-05-21",
+    endDate: "2026-05-21",
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "holiday-005",
+    organisationId: "org-1",
+    schoolId: null,
+    title: "Hari Raya Haji",
+    startDate: "2026-06-17",
+    endDate: "2026-06-17",
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "holiday-006",
+    organisationId: "org-1",
+    schoolId: null,
+    title: "National Day",
+    startDate: "2026-08-09",
+    endDate: "2026-08-09",
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "holiday-007",
+    organisationId: "org-1",
+    schoolId: null,
+    title: "Deepavali",
+    startDate: "2026-10-27",
+    endDate: "2026-10-27",
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "holiday-008",
+    organisationId: "org-1",
+    schoolId: null,
+    title: "Christmas Day",
+    startDate: "2026-12-25",
+    endDate: "2026-12-25",
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
+  // School-specific inset / closure day
+  {
+    id: "holiday-009",
+    organisationId: "org-1",
+    schoolId: "school-1",
+    title: "School Inset Day",
+    startDate: "2026-04-13",
+    endDate: "2026-04-13",
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
+];
+
+// ─── Demo class schedules ──────────────────────────────────────────────────
+
+export const DEMO_CLASS_SCHEDULES: ClassSchedule[] = [
+  // Weekly swimming for K1 year level (Mon + Wed, full year)
+  {
+    id: "sched-001",
+    organisationId: "org-1",
+    schoolId: "school-1",
+    scope: "year_level",
+    yearLevel: "K1",
+    title: "Swimming",
+    description: "Pool session at Clementi Sports Hub",
+    recurrence: "weekly",
+    daysOfWeek: [1, 3], // Mon, Wed
+    startDate: "2026-01-05",
+    endDate: "2026-11-27",
+    startTime: "10:00",
+    endTime: "11:00",
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
+  // Weekly music for K2 year level (Fridays, full year)
+  {
+    id: "sched-002",
+    organisationId: "org-1",
+    schoolId: "school-1",
+    scope: "year_level",
+    yearLevel: "K2",
+    title: "Music & Movement",
+    recurrence: "weekly",
+    daysOfWeek: [5], // Fri
+    startDate: "2026-01-05",
+    endDate: "2026-11-27",
+    startTime: "09:00",
+    endTime: "09:45",
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
+  // Monthly library visit for class-1 (Kingfisher K1), first day of each month
+  {
+    id: "sched-003",
+    organisationId: "org-1",
+    schoolId: "school-1",
+    scope: "class",
+    classId: "class-1",
+    title: "Library Visit",
+    description: "Yew Tee Public Library reading programme",
+    recurrence: "monthly",
+    dayOfMonth: 8,
+    startDate: "2026-01-08",
+    endDate: "2026-11-08",
+    startTime: "14:00",
+    endTime: "15:00",
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
+];
+
+// ─── Organisation ──────────────────────────────────────────────────────────
+
+export const ORGANISATION: Organisation = {
+  id: "org-1",
+  name: "My First Skool",
+};
+
+// ─── School ────────────────────────────────────────────────────────────────
+
+export const SCHOOL: School = {
+  id: "school-1",
+  organisationId: "org-1",
+  name: "Yew Tee Campus",
+  address: "Blk 322A Tengah Drive, Singapore 671322",
+  openingHours: "7:00am – 7:00pm",
+  supportedYears: ["N1", "N2", "K1", "K2"],
+};
+
+// ─── Employees ─────────────────────────────────────────────────────────────
+
+export const EMPLOYEES: Employee[] = [
+  {
+    id: "emp-siti",
+    organisationId: "org-1",
+    firstName: "Siti",
+    lastName: "Binte Rahmat",
+    email: "siti@myfirstskool.edu.sg",
+  },
+  {
+    id: "emp-lim",
+    organisationId: "org-1",
+    firstName: "Lim",
+    lastName: "Wei Ling",
+    email: "lim@myfirstskool.edu.sg",
+  },
+  {
+    id: "emp-priya",
+    organisationId: "org-1",
+    firstName: "Priya",
+    lastName: "Shankar",
+    email: "priya@myfirstskool.edu.sg",
+  },
+  {
+    id: "emp-david",
+    organisationId: "org-1",
+    firstName: "David",
+    lastName: "Tan",
+    email: "david@myfirstskool.edu.sg",
+  },
+];
+
+// ─── Employee school roles ─────────────────────────────────────────────────
+
+export const EMPLOYEE_SCHOOL_ROLES: EmployeeSchoolRole[] = [
+  { id: "role-siti",         employeeId: "emp-siti",   schoolId: "school-1", role: "teacher",      isPrimary: true, startDate: "2026-01-06" },
+  { id: "role-lim",          employeeId: "emp-lim",    schoolId: "school-1", role: "teacher",      isPrimary: true, startDate: "2026-01-06" },
+  { id: "role-priya",        employeeId: "emp-priya",  schoolId: null,       role: "org_admin",    isPrimary: true, startDate: "2026-01-06" },
+  { id: "role-david",        employeeId: "emp-david",  schoolId: "school-1", role: "school_admin", isPrimary: true, startDate: "2026-01-06" },
+];
+
+// ─── Class teacher assignments ─────────────────────────────────────────────
+
+export const CLASS_TEACHER_ASSIGNMENTS: ClassTeacherAssignment[] = [
+  { id: "cta-1", classId: "class-1", employeeId: "emp-siti", isPrimary: true },
+  { id: "cta-2", classId: "class-2", employeeId: "emp-lim",  isPrimary: true },
+];
+
+// ─── Parents ───────────────────────────────────────────────────────────────
+// parent-ahmed: K1 parent — 1 child (Rayan)
+// parent-nur:   K2 parent — 2 children (Amir + Bao), the "2-child" demo persona
+
+export const PARENTS: Parent[] = [
+  {
+    id: "parent-ahmed",
+    organisationId: "org-1",
+    firstName: "Ahmed",
+    lastName: "Al-Rashid",
+    email: "ahmed@example.com",
+    phone: "+65 8123 4567",
+  },
+  {
+    id: "parent-nur",
+    organisationId: "org-1",
+    firstName: "Nur",
+    lastName: "Hassan",
+    email: "nur@example.com",
+    phone: "+65 9333 0099",
+  },
+];
+
+// ─── Student–parent links ──────────────────────────────────────────────────
+
+export const STUDENT_PARENT_LINKS: StudentParentLink[] = [
+  { id: "spl-1", childId: "child-rayan", parentId: "parent-ahmed", relationship: "parent", parentType: "active" },
+  { id: "spl-2", childId: "child-amir",  parentId: "parent-nur",   relationship: "parent", parentType: "active" },
+  { id: "spl-3", childId: "child-bao",   parentId: "parent-nur",   relationship: "parent", parentType: "passive" },
+];
+
+// ─── Student enrollments (active) ─────────────────────────────────────────
+
+export const STUDENT_ENROLLMENTS: StudentEnrollment[] = [
+  // Kingfisher K1
+  { id: "enr-rayan",    childId: "child-rayan",    classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-aisha",    childId: "child-aisha",    classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-mei",      childId: "child-mei",      classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-omar",     childId: "child-omar",     classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-priya",    childId: "child-priya",    classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-kai",      childId: "child-kai",      classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-sara",     childId: "child-sara",     classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-darius",   childId: "child-darius",   classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-aryan",    childId: "child-aryan",    classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-fatimah",  childId: "child-fatimah",  classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-jingwei",  childId: "child-jingwei",  classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-lakshmi",  childId: "child-lakshmi",  classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-nathan",   childId: "child-nathan",   classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-nurul",    childId: "child-nurul",    classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-ethan",    childId: "child-ethan",    classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-siti",     childId: "child-siti",     classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-rohan",    childId: "child-rohan",    classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-zoe",      childId: "child-zoe",      classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-darren",   childId: "child-darren",   classId: "class-1", startDate: "2026-01-06", isActive: true },
+  { id: "enr-nadia",    childId: "child-nadia",    classId: "class-1", startDate: "2026-01-06", isActive: true },
+  // Sparrow K2
+  { id: "enr-amir",     childId: "child-amir",     classId: "class-2", startDate: "2026-01-06", isActive: true },
+  { id: "enr-bao",      childId: "child-bao",      classId: "class-2", startDate: "2026-01-06", isActive: true },
+  { id: "enr-clara",    childId: "child-clara",    classId: "class-2", startDate: "2026-01-06", isActive: true },
+  { id: "enr-dev",      childId: "child-dev",      classId: "class-2", startDate: "2026-01-06", isActive: true },
+  { id: "enr-elise",    childId: "child-elise",    classId: "class-2", startDate: "2026-01-06", isActive: true },
 ];

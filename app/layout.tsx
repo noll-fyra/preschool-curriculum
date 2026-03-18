@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Nunito } from "next/font/google";
+import { Livvic } from "next/font/google";
 import "./globals.css";
 
-const nunito = Nunito({
+const livvic = Livvic({
   subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
-  variable: "--font-nunito",
+  weight: ["400", "600", "700", "900"],
+  variable: "--font-livvic",
   display: "swap",
 });
 
@@ -21,8 +21,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en-SG" className={nunito.variable}>
-      <body className="font-[family-name:var(--font-nunito)] antialiased">
+    <html lang="en-SG" className={livvic.variable}>
+      <body className="font-(family-name:--font-livvic) antialiased">
         <a href="#main" className="skip-link">
           Skip to main content
         </a>

@@ -11,7 +11,7 @@ import type {
   LevelId,
   Pronoun,
 } from "./types";
-import { getCurrentLevel, evaluateSkillMastery, evaluateSEDMastery } from "./mastery";
+import { getCurrentLevel, evaluateSkillMastery, evaluateSEDMastery, isBehaviourBased } from "./mastery";
 import { getActivityConfig } from "./activity-data";
 
 // ─── Pronoun helpers ──────────────────────────────────────────────────────
@@ -78,7 +78,7 @@ export function getWorkingOnText(
   const levelMilestones = areaMilestones.filter((m) => m.levelId === currentLevel);
 
   const evaluate = (milestoneId: string) =>
-    areaId === "SED"
+    isBehaviourBased(areaId)
       ? evaluateSEDMastery(observations, childId, milestoneId)
       : evaluateSkillMastery(sessions, childId, milestoneId);
 
@@ -105,7 +105,7 @@ export function getRecencyLabel(
 
   let latestDate: Date | null = null;
 
-  if (areaId === "SED") {
+  if (isBehaviourBased(areaId)) {
     const relevant = observations.filter(
       (o) => o.childId === childId && ids.has(o.milestoneId)
     );
@@ -352,6 +352,15 @@ export function getAreaSummaryText(
   }
   if (areaId === "NUM") {
     return `${childName} is developing the number sense and early maths skills that Primary 1 builds on. ${Subj(pronoun)} is currently at the ${levelName} level — ${levelDesc}.`;
+  }
+  if (areaId === "ACE") {
+    return `${childName} is exploring creativity through art, music, movement, and imaginative play. These milestones are assessed by the class teacher through observation. ${Subj(pronoun)} is currently at the ${levelName} level — ${levelDesc}.`;
+  }
+  if (areaId === "DOW") {
+    return `${childName} is developing curiosity and early scientific thinking — noticing the world, asking questions, and discovering how things work. These milestones are assessed by the class teacher through observation. ${Subj(pronoun)} is currently at the ${levelName} level — ${levelDesc}.`;
+  }
+  if (areaId === "HMS") {
+    return `${childName} is building the physical skills and health habits that support active, confident school participation. These milestones are assessed by the class teacher through observation. ${Subj(pronoun)} is currently at the ${levelName} level — ${levelDesc}.`;
   }
   // SED — special copy explaining observation-based assessment
   return `${childName} is growing in how ${subj(pronoun)} understands and manages ${poss(pronoun)} own feelings and those of ${poss(pronoun)} friends. Social and emotional development is assessed by the class teacher through observation in the classroom — not through digital activities. These milestones show what ${childName} demonstrates consistently in real interactions with friends and teachers. You can reinforce these skills at home through everyday moments: talking about feelings during stories, modelling turn-taking in games, and noticing kind behaviour when you see it.`;

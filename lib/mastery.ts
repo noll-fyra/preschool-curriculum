@@ -8,6 +8,11 @@ import type {
   LevelId,
 } from "./types";
 
+// Areas assessed via teacher observation rather than digital activities
+export function isBehaviourBased(areaId: LearningAreaId): boolean {
+  return areaId === "SED" || areaId === "ACE" || areaId === "DOW" || areaId === "HMS";
+}
+
 // ─── Skill-based mastery (LL, NUM) ─────────────────────────────────────────
 // Achieved if: last 3 sessions are all passes (consecutive)
 //           OR 5 of the last 7 sessions are passes
@@ -70,7 +75,7 @@ export function getMasteryCount(
   allSessions: ActivitySession[],
   allObservations: TeacherObservation[]
 ): { count: number; total: number } {
-  if (milestone.areaId === "SED") {
+  if (isBehaviourBased(milestone.areaId)) {
     const observations = allObservations.filter(
       (o) => o.childId === childId && o.milestoneId === milestone.id
     );
@@ -153,7 +158,7 @@ export function computeStatus(
   sessions: ActivitySession[],
   observations: TeacherObservation[]
 ): MilestoneStatus {
-  if (milestone.areaId === "SED") {
+  if (isBehaviourBased(milestone.areaId)) {
     return evaluateSEDMastery(observations, childId, milestone.id);
   }
   return evaluateSkillMastery(sessions, childId, milestone.id);

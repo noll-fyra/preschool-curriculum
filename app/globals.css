@@ -15,9 +15,9 @@
   --color-accent: #F3ECE4;
 
   /* Text */
-  --color-text-dark: #333333;
-  --color-text-mid: #666666;
-  --color-text-muted: #999999;
+  --color-text-dark: #1A1A1A;
+  --color-text-mid: #444444;
+  --color-text-muted: #707070;
 
   /* Surfaces */
   --color-bg-warm: #F5F5F5;
@@ -39,6 +39,7 @@
 }
 
 html {
+  font-size: 17px;
   scroll-behavior: smooth;
 }
 
@@ -48,7 +49,7 @@ html {
 
 body {
   background-color: #F5F5F5;
-  color: #333333;
+  color: #1A1A1A;
   -webkit-font-smoothing: antialiased;
 }
 

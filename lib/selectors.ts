@@ -23,6 +23,9 @@ export function getChildLevelPerArea(
     LL: getCurrentLevel(store.milestones, store.progress, childId, "LL"),
     NUM: getCurrentLevel(store.milestones, store.progress, childId, "NUM"),
     SED: getCurrentLevel(store.milestones, store.progress, childId, "SED"),
+    ACE: getCurrentLevel(store.milestones, store.progress, childId, "ACE"),
+    DOW: getCurrentLevel(store.milestones, store.progress, childId, "DOW"),
+    HMS: getCurrentLevel(store.milestones, store.progress, childId, "HMS"),
   };
 }
 

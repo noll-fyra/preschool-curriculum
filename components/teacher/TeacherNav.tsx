@@ -52,6 +52,32 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+  {
+    href: "/teacher/calendar",
+    label: "Calendar",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <rect x="2" y="4" width="16" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+        <path d="M2 8h16" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M6 2v4M14 2v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <rect x="5" y="11" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.5"/>
+        <rect x="9" y="11" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.5"/>
+      </svg>
+    ),
+  },
+  {
+    href: "/teacher/rubric",
+    label: "Rubric",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <rect x="3" y="2" width="14" height="16" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+        <path d="M7 6h6M7 9h6M7 12h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <circle cx="5.5" cy="6" r="0.75" fill="currentColor"/>
+        <circle cx="5.5" cy="9" r="0.75" fill="currentColor"/>
+        <circle cx="5.5" cy="12" r="0.75" fill="currentColor"/>
+      </svg>
+    ),
+  },
 ];
 
 export function TeacherNav() {

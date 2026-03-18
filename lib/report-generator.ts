@@ -41,6 +41,9 @@ export function generateReportDraft(
     LL: getCurrentLevel(milestones, progress, childId, "LL"),
     NUM: getCurrentLevel(milestones, progress, childId, "NUM"),
     SED: getCurrentLevel(milestones, progress, childId, "SED"),
+    ACE: getCurrentLevel(milestones, progress, childId, "ACE"),
+    DOW: getCurrentLevel(milestones, progress, childId, "DOW"),
+    HMS: getCurrentLevel(milestones, progress, childId, "HMS"),
   };
 
   // ─── Para 1: current level summary ──────────────────────────────────

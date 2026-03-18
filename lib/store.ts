@@ -18,6 +18,17 @@ import type {
   FamilyContext,
   TeacherNote,
   NoteTag,
+  CalendarHoliday,
+  ClassSchedule,
+  Organisation,
+  School,
+  Employee,
+  EmployeeSchoolRole,
+  ClassTeacherAssignment,
+  Parent,
+  StudentParentLink,
+  StudentEnrollment,
+  EmployeeRole,
 } from "./types";
 import type { ActivityConfig } from "./activity-data";
 import {
@@ -35,13 +46,52 @@ import {
   DEMO_TEACHER_STRATEGIES,
   DEMO_FAMILY_CONTEXTS,
   DEMO_TEACHER_NOTES,
+  DEMO_CALENDAR_HOLIDAYS,
+  DEMO_CLASS_SCHEDULES,
+  ORGANISATION,
+  SCHOOL,
+  EMPLOYEES,
+  EMPLOYEE_SCHOOL_ROLES,
+  CLASS_TEACHER_ASSIGNMENTS,
+  PARENTS,
+  STUDENT_PARENT_LINKS,
+  STUDENT_ENROLLMENTS,
 } from "./seed-data";
 import { computeStatus } from "./mastery";
 import { generateReportDraft } from "./report-generator";
 
 // ─── Store shape ───────────────────────────────────────────────────────────
 
+// ─── Demo persona state ────────────────────────────────────────────────────
+export interface DemoPersona {
+  /** Employee ID of the active teacher persona (emp-siti or emp-lim) */
+  teacherEmployeeId: string;
+  /** ID of the active parent persona */
+  parentId: string;
+  /** Role of the active school-admin persona */
+  adminRole: EmployeeRole;
+  /** Child ID currently viewed in student demo */
+  studentChildId: string;
+}
+
 export interface NurtureStore {
+  // ── Hierarchy ─────────────────────────────────────────────────────────────
+  organisation: Organisation;
+  school: School;
+  employees: Employee[];
+  employeeSchoolRoles: EmployeeSchoolRole[];
+  classTeacherAssignments: ClassTeacherAssignment[];
+  parents: Parent[];
+  studentParentLinks: StudentParentLink[];
+  studentEnrollments: StudentEnrollment[];
+
+  // ── Demo persona ──────────────────────────────────────────────────────────
+  demoPersona: DemoPersona;
+  setDemoTeacher: (employeeId: string, classId: string) => void;
+  setDemoParent: (parentId: string) => void;
+  setDemoAdmin: (role: EmployeeRole) => void;
+  setDemoStudent: (childId: string) => void;
+
   // Data
   classes: Class[];
   activeClassId: string;
@@ -60,6 +110,8 @@ export interface NurtureStore {
   teacherStrategies: TeacherStrategies[];
   familyContexts: FamilyContext[];
   teacherNotes: TeacherNote[];
+  calendarHolidays: CalendarHoliday[];
+  classSchedules: ClassSchedule[];
 
   // Actions
   setActiveClass: (classId: string) => void;
@@ -95,6 +147,28 @@ export interface NurtureStore {
   setTeacherClasses: (teacherId: string, classIds: string[]) => void;
   setActivityConfig: (milestoneId: string, config: ActivityConfig) => void;
   clearActivityConfigOverride: (milestoneId: string) => void;
+
+  // Calendar actions
+  createHoliday: (h: Omit<CalendarHoliday, "id" | "createdAt">) => void;
+  updateHoliday: (id: string, h: Partial<Omit<CalendarHoliday, "id" | "createdAt">>) => void;
+  deleteHoliday: (id: string) => void;
+  createSchedule: (s: Omit<ClassSchedule, "id" | "createdAt">) => void;
+  updateSchedule: (id: string, s: Partial<Omit<ClassSchedule, "id" | "createdAt">>) => void;
+  deleteSchedule: (id: string) => void;
+
+  // Hierarchy CRUD
+  addEmployee: (e: Omit<Employee, "id">) => void;
+  updateEmployee: (id: string, e: Partial<Omit<Employee, "id">>) => void;
+  deleteEmployee: (id: string) => void;
+  addEmployeeRole: (r: Omit<EmployeeSchoolRole, "id">) => void;
+  removeEmployeeRole: (id: string) => void;
+  addParent: (p: Omit<Parent, "id">) => void;
+  updateParent: (id: string, p: Partial<Omit<Parent, "id">>) => void;
+  deleteParent: (id: string) => void;
+  linkStudentParent: (link: Omit<StudentParentLink, "id">) => void;
+  unlinkStudentParent: (id: string) => void;
+  enrollStudent: (e: Omit<StudentEnrollment, "id">) => void;
+  transferStudent: (childId: string, newClassId: string) => void;
 }
 
 // ─── Store ─────────────────────────────────────────────────────────────────
@@ -102,6 +176,32 @@ export interface NurtureStore {
 const initialProgress = buildInitialProgress();
 
 export const useStore = create<NurtureStore>((set, get) => ({
+  // ── Hierarchy initial state ────────────────────────────────────────────────
+  organisation: ORGANISATION,
+  school: SCHOOL,
+  employees: EMPLOYEES,
+  employeeSchoolRoles: EMPLOYEE_SCHOOL_ROLES,
+  classTeacherAssignments: CLASS_TEACHER_ASSIGNMENTS,
+  parents: PARENTS,
+  studentParentLinks: STUDENT_PARENT_LINKS,
+  studentEnrollments: STUDENT_ENROLLMENTS,
+
+  // ── Demo persona initial state ────────────────────────────────────────────
+  demoPersona: {
+    teacherEmployeeId: "emp-siti",
+    parentId: "parent-ahmed",
+    adminRole: "org_admin",
+    studentChildId: "child-rayan",
+  },
+  setDemoTeacher: (employeeId, classId) =>
+    set((s) => ({ demoPersona: { ...s.demoPersona, teacherEmployeeId: employeeId }, activeClassId: classId })),
+  setDemoParent: (parentId) =>
+    set((s) => ({ demoPersona: { ...s.demoPersona, parentId } })),
+  setDemoAdmin: (role) =>
+    set((s) => ({ demoPersona: { ...s.demoPersona, adminRole: role } })),
+  setDemoStudent: (childId) =>
+    set((s) => ({ demoPersona: { ...s.demoPersona, studentChildId: childId } })),
+
   classes: CLASSES,
   activeClassId: CLASSES[0].id,
   teachers: TEACHERS,
@@ -119,6 +219,8 @@ export const useStore = create<NurtureStore>((set, get) => ({
   teacherStrategies: DEMO_TEACHER_STRATEGIES,
   familyContexts: DEMO_FAMILY_CONTEXTS,
   teacherNotes: DEMO_TEACHER_NOTES,
+  calendarHolidays: DEMO_CALENDAR_HOLIDAYS,
+  classSchedules: DEMO_CLASS_SCHEDULES,
 
   // ── Switch active class ──────────────────────────────────────────────────
   setActiveClass: (classId) => set({ activeClassId: classId }),
@@ -493,6 +595,42 @@ export const useStore = create<NurtureStore>((set, get) => ({
     }));
   },
 
+  // ── Calendar: holidays ────────────────────────────────────────────────────
+  createHoliday: (h) => {
+    const newHoliday: CalendarHoliday = {
+      ...h,
+      id: `holiday-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+    };
+    set((s) => ({ calendarHolidays: [...s.calendarHolidays, newHoliday] }));
+  },
+  updateHoliday: (id, h) => {
+    set((s) => ({
+      calendarHolidays: s.calendarHolidays.map((x) => x.id === id ? { ...x, ...h } : x),
+    }));
+  },
+  deleteHoliday: (id) => {
+    set((s) => ({ calendarHolidays: s.calendarHolidays.filter((h) => h.id !== id) }));
+  },
+
+  // ── Calendar: class schedules ─────────────────────────────────────────────
+  createSchedule: (sch) => {
+    const newSchedule: ClassSchedule = {
+      ...sch,
+      id: `sched-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+    };
+    set((s) => ({ classSchedules: [...s.classSchedules, newSchedule] }));
+  },
+  updateSchedule: (id, sch) => {
+    set((s) => ({
+      classSchedules: s.classSchedules.map((x) => x.id === id ? { ...x, ...sch } : x),
+    }));
+  },
+  deleteSchedule: (id) => {
+    set((s) => ({ classSchedules: s.classSchedules.filter((s2) => s2.id !== id) }));
+  },
+
   // ── Admin: activity config overrides (for student play) ─────────────────
   setActivityConfig: (milestoneId, config) => {
     set((s) => ({
@@ -505,5 +643,77 @@ export const useStore = create<NurtureStore>((set, get) => ({
       delete next[milestoneId];
       return { activityConfigOverrides: next };
     });
+  },
+
+  // ── Hierarchy CRUD ────────────────────────────────────────────────────────
+  addEmployee: (e) => {
+    const id = `emp-${Date.now()}`;
+    set((s) => ({ employees: [...s.employees, { ...e, id }] }));
+  },
+  updateEmployee: (id, e) => {
+    set((s) => ({ employees: s.employees.map((x) => (x.id === id ? { ...x, ...e } : x)) }));
+  },
+  deleteEmployee: (id) => {
+    set((s) => ({
+      employees: s.employees.filter((x) => x.id !== id),
+      employeeSchoolRoles: s.employeeSchoolRoles.filter((r) => r.employeeId !== id),
+      classTeacherAssignments: s.classTeacherAssignments.filter((a) => a.employeeId !== id),
+    }));
+  },
+  addEmployeeRole: (r) => {
+    const id = `role-${Date.now()}`;
+    set((s) => ({ employeeSchoolRoles: [...s.employeeSchoolRoles, { ...r, id }] }));
+  },
+  removeEmployeeRole: (id) => {
+    set((s) => ({ employeeSchoolRoles: s.employeeSchoolRoles.filter((r) => r.id !== id) }));
+  },
+  addParent: (p) => {
+    const id = `parent-${Date.now()}`;
+    set((s) => ({ parents: [...s.parents, { ...p, id }] }));
+  },
+  updateParent: (id, p) => {
+    set((s) => ({ parents: s.parents.map((x) => (x.id === id ? { ...x, ...p } : x)) }));
+  },
+  deleteParent: (id) => {
+    set((s) => ({
+      parents: s.parents.filter((x) => x.id !== id),
+      studentParentLinks: s.studentParentLinks.filter((l) => l.parentId !== id),
+    }));
+  },
+  linkStudentParent: (link) => {
+    const id = `spl-${Date.now()}`;
+    set((s) => ({ studentParentLinks: [...s.studentParentLinks, { ...link, id }] }));
+  },
+  unlinkStudentParent: (id) => {
+    set((s) => ({ studentParentLinks: s.studentParentLinks.filter((l) => l.id !== id) }));
+  },
+  enrollStudent: (e) => {
+    const id = `enr-${Date.now()}`;
+    // Deactivate any existing active enrollment for this child
+    set((s) => ({
+      studentEnrollments: [
+        ...s.studentEnrollments.map((x) =>
+          x.childId === e.childId && x.isActive
+            ? { ...x, isActive: false, endDate: new Date().toISOString().slice(0, 10) }
+            : x
+        ),
+        { ...e, id },
+      ],
+    }));
+  },
+  transferStudent: (childId, newClassId) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const id = `enr-${Date.now()}`;
+    set((s) => ({
+      children: s.children.map((c) => (c.id === childId ? { ...c, classId: newClassId } : c)),
+      studentEnrollments: [
+        ...s.studentEnrollments.map((x) =>
+          x.childId === childId && x.isActive
+            ? { ...x, isActive: false, endDate: today }
+            : x
+        ),
+        { id, childId, classId: newClassId, startDate: today, isActive: true },
+      ],
+    }));
   },
 }));
