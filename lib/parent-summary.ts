@@ -10,6 +10,8 @@ import type {
   LearningAreaId,
   LevelId,
   Pronoun,
+  DailyUpdate,
+  MoodType,
 } from "./types";
 import { getCurrentLevel, evaluateSkillMastery, evaluateSEDMastery, isBehaviourBased } from "./mastery";
 import { getActivityConfig } from "./activity-data";
@@ -152,111 +154,99 @@ export function getRecencyLabel(
 
 export interface FeedItem {
   id: string;
-  type: "activity_completed" | "milestone_achieved" | "teacher_update";
-  title: string;
-  subtitle: string;
+  type: "daily_update" | "milestone_achieved" | "teacher_update";
   timestamp: string; // ISO string
-  icon: "activity" | "milestone" | "teacher_update";
-  /** For teacher_update: media URLs for display */
+  // daily_update fields
+  mood?: MoodType;
+  text?: string;
+  photos?: string[];
+  // milestone_achieved fields
+  headline?: string;       // parentDescription
+  whatThisMeans?: string;  // brief context line
+  // teacher_update fields
+  teacherName?: string;
+  updateText?: string;
   media?: { type: "photo" | "video"; url: string }[];
 }
 
+const AREA_CONTEXT: Record<string, string> = {
+  LL:  "Language and early literacy skills are the foundation for reading and writing at primary school.",
+  NUM: "Early number sense built now gives children a head-start in maths at primary school.",
+  SED: "Understanding and managing feelings is one of the most important skills for school and life.",
+  ACE: "Creativity and self-expression build confidence and communication skills.",
+  DOW: "Curiosity about the world develops scientific thinking and a love of learning.",
+  HMS: "Strong physical skills and healthy habits support confidence and focus in the classroom.",
+};
+
 export function getFeedItems(
   childId: string,
-  classId: string,
   sessions: ActivitySession[],
   progress: ChildMilestoneProgress[],
   milestones: Milestone[],
   chatMessages: ChatMessage[],
-  teachers: { id: string; firstName: string; lastName: string }[]
+  teachers: { id: string; firstName: string; lastName: string }[],
+  dailyUpdates: DailyUpdate[]
 ): FeedItem[] {
-  void classId; // classId no longer needed with per-child chatMessages
+  void sessions; // activity completions are shown in area drill-down, not the home feed
   const items: FeedItem[] = [];
+  const cutoff = Date.now() - 14 * 24 * 60 * 60 * 1000;
 
-  // Activity completions — deduplicate to 1 per milestone per day (most recent result)
-  const childSessions = sessions.filter((s) => s.childId === childId);
-  const sessionMap = new Map<string, ActivitySession>();
-  for (const s of childSessions) {
-    const key = `${s.milestoneId}::${s.attemptedAt.slice(0, 10)}`;
-    const existing = sessionMap.get(key);
-    if (!existing || new Date(s.attemptedAt) > new Date(existing.attemptedAt)) {
-      sessionMap.set(key, s);
-    }
-  }
-
-  for (const s of sessionMap.values()) {
-    const milestone = milestones.find((m) => m.id === s.milestoneId);
-    if (!milestone) continue;
-    const config = getActivityConfig(s.milestoneId);
-    const activityName = config?.name ?? milestone.statement;
-
-    const scoreGloss =
-      s.score === 3 ? "excellent!" :
-      s.score === 2 ? "well done!" :
-      s.score === 1 ? "keep practising" :
-      "needs a bit more practice";
-
+  // Daily updates
+  for (const du of dailyUpdates) {
+    if (du.childId !== childId) continue;
+    if (new Date(du.createdAt).getTime() < cutoff) continue;
     items.push({
-      id: s.id,
-      type: "activity_completed",
-      title: `Completed: ${activityName}`,
-      subtitle: `Got ${s.score} out of 3 right — ${scoreGloss}`,
-      timestamp: s.attemptedAt,
-      icon: "activity",
+      id: du.id,
+      type: "daily_update",
+      timestamp: du.createdAt,
+      mood: du.mood,
+      text: du.text,
+      photos: du.photos,
     });
   }
 
-  // Milestone achievements
+  // Milestone achievements (last 14 days)
   for (const p of progress) {
     if (p.childId !== childId || p.status !== "achieved" || !p.achievedAt) continue;
+    if (new Date(p.achievedAt).getTime() < cutoff) continue;
     const milestone = milestones.find((m) => m.id === p.milestoneId);
     if (!milestone) continue;
     items.push({
       id: `achieved-${p.milestoneId}`,
       type: "milestone_achieved",
-      title: "Milestone reached!",
-      subtitle: milestone.parentDescription,
       timestamp: p.achievedAt,
-      icon: "milestone",
+      headline: milestone.parentDescription,
+      whatThisMeans: AREA_CONTEXT[milestone.areaId] ?? "",
     });
   }
 
   // Progress updates from teacher (kind === "progress_update" only)
   const progressUpdates = chatMessages.filter(
-    (m) => m.childId === childId && m.senderType === "teacher" && m.kind === "progress_update"
+    (m) =>
+      m.childId === childId &&
+      m.senderType === "teacher" &&
+      m.kind === "progress_update" &&
+      new Date(m.createdAt).getTime() >= cutoff
   );
   for (const m of progressUpdates) {
     const teacher = teachers.find((t) => t.id === m.senderId);
     const teacherName = teacher
       ? [teacher.firstName, teacher.lastName].filter(Boolean).join(" ").trim() || "Teacher"
       : "Teacher";
-    const subtitle = m.text.length > 80 ? m.text.slice(0, 80) + "…" : m.text;
     items.push({
       id: m.id,
       type: "teacher_update",
-      title: `Update from ${teacherName}`,
-      subtitle,
       timestamp: m.createdAt,
-      icon: "teacher_update",
+      teacherName,
+      updateText: m.text,
       media: m.media,
     });
   }
 
-  // Sort by timestamp descending
-  items.sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-  );
+  // Sort chronologically descending
+  items.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-  // Demote milestone achievements older than 7 days below more recent items
-  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  const recent = items.filter(
-    (it) => it.type !== "milestone_achieved" || new Date(it.timestamp).getTime() > sevenDaysAgo
-  );
-  const old = items.filter(
-    (it) => it.type === "milestone_achieved" && new Date(it.timestamp).getTime() <= sevenDaysAgo
-  );
-
-  return [...recent, ...old].slice(0, 3);
+  return items;
 }
 
 // ─── Hero card summary ────────────────────────────────────────────────────

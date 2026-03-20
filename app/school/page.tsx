@@ -6,7 +6,7 @@ import { useEffect } from "react";
 export default function AdminHomePage() {
   const router = useRouter();
   useEffect(() => {
-    router.replace("/school/classes");
+    router.replace("/school/dashboard");
   }, [router]);
   return null;
 }

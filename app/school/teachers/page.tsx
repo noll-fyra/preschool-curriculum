@@ -5,14 +5,12 @@ import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { getTeacherDisplayName } from "@/lib/display-name";
 
-type TeacherFilter = "all" | "assigned" | "unassigned";
-
 export default function AdminTeachersPage() {
   const { teachers, classes } = useStore();
-  const [filter, setFilter] = useState<TeacherFilter>("all");
+  const [filter, setFilter] = useState<"all" | "assigned" | "unassigned">("all");
 
   const filtered = teachers.filter((t) => {
-    if (filter === "assigned") return t.classIds.length > 0;
+    if (filter === "assigned")   return t.classIds.length > 0;
     if (filter === "unassigned") return t.classIds.length === 0;
     return true;
   });

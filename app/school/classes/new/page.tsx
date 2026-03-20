@@ -10,7 +10,9 @@ export default function NewClassPage() {
   const { addClass } = useStore();
   const [name, setName] = useState("");
   const [termLabel, setTermLabel] = useState("Term 2, 2026");
-  const [preschoolYear, setPreschoolYear] = useState<"N1" | "N2" | "K1" | "K2">("K1");
+  const [preschoolYear, setPreschoolYear] = useState<"N1" | "N2" | "K1" | "K2">(
+    "K1",
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,32 +36,43 @@ export default function NewClassPage() {
       >
         ← Back to classes
       </Link>
-      <h1 className="text-2xl font-bold mb-6" style={{ color: "var(--color-text-dark)" }}>
+      <h1
+        className="text-2xl font-bold mb-6"
+        style={{ color: "var(--color-text-dark)" }}
+      >
         New class
       </h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <label className="block">
-          <span className="block text-sm font-medium mb-1" style={{ color: "var(--color-text-dark)" }}>
+          <span
+            className="block text-sm font-medium mb-1"
+            style={{ color: "var(--color-text-dark)" }}
+          >
             Class name
           </span>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Kingfisher K1"
+            placeholder="e.g. Kingfisher N1"
             className="w-full px-4 py-2.5 rounded-lg border text-sm"
             style={{ borderColor: "var(--color-border)" }}
             autoFocus
           />
         </label>
         <label className="block">
-          <span className="block text-sm font-medium mb-1" style={{ color: "var(--color-text-dark)" }}>
+          <span
+            className="block text-sm font-medium mb-1"
+            style={{ color: "var(--color-text-dark)" }}
+          >
             Year level
           </span>
           <select
             value={preschoolYear}
-            onChange={(e) => setPreschoolYear(e.target.value as "N1" | "N2" | "K1" | "K2")}
+            onChange={(e) =>
+              setPreschoolYear(e.target.value as "N1" | "N2" | "K1" | "K2")
+            }
             className="w-full px-4 py-2.5 rounded-lg border text-sm"
             style={{ borderColor: "var(--color-border)" }}
           >
@@ -70,7 +83,10 @@ export default function NewClassPage() {
           </select>
         </label>
         <label className="block">
-          <span className="block text-sm font-medium mb-1" style={{ color: "var(--color-text-dark)" }}>
+          <span
+            className="block text-sm font-medium mb-1"
+            style={{ color: "var(--color-text-dark)" }}
+          >
             Term
           </span>
           <input
@@ -93,7 +109,10 @@ export default function NewClassPage() {
           <Link
             href="/school/classes"
             className="px-4 py-2.5 rounded-lg text-sm font-medium border"
-            style={{ borderColor: "var(--color-border)", color: "var(--color-text-mid)" }}
+            style={{
+              borderColor: "var(--color-border)",
+              color: "var(--color-text-mid)",
+            }}
           >
             Cancel
           </Link>

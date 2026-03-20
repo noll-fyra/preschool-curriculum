@@ -2,6 +2,7 @@
 
 import { use, useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import {
   getMilestoneProgressForChild,
@@ -11,7 +12,7 @@ import {
 } from "@/lib/selectors";
 import { ChildAvatar } from "@/components/teacher/ChildAvatar";
 import { StatusBadge } from "@/components/teacher/StatusBadge";
-import { ReportEditor } from "@/components/teacher/ReportEditor";
+// ReportEditor is used in the Reports section (/teacher/reports/[childId])
 import { getCurrentLevel } from "@/lib/mastery";
 import { LEARNING_AREAS, LEVEL_LABELS } from "@/lib/types";
 import type { NoteTag, LevelId } from "@/lib/types";
@@ -19,7 +20,7 @@ import { ChildProfileHeader } from "@/components/teacher/ChildProfileHeader";
 import { getChildDisplayName } from "@/lib/display-name";
 import { ProgressChart } from "@/components/shared/ProgressChart";
 
-type Tab = "profile" | "observations" | "reports" | "progress" | "portfolio";
+type Tab = "overview" | "observations" | "milestones" | "family";
 
 const NOTE_TAG_STYLES: Record<NoteTag, { label: string; bg: string; text: string }> = {
   learning: { label: "Learning", bg: "#EFF6FF", text: "#1D4ED8" },
@@ -63,13 +64,11 @@ export default function ChildProfilePage({
   params: Promise<{ childId: string }>;
 }) {
   const { childId } = use(params);
+  const router = useRouter();
   const store = useStore();
   const {
     logObservation,
     undoObservation,
-    generateReport,
-    saveReportNotes,
-    publishReport,
     savePersonalitySnapshot,
     saveTeacherStrategies,
     saveFamilyContext,
@@ -77,7 +76,7 @@ export default function ChildProfilePage({
     deleteTeacherNote,
   } = store;
 
-  const [activeTab, setActiveTab] = useState<Tab>("profile");
+  const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [lastLogged, setLastLogged] = useState<string | null>(null);
 
   // Inline edit state
@@ -92,9 +91,6 @@ export default function ChildProfilePage({
   const [noteDraft, setNoteDraft] = useState("");
   const [noteTags, setNoteTags] = useState<NoteTag[]>([]);
   const [showAllNotes, setShowAllNotes] = useState(false);
-  const [portfolioContent, setPortfolioContent] = useState<string | null>(null);
-  const [portfolioGenerating, setPortfolioGenerating] = useState(false);
-
   const child = store.children.find((c) => c.id === childId);
   if (!child) {
     return (
@@ -108,8 +104,6 @@ export default function ChildProfilePage({
   const allProgress = getMilestoneProgressForChild(childId, store);
   const sedMilestones = getSEDMilestones(store);
   const todayLogged = getTodayObservationMilestoneIds(childId, store);
-  const report = store.reports.find((r) => r.childId === childId);
-
   // Profile section data
   const snapshot = store.personalitySnapshots.find((s) => s.childId === childId);
   const strategies = store.teacherStrategies.find((s) => s.childId === childId);
@@ -320,41 +314,15 @@ export default function ChildProfilePage({
   }
 
   const TABS: { id: Tab; label: string }[] = [
-    { id: "profile", label: "Profile" },
+    { id: "overview", label: "Overview" },
     { id: "observations", label: "Observations" },
-    { id: "reports", label: "Reports" },
-    { id: "progress", label: "Progress" },
-    { id: "portfolio", label: "Portfolio" },
+    { id: "milestones", label: "Milestones" },
+    { id: "family", label: "Family" },
   ];
 
-  async function handleGeneratePortfolio() {
-    setPortfolioGenerating(true);
-    try {
-      const res = await fetch("/api/generate/portfolio", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          child,
-          milestones: store.milestones,
-          progress: store.progress,
-          sessions: store.sessions,
-          observations: store.observations,
-          notes: childNotes.slice(0, 10),
-          snapshot,
-          strategies,
-          familyContext: familyCtx,
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setPortfolioContent(data.content ?? null);
-      }
-    } finally {
-      setPortfolioGenerating(false);
-    }
-  }
+  // Portfolio generation moved to Documents page
 
-  async function handleRegenerateReport(): Promise<string | null> {
+  async function _handleRegenerateReport(): Promise<string | null> {
     try {
       const res = await fetch("/api/generate/report", {
         method: "POST",
@@ -409,10 +377,16 @@ export default function ChildProfilePage({
       )}
 
       {/* Back */}
-      <Link
-        href="/teacher/class"
+      <button
+        onClick={() => {
+          if (typeof window !== "undefined" && window.history.length > 1) {
+            router.back();
+          } else {
+            router.push("/teacher/class");
+          }
+        }}
         className="inline-flex items-center gap-1.5 text-sm mb-5"
-        style={{ color: "var(--color-text-muted)" }}
+        style={{ color: "var(--color-text-muted)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path
@@ -423,8 +397,8 @@ export default function ChildProfilePage({
             strokeLinejoin="round"
           />
         </svg>
-        Class
-      </Link>
+        Back
+      </button>
 
       {/* Section 1: Identity header */}
       <ChildProfileHeader child={child} completenessPercent={completeness} />
@@ -454,8 +428,8 @@ export default function ChildProfilePage({
         ))}
       </div>
 
-      {/* ── Tab: Profile ──────────────────────────────────────────────────── */}
-      {activeTab === "profile" && (
+      {/* ── Tab: Overview ─────────────────────────────────────────────────── */}
+      {activeTab === "overview" && (
         <div className="flex flex-col gap-5">
 
           {/* Section 2: Personality snapshot */}
@@ -793,174 +767,20 @@ export default function ChildProfilePage({
             )}
           </div>
 
-          {/* Section 6: Family & current context */}
-          <div className="flex flex-col gap-3">
-            {/* 6a: Context narrative — hidden entirely when empty, not shown empty */}
-            {familyCtx?.content ? (
-              <div
-                className="rounded-2xl border px-4 py-3.5"
-                style={{ background: "#FFFBF2", borderColor: "#F5A623" }}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-sm font-bold" style={{ color: "#A06010" }}>
-                    Family context
-                  </h2>
-                  {!editingContext && (
-                    <button
-                      onClick={() => {
-                        setContextDraft(familyCtx.content);
-                        setEditingContext(true);
-                      }}
-                      className="text-xs font-medium"
-                      style={{ color: "#A06010" }}
-                    >
-                      Edit ↗
-                    </button>
-                  )}
-                </div>
-                {editingContext ? (
-                  <div>
-                    <textarea
-                      value={contextDraft}
-                      onChange={(e) => setContextDraft(e.target.value)}
-                      rows={4}
-                      autoFocus
-                      className="w-full rounded-xl border px-3 py-2 text-sm resize-none mb-3"
-                      style={{
-                        borderColor: "#F5A623",
-                        background: "white",
-                        color: "var(--color-text-dark)",
-                      }}
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleSaveContext}
-                        className="px-4 py-1.5 rounded-lg text-sm font-semibold"
-                        style={{ background: "#F5A623", color: "white" }}
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={() => setEditingContext(false)}
-                        className="px-4 py-1.5 rounded-lg text-sm font-medium"
-                        style={{ color: "var(--color-text-muted)" }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <p className="text-sm leading-relaxed" style={{ color: "var(--color-text-dark)" }}>
-                      {familyCtx.content}
-                    </p>
-                    <p className="text-xs mt-2" style={{ color: "#A06010", opacity: 0.7 }}>
-                      Updated {formatRelativeDate(familyCtx.updatedAt)}
-                    </p>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div>
-                {editingContext ? (
-                  <div
-                    className="rounded-2xl border px-4 py-3.5"
-                    style={{ background: "#FFFBF2", borderColor: "#F5A623" }}
-                  >
-                    <h2 className="text-sm font-bold mb-2" style={{ color: "#A06010" }}>
-                      Family context
-                    </h2>
-                    <textarea
-                      value={contextDraft}
-                      onChange={(e) => setContextDraft(e.target.value)}
-                      rows={4}
-                      autoFocus
-                      className="w-full rounded-xl border px-3 py-2 text-sm resize-none mb-3"
-                      style={{
-                        borderColor: "#F5A623",
-                        background: "white",
-                        color: "var(--color-text-dark)",
-                      }}
-                      placeholder="E.g. parents separated, pickup schedule, cultural context, professional support..."
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleSaveContext}
-                        className="px-4 py-1.5 rounded-lg text-sm font-semibold"
-                        style={{ background: "#F5A623", color: "white" }}
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={() => setEditingContext(false)}
-                        className="px-4 py-1.5 rounded-lg text-sm font-medium"
-                        style={{ color: "var(--color-text-muted)" }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setContextDraft("");
-                      setEditingContext(true);
-                    }}
-                    className="text-sm"
-                    style={{ color: "var(--color-text-muted)" }}
-                  >
-                    + Add family context note
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* 6b: Family contact summary */}
-            {child.primaryGuardian && (
-              <div
-                className="rounded-2xl border px-4 py-3.5"
-                style={{ borderColor: "var(--color-border)", background: "white" }}
-              >
-                <h2 className="text-sm font-bold mb-3" style={{ color: "var(--color-text-dark)" }}>
-                  Family contacts
-                </h2>
-                <div className="flex items-center gap-3">
-                  <ChildAvatar name={child.primaryGuardian.name} size="sm" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium" style={{ color: "var(--color-text-dark)" }}>
-                      {child.primaryGuardian.name}
-                    </p>
-                    <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                      Primary contact
-                    </p>
-                  </div>
-                  <div className="flex gap-2 text-xs shrink-0">
-                    {child.primaryGuardian.phone && (
-                      <a
-                        href={`tel:${child.primaryGuardian.phone.replace(/\s+/g, "")}`}
-                        className="rounded-full px-2.5 py-1 font-medium"
-                        style={{
-                          background: "var(--color-primary-wash)",
-                          color: "var(--color-primary)",
-                        }}
-                      >
-                        Call
-                      </a>
-                    )}
-                    {child.primaryGuardian.email && (
-                      <a
-                        href={`mailto:${child.primaryGuardian.email}`}
-                        className="rounded-full px-2.5 py-1 font-medium"
-                        style={{ background: "#E8EFF8", color: "#3A5EA0" }}
-                      >
-                        Email
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Section 6: Family — see Family tab */}
+          <button
+            onClick={() => setActiveTab("family")}
+            className="rounded-2xl border px-4 py-3.5 flex items-center justify-between w-full text-left"
+            style={{ borderColor: "var(--color-border)", background: "white" }}
+          >
+            <div>
+              <p className="text-sm font-semibold" style={{ color: "var(--color-text-dark)" }}>Family &amp; contacts</p>
+              <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>Guardian contacts, medical notes, family context, messages</p>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ opacity: 0.4, flexShrink: 0 }}>
+              <path d="M5 2l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
 
           {/* Section 7: Teacher notes log */}
           <div
@@ -1260,36 +1080,130 @@ export default function ChildProfilePage({
         </div>
       )}
 
-      {/* ── Tab: Reports ──────────────────────────────────────────────────── */}
-      {activeTab === "reports" && (
-        <div>
-          {!report ? (
-            <div className="text-center py-12">
-              <p className="text-sm mb-4" style={{ color: "var(--color-text-muted)" }}>
-                No report generated yet for {displayName}.
-              </p>
-              <button
-                onClick={() => generateReport(childId)}
-                className="px-6 py-3 rounded-xl text-sm font-semibold text-white"
-                style={{ background: "var(--color-primary)" }}
-              >
-                Generate draft
-              </button>
+      {/* ── Tab: Family ───────────────────────────────────────────────────── */}
+      {activeTab === "family" && (
+        <div className="flex flex-col gap-5">
+
+          {/* Guardian contact */}
+          {child.primaryGuardian ? (
+            <div
+              className="rounded-2xl border px-4 py-3.5"
+              style={{ borderColor: "var(--color-border)", background: "white" }}
+            >
+              <h2 className="text-sm font-bold mb-3" style={{ color: "var(--color-text-dark)" }}>
+                Family contacts
+              </h2>
+              <div className="flex items-center gap-3">
+                <ChildAvatar name={child.primaryGuardian.name} size="sm" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium" style={{ color: "var(--color-text-dark)" }}>
+                    {child.primaryGuardian.name}
+                  </p>
+                  <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                    Primary contact
+                  </p>
+                </div>
+                <div className="flex gap-2 text-xs shrink-0">
+                  {child.primaryGuardian.phone && (
+                    <a
+                      href={`tel:${child.primaryGuardian.phone.replace(/\s+/g, "")}`}
+                      className="rounded-full px-2.5 py-1 font-medium"
+                      style={{ background: "var(--color-primary-wash)", color: "var(--color-primary)" }}
+                    >
+                      Call
+                    </a>
+                  )}
+                  {child.primaryGuardian.email && (
+                    <a
+                      href={`mailto:${child.primaryGuardian.email}`}
+                      className="rounded-full px-2.5 py-1 font-medium"
+                      style={{ background: "#E8EFF8", color: "#3A5EA0" }}
+                    >
+                      Email
+                    </a>
+                  )}
+                </div>
+              </div>
             </div>
           ) : (
-            <ReportEditor
-              report={report}
-              childName={displayName}
-              onSaveNotes={saveReportNotes}
-              onPublish={publishReport}
-              onRegenerateDraft={handleRegenerateReport}
-            />
+            <div className="rounded-2xl border px-4 py-4" style={{ borderColor: "var(--color-border)", background: "white" }}>
+              <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>No guardian contact details on record.</p>
+            </div>
           )}
+
+          {/* Allergy / medical flags */}
+          {child.flags && Object.values(child.flags).some(Boolean) && (
+            <div className="rounded-2xl border px-4 py-3.5" style={{ borderColor: "#F5A623", background: "#FFFBF2" }}>
+              <h2 className="text-sm font-bold mb-2" style={{ color: "#A06010" }}>Medical &amp; welfare notes</h2>
+              {child.flags.allergy && <p className="text-sm mb-1" style={{ color: "var(--color-text-dark)" }}><strong>Allergy:</strong> {child.flags.allergy}</p>}
+              {child.flags.medicalNote && <p className="text-sm mb-1" style={{ color: "var(--color-text-dark)" }}><strong>Medical:</strong> {child.flags.medicalNote}</p>}
+              {child.flags.specialNeed && <p className="text-sm mb-1" style={{ color: "var(--color-text-dark)" }}><strong>Special need:</strong> {child.flags.specialNeed}</p>}
+              {child.flags.welfareConcern && <p className="text-sm" style={{ color: "#B91C1C" }}><strong>Welfare:</strong> {child.flags.welfareConcern}</p>}
+            </div>
+          )}
+
+          {/* Family context */}
+          <div
+            className="rounded-2xl border px-4 py-3.5"
+            style={{ background: "#FFFBF2", borderColor: "#F5A623" }}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-sm font-bold" style={{ color: "#A06010" }}>Family context</h2>
+              {!editingContext && (
+                <button
+                  onClick={() => { setContextDraft(familyCtx?.content ?? ""); setEditingContext(true); }}
+                  className="text-xs font-medium"
+                  style={{ color: "#A06010" }}
+                >
+                  {familyCtx?.content ? "Edit ↗" : "Write ↗"}
+                </button>
+              )}
+            </div>
+            {editingContext ? (
+              <div>
+                <textarea
+                  value={contextDraft}
+                  onChange={(e) => setContextDraft(e.target.value)}
+                  rows={4}
+                  autoFocus
+                  className="w-full rounded-xl border px-3 py-2 text-sm resize-none mb-3"
+                  style={{ borderColor: "#F5A623", background: "white", color: "var(--color-text-dark)" }}
+                  placeholder="E.g. parents separated, pickup schedule, cultural context, professional support..."
+                />
+                <div className="flex gap-2">
+                  <button onClick={handleSaveContext} className="px-4 py-1.5 rounded-lg text-sm font-semibold" style={{ background: "#F5A623", color: "white" }}>Save</button>
+                  <button onClick={() => setEditingContext(false)} className="px-4 py-1.5 rounded-lg text-sm font-medium" style={{ color: "var(--color-text-muted)" }}>Cancel</button>
+                </div>
+              </div>
+            ) : familyCtx?.content ? (
+              <div>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--color-text-dark)" }}>{familyCtx.content}</p>
+                <p className="text-xs mt-2" style={{ color: "#A06010", opacity: 0.7 }}>Updated {formatRelativeDate(familyCtx.updatedAt)}</p>
+              </div>
+            ) : (
+              <p className="text-sm italic" style={{ color: "#A06010" }}>No family context note yet.</p>
+            )}
+          </div>
+
+          {/* Link to messages */}
+          <a
+            href={`/teacher/messages/${childId}`}
+            className="rounded-2xl border px-4 py-3.5 flex items-center justify-between"
+            style={{ borderColor: "var(--color-border)", background: "white", textDecoration: "none" }}
+          >
+            <div>
+              <p className="text-sm font-semibold" style={{ color: "var(--color-text-dark)" }}>Parent messages</p>
+              <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>View full message thread with {displayName}&apos;s family</p>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ opacity: 0.4, flexShrink: 0 }}>
+              <path d="M5 2l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </a>
         </div>
       )}
 
-      {/* ── Tab: Progress ─────────────────────────────────────────────────── */}
-      {activeTab === "progress" && (
+      {/* ── Tab: Milestones ───────────────────────────────────────────────── */}
+      {activeTab === "milestones" && (
         <div
           className="rounded-2xl p-5"
           style={{ background: "white", border: "1px solid var(--color-border)" }}
@@ -1302,110 +1216,6 @@ export default function ChildProfilePage({
             Tap a dot to see which milestone was reached.
           </p>
           <ProgressChart childId={childId} academicYear={academicYear} />
-        </div>
-      )}
-
-      {/* ── Tab: Portfolio ─────────────────────────────────────────────────── */}
-      {activeTab === "portfolio" && (
-        <div className="flex flex-col gap-5">
-          <div
-            className="rounded-2xl border overflow-hidden"
-            style={{ borderColor: "var(--color-border)" }}
-          >
-            <div
-              className="px-5 py-3 border-b flex items-center justify-between gap-3"
-              style={{ background: "var(--color-bg-cream)", borderColor: "var(--color-border)" }}
-            >
-              <div>
-                <h2 className="text-sm font-semibold" style={{ color: "var(--color-text-dark)" }}>
-                  Learning portfolio
-                </h2>
-                <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>
-                  AI-generated narrative celebrating {displayName}&apos;s learning journey
-                </p>
-              </div>
-              <button
-                onClick={handleGeneratePortfolio}
-                disabled={portfolioGenerating}
-                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg text-white font-medium transition-opacity disabled:opacity-50 shrink-0"
-                style={{ background: "var(--color-primary)" }}
-              >
-                {portfolioGenerating ? (
-                  <>
-                    <svg width="12" height="12" viewBox="0 0 12 12" className="animate-spin" fill="none">
-                      <circle cx="6" cy="6" r="4" stroke="white" strokeWidth="1.5" strokeDasharray="20" strokeDashoffset="5" />
-                    </svg>
-                    Generating…
-                  </>
-                ) : portfolioContent ? (
-                  <>
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                      <path d="M10 6A4 4 0 112 6" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                      <path d="M10 3v3h-3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    Regenerate
-                  </>
-                ) : (
-                  <>
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                      <path d="M6 1v10M1 6h10" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
-                    Generate portfolio
-                  </>
-                )}
-              </button>
-            </div>
-
-            <div className="px-5 py-4">
-              {portfolioGenerating ? (
-                <div className="flex flex-col gap-3">
-                  {[90, 75, 85, 60, 80].map((w, i) => (
-                    <div
-                      key={i}
-                      className="h-4 rounded animate-pulse"
-                      style={{ background: "var(--color-bg-deep)", width: `${w}%` }}
-                    />
-                  ))}
-                </div>
-              ) : portfolioContent ? (
-                <div className="prose prose-sm max-w-none">
-                  {portfolioContent.split("\n").map((line, i) => {
-                    if (line.startsWith("## ")) {
-                      return (
-                        <h3 key={i} className="text-sm font-bold mt-4 mb-1 first:mt-0" style={{ color: "var(--color-text-dark)" }}>
-                          {line.replace("## ", "")}
-                        </h3>
-                      );
-                    }
-                    if (line.trim() === "") return <div key={i} className="h-2" />;
-                    return (
-                      <p key={i} className="text-sm leading-relaxed" style={{ color: "var(--color-text-dark)" }}>
-                        {line}
-                      </p>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-10">
-                  <div
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3"
-                    style={{ background: "var(--color-primary-wash)" }}
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <rect x="3" y="3" width="18" height="18" rx="3" stroke="var(--color-primary)" strokeWidth="1.5" fill="none" />
-                      <path d="M7 8h10M7 12h10M7 16h6" stroke="var(--color-primary)" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
-                  </div>
-                  <p className="text-sm font-medium mb-1" style={{ color: "var(--color-text-dark)" }}>
-                    No portfolio yet
-                  </p>
-                  <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                    Generate an AI-written narrative of {displayName}&apos;s learning journey this term.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       )}
     </div>

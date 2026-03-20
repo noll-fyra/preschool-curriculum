@@ -35,7 +35,7 @@ export default function TeacherCalendarPage() {
   const todayISO = toISO(new Date());
   const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
 
-  const [calView, setCalView] = useState<CalendarView>("month");
+  const [calView, setCalView] = useState<CalendarView>("week");
   const [selectedDate, setSelectedDate] = useState(clampToYear(todayISO));
   const [detailEvent, setDetailEvent] = useState<DetailEvent | null>(null);
 
@@ -186,7 +186,7 @@ export default function TeacherCalendarPage() {
     <div className="px-5 py-6 md:px-8 md:py-8 flex flex-col" style={{ minHeight: 0 }}>
       {/* Header */}
       <div className="mb-5 shrink-0">
-        <h1 className="text-2xl font-bold" style={{ color: "var(--color-text-dark)" }}>Calendar</h1>
+        <h1 className="text-2xl font-bold" style={{ color: "var(--color-text-dark)" }}>Schedule</h1>
       </div>
 
       <CalendarToolbar

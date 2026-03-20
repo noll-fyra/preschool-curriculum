@@ -1,162 +1,276 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useMemo } from "react";
 import { useStore } from "@/lib/store";
-import { getChildDisplayName } from "@/lib/display-name";
-import { getAllChildrenWithLevels } from "@/lib/selectors";
-import { ChildStatusCard } from "@/components/teacher/ChildStatusCard";
-import { ChildAvatar } from "@/components/teacher/ChildAvatar";
-import type { LearningAreaId, LevelId, ChildWithLevels } from "@/lib/types";
-import { LEARNING_AREAS } from "@/lib/types";
+import {
+  getCurrentPhase,
+  getAttendanceSummary,
+  getWeeklyDomainCoverage,
+  getFlaggedChildren,
+  getScheduleForToday,
+  getWeeklyObservationCount,
+} from "@/lib/dashboard-utils";
+import { getWeekStart } from "@/lib/assignments";
+import type { LearningAreaId } from "@/lib/types";
+import type { ObservationFeedItem } from "@/components/teacher/dashboard/ObservationsFeed";
 
-const FILTERS: { id: LearningAreaId | "all"; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "LL", label: "Language & Literacy" },
-  { id: "NUM", label: "Numeracy" },
-  { id: "SED", label: "Social & Emotional" },
-];
+import { DashboardTopBar } from "@/components/teacher/dashboard/DashboardTopBar";
+import { StatStrip } from "@/components/teacher/dashboard/StatStrip";
+import { ChildrenGrid } from "@/components/teacher/dashboard/ChildrenGrid";
+import { ScheduleTimeline } from "@/components/teacher/dashboard/ScheduleTimeline";
+import { AIInsightCard } from "@/components/teacher/dashboard/AIInsightCard";
+import { QuickActionsGrid } from "@/components/teacher/dashboard/QuickActionsGrid";
+import { DomainSnapshot } from "@/components/teacher/dashboard/DomainSnapshot";
+import { ObservationsFeed } from "@/components/teacher/dashboard/ObservationsFeed";
 
-const LEVELS: { id: LevelId; label: string; bg: string; text: string; border: string }[] = [
-  { id: "B", label: "Beginning", bg: "#FEE9E5", text: "#C0432A", border: "#F5C4BB" },
-  { id: "D", label: "Developing", bg: "#FEF3D7", text: "#A06010", border: "#F5E0A0" },
-  { id: "S", label: "Secure",    bg: "#E8F5EE", text: "#2D7A4F", border: "#B8DEC8" },
-];
+export default function TeacherDashboard() {
+  const {
+    children,
+    classes,
+    activeClassId,
+    setActiveClass,
+    observations,
+    sessions,
+    chatMessages,
+    attendance,
+    classSchedules,
+    milestones,
+    employees,
+    demoPersona,
+    openQuickLog,
+    openNotifications,
+  } = useStore();
 
-export default function ClassPage() {
-  const store = useStore();
-  const activeClass = store.classes.find((c) => c.id === store.activeClassId) ?? store.classes[0];
-  const children = getAllChildrenWithLevels(store).sort((a, b) => getChildDisplayName(a).localeCompare(getChildDisplayName(b)));
-  const [activeFilter, setActiveFilter] = useState<LearningAreaId | "all">("all");
+  // ── Derived state ──────────────────────────────────────────────────────────
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const weekStart = getWeekStart(now);
+  const phase = getCurrentPhase(now);
+  const classChildren = useMemo(
+    () => children.filter((c) => c.classId === activeClassId),
+    [children, activeClassId]
+  );
+
+  // Active teacher name
+  const activeEmployee = employees.find(
+    (e) => e.id === demoPersona.teacherEmployeeId
+  );
+  const teacherName = activeEmployee
+    ? `${activeEmployee.firstName} ${activeEmployee.lastName}`.trim()
+    : "Teacher";
+
+  // Attendance
+  const attendanceSummary = useMemo(
+    () => getAttendanceSummary(children, attendance, activeClassId, today),
+    [children, attendance, activeClassId, today]
+  );
+
+  // Weekly domain coverage per child
+  const weeklyDomainCoverage = useMemo(() => {
+    const result: Record<string, Record<LearningAreaId, boolean>> = {};
+    for (const child of classChildren) {
+      result[child.id] = getWeeklyDomainCoverage(
+        child.id,
+        observations,
+        sessions,
+        milestones,
+        weekStart
+      );
+    }
+    return result;
+  }, [classChildren, observations, sessions, milestones, weekStart]);
+
+  // Flagged children
+  const flaggedChildIds = useMemo(
+    () => getFlaggedChildren(classChildren, observations, chatMessages, milestones, today),
+    [classChildren, observations, chatMessages, milestones, today]
+  );
+
+  // Today's schedule
+  const scheduleActivities = useMemo(
+    () => getScheduleForToday(classSchedules, classes, activeClassId, classChildren.length, today, now),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [classSchedules, classes, activeClassId, classChildren.length, today]
+  );
+  const activitiesCompleted = scheduleActivities.filter((a) => a.status === "done").length;
+  const activitiesRemaining = scheduleActivities.filter((a) => a.status !== "done").length;
+
+  // Weekly observation count
+  const observationsThisWeek = useMemo(
+    () => getWeeklyObservationCount(observations, children, activeClassId, weekStart),
+    [observations, children, activeClassId, weekStart]
+  );
+
+  // Recent observations feed (last 5 for this class)
+  const classChildIds = useMemo(
+    () => new Set(classChildren.map((c) => c.id)),
+    [classChildren]
+  );
+  const milestoneMap = useMemo(
+    () => new Map(milestones.map((m) => [m.id, m])),
+    [milestones]
+  );
+
+  const recentObservationItems = useMemo((): ObservationFeedItem[] => {
+    return observations
+      .filter((o) => classChildIds.has(o.childId))
+      .sort((a, b) => b.observedAt.localeCompare(a.observedAt))
+      .slice(0, 5)
+      .map((o) => {
+        const child = children.find((c) => c.id === o.childId);
+        const milestone = milestoneMap.get(o.milestoneId);
+        if (!child || !milestone) return null;
+        return { observation: o, child, milestone, teacherName } as ObservationFeedItem;
+      })
+      .filter((x): x is ObservationFeedItem => x !== null);
+  }, [observations, classChildIds, children, milestoneMap, teacherName]);
+
+  // Notification count (For You: unread messages + flagged children + draft-ready reports)
+  const unreadMessageThreads = useMemo(() => {
+    const threads = new Set<string>();
+    for (const m of chatMessages) {
+      if (m.senderType === "parent" && !m.readAt && classChildIds.has(m.childId)) {
+        threads.add(m.childId);
+      }
+    }
+    return threads.size;
+  }, [chatMessages, classChildIds]);
+
+  const notificationCount = unreadMessageThreads + flaggedChildIds.size;
+
+  // Insight stats
+  const insightStats = {
+    presentCount: attendanceSummary.present,
+    totalCount: attendanceSummary.total,
+    activitiesToday: scheduleActivities.length,
+    observationsThisWeek,
+    flaggedCount: flaggedChildIds.size,
+    absentNames: attendanceSummary.absentNames,
+  };
+
+  // Right column sections — shared between desktop and mobile renders
+  const rightColumnContent = (
+    <>
+      <SectionCard>
+        <AIInsightCard phase={phase} stats={insightStats} teacherName={teacherName} />
+      </SectionCard>
+      <SectionCard>
+        <DomainSnapshot
+          classChildren={classChildren}
+          observations={observations}
+          sessions={sessions}
+          milestones={milestones}
+          weekStart={weekStart}
+        />
+      </SectionCard>
+      <SectionCard>
+        <ObservationsFeed items={recentObservationItems} />
+      </SectionCard>
+    </>
+  );
 
   return (
-    <div className="px-5 py-6 md:px-8 md:py-8 max-w-4xl">
-      <div className="mb-5">
-        <h1 className="text-2xl font-bold" style={{ color: "var(--color-text-dark)" }}>
-          {activeClass.name}
-        </h1>
-        <p className="text-sm mt-0.5" style={{ color: "var(--color-text-muted)" }}>
-          {children.length} children · {activeClass.termLabel}
-        </p>
-      </div>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {/* Dashboard-local top bar */}
+      <DashboardTopBar
+        teacherName={teacherName}
+        today={now}
+        classes={classes}
+        activeClassId={activeClassId}
+        onClassChange={setActiveClass}
+        onQuickLogOpen={openQuickLog}
+        onNotificationsOpen={openNotifications}
+        notificationCount={notificationCount}
+      />
 
-      {/* Filter bar */}
-      <div className="flex gap-2 mb-6 flex-wrap">
-        {FILTERS.map((f) => {
-          const active = activeFilter === f.id;
-          return (
-            <button
-              key={f.id}
-              onClick={() => setActiveFilter(f.id)}
-              className="px-3.5 py-1.5 rounded-full text-sm font-medium border transition-all"
-              style={{
-                background: active ? "var(--color-primary)" : "white",
-                color: active ? "white" : "var(--color-text-mid)",
-                borderColor: active ? "var(--color-primary)" : "var(--color-border)",
-              }}
-            >
-              {f.label}
-            </button>
-          );
-        })}
-      </div>
+      {/* Scrollable content area */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "20px" }}>
+        {/* Quick actions — full-width single row */}
+        <div style={{ maxWidth: 1280, margin: "0 auto 16px" }}>
+          <QuickActionsGrid onLogObservation={openQuickLog} />
+        </div>
 
-      {/* ── All view ─────────────────────────────────────────────────────── */}
-      {activeFilter === "all" && (
-        <>
-          <div className="flex gap-3 mb-5 flex-wrap">
-            {LEVELS.map(({ label, bg, text }) => (
-              <span key={label} className="inline-flex items-center gap-1.5 text-xs" style={{ color: "var(--color-text-muted)" }}>
-                <span className="w-2.5 h-2.5 rounded-full" style={{ background: bg, border: `1.5px solid ${text}` }} />
-                {label}
-              </span>
-            ))}
+        <div
+          style={{
+            display: "flex",
+            gap: 20,
+            alignItems: "flex-start",
+            maxWidth: 1280,
+            margin: "0 auto",
+          }}
+        >
+          {/* Left column (~65%) — always visible */}
+          <div
+            style={{
+              flex: "65 1 0%",
+              minWidth: 0,
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+            }}
+          >
+            <SectionCard>
+              <StatStrip
+                present={attendanceSummary.present}
+                total={attendanceSummary.total}
+                pending={attendanceSummary.pending}
+                activitiesCompleted={activitiesCompleted}
+                activitiesRemaining={activitiesRemaining}
+                observationsThisWeek={observationsThisWeek}
+                needsAttentionCount={flaggedChildIds.size}
+                absentNames={attendanceSummary.absentNames}
+              />
+            </SectionCard>
+
+            <SectionCard>
+              <ChildrenGrid
+                children={classChildren}
+                attendance={attendance}
+                weeklyDomainCoverage={weeklyDomainCoverage}
+                flaggedChildIds={flaggedChildIds}
+                today={today}
+              />
+            </SectionCard>
+
+            <SectionCard>
+              <ScheduleTimeline activities={scheduleActivities} />
+            </SectionCard>
+
+            {/* Mobile: right column stacked below left column */}
+            <div className="lg:hidden flex flex-col gap-4">
+              {rightColumnContent}
+            </div>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {children.map((child) => (
-              <ChildStatusCard key={child.id} child={child} />
-            ))}
-          </div>
-        </>
-      )}
 
-      {/* ── Grouped by proficiency ───────────────────────────────────────── */}
-      {activeFilter !== "all" && (
-        <GroupedView
-          students={children}
-          areaId={activeFilter}
-          areaName={LEARNING_AREAS.find((a) => a.id === activeFilter)!.name}
-        />
-      )}
+          {/* Right column (~35%) — desktop only */}
+          <div
+            className="hidden lg:flex"
+            style={{
+              flex: "35 1 0%",
+              minWidth: 0,
+              flexDirection: "column",
+              gap: 16,
+            }}
+          >
+            {rightColumnContent}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-function GroupedView({
-  students,
-  areaId,
-  areaName,
-}: {
-  students: ChildWithLevels[];
-  areaId: LearningAreaId;
-  areaName: string;
-}) {
-  const grouped = LEVELS.map((level) => ({
-    ...level,
-    students: students
-      .filter((c) => c.levels[areaId] === level.id)
-      .sort((a, b) => getChildDisplayName(a).localeCompare(getChildDisplayName(b))),
-  }));
-
+function SectionCard({ children }: { children: React.ReactNode }) {
   return (
-    <div>
-      <p className="text-sm mb-5" style={{ color: "var(--color-text-muted)" }}>
-        Students grouped by their current level in{" "}
-        <span className="font-medium" style={{ color: "var(--color-text-dark)" }}>{areaName}</span>
-      </p>
-
-      {/* Three columns on md+, stacked on mobile */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {grouped.map(({ id, label, bg, text, border, students: groupStudents }) => (
-          <div key={id} className="rounded-2xl overflow-hidden border" style={{ borderColor: border }}>
-            {/* Group header */}
-            <div className="px-4 py-3 flex items-center justify-between" style={{ background: bg }}>
-              <span className="text-sm font-semibold" style={{ color: text }}>{label}</span>
-              <span
-                className="text-xs font-medium px-2 py-0.5 rounded-full"
-                style={{ background: "rgba(255,255,255,0.6)", color: text }}
-              >
-                {groupStudents.length}
-              </span>
-            </div>
-
-            {/* Children in this group */}
-            <div className="bg-white divide-y divide-border">
-              {groupStudents.length === 0 ? (
-                <p className="px-4 py-4 text-sm" style={{ color: "var(--color-text-muted)" }}>
-                  No students at this level
-                </p>
-              ) : (
-                groupStudents.map((child) => (
-                  <Link
-                    key={child.id}
-                    href={`/teacher/child/${child.id}`}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-bg-cream transition-colors"
-                  >
-                    <ChildAvatar name={getChildDisplayName(child)} size="sm" />
-                    <span className="text-sm font-medium" style={{ color: "var(--color-text-dark)" }}>
-                      {getChildDisplayName(child)}
-                    </span>
-                    <svg className="ml-auto opacity-30" width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </Link>
-                ))
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+    <div
+      style={{
+        background: "#fff",
+        borderRadius: 14,
+        padding: "16px",
+        border: "1px solid var(--color-border)",
+      }}
+    >
+      {children}
     </div>
   );
 }

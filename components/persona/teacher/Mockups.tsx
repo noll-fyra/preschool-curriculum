@@ -2,77 +2,59 @@
 // These are used as the `visual` prop in the teacher landing page sections.
 
 export function HeroDashboardMockup() {
+  const domainColors = ["#F5A623", "#7BA3D4", "#E8745A", "#4A9B6F", "#9B6FBD"];
+  const children = [
+    { name: "Aiden T.", presence: "present", dots: [true, true, true, false, false], flag: false },
+    { name: "Sophia L.", presence: "present", dots: [true, false, true, true, false], flag: true },
+    { name: "Marcus H.", presence: "late", dots: [false, true, true, false, true], flag: false },
+    { name: "Priya K.", presence: "present", dots: [true, true, false, true, false], flag: false },
+    { name: "Ethan W.", presence: "present", dots: [true, false, false, true, true], flag: false },
+    { name: "Layla M.", presence: "absent", dots: [false, false, false, false, false], flag: false },
+  ];
+  const presenceColor = (p: string) =>
+    p === "present" ? "#34D399" : p === "late" ? "#FBBF24" : "#D1D5DB";
+
   return (
     <div
       className="rounded-2xl overflow-hidden"
-      style={{
-        border: "1px solid #E5E5E5",
-        boxShadow: "0 8px 48px rgba(0,0,0,0.10)",
-      }}
+      style={{ border: "1px solid #E5E5E5", boxShadow: "0 8px 48px rgba(0,0,0,0.10)" }}
     >
       {/* Browser chrome */}
       <div
         className="flex items-center gap-2 px-4 py-3"
-        style={{
-          backgroundColor: "#F5F5F5",
-          borderBottom: "1px solid #E5E5E5",
-        }}
+        style={{ backgroundColor: "#F5F5F5", borderBottom: "1px solid #E5E5E5" }}
       >
         <div className="flex gap-1.5">
           {["#F87171", "#FBBF24", "#34D399"].map((c) => (
-            <div
-              key={c}
-              className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: c }}
-            />
+            <div key={c} className="w-3 h-3 rounded-full" style={{ backgroundColor: c }} />
           ))}
         </div>
         <div
           className="flex-1 mx-3 h-6 rounded-lg flex items-center px-3 text-xs"
-          style={{
-            backgroundColor: "#FFFFFF",
-            color: "#999999",
-            border: "1px solid #E5E5E5",
-          }}
+          style={{ backgroundColor: "#FFFFFF", color: "#999999", border: "1px solid #E5E5E5" }}
         >
-          app.nurture.edu.sg/teacher/class
+          app.nurture.edu.sg/teacher/dashboard
         </div>
       </div>
 
       {/* App layout */}
-      <div
-        className="flex"
-        style={{ backgroundColor: "#FAFAFA", minHeight: 380 }}
-      >
+      <div className="flex" style={{ backgroundColor: "#FAFAFA", minHeight: 400 }}>
         {/* Sidebar */}
         <div
-          className="w-48 shrink-0 border-r p-4 hidden sm:block"
+          className="w-40 shrink-0 border-r py-4 px-3 hidden sm:flex flex-col gap-1"
           style={{ backgroundColor: "#FFFFFF", borderColor: "#F0F0F0" }}
         >
-          <div className="flex items-center gap-2 mb-6">
-            <div
-              className="w-6 h-6 rounded-lg flex items-center justify-center text-sm"
-              style={{ backgroundColor: "#F79863" }}
-            >
-              🌱
-            </div>
-            <span className="text-sm font-bold" style={{ color: "#333333" }}>
-              nurture
-            </span>
+          <div className="flex items-center gap-2 mb-5 px-2">
+            <div className="w-5 h-5 rounded-md flex items-center justify-center text-xs" style={{ backgroundColor: "#F79863" }}>🌱</div>
+            <span className="text-xs font-bold" style={{ color: "#333333" }}>nurture</span>
           </div>
-          {[
-            "Class overview",
-            "Child profiles",
-            "Activities",
-            "Observations",
-            "Reports",
-          ].map((item, i) => (
+          {["Dashboard", "Children", "Schedule", "Observations", "Reports", "Messages"].map((item, i) => (
             <div
               key={item}
-              className="text-xs px-3 py-2 rounded-lg mb-1"
+              className="text-xs px-2 py-1.5 rounded-lg"
               style={{
                 backgroundColor: i === 0 ? "#FEF0E7" : "transparent",
-                color: i === 0 ? "#F79863" : "#666666",
+                color: i === 0 ? "#F79863" : "#888888",
                 fontWeight: i === 0 ? 600 : 400,
               }}
             >
@@ -82,185 +64,96 @@ export function HeroDashboardMockup() {
         </div>
 
         {/* Main content */}
-        <div className="flex-1 p-5">
-          <div className="flex items-center justify-between mb-4">
+        <div className="flex-1 flex flex-col p-4 gap-3 min-w-0">
+          {/* Top bar */}
+          <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-bold" style={{ color: "#333333" }}>
-                Caterpillar Class · K2
-              </p>
-              <p className="text-xs" style={{ color: "#999999" }}>
-                23 children · Week 11 · Term 2
-              </p>
+              <p className="text-xs font-bold" style={{ color: "#333333" }}>Ms Tan · Thu 20 Mar</p>
+              <p className="text-xs" style={{ color: "#999999" }}>Caterpillar Class · K2</p>
             </div>
             <button
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg"
+              className="text-xs font-semibold px-2.5 py-1.5 rounded-lg"
               style={{ backgroundColor: "#F79863", color: "white" }}
             >
-              + Log observation
+              + Quick-log
             </button>
           </div>
 
-          {/* Milestone summary bar */}
-          <div
-            className="rounded-xl p-3 mb-4 grid grid-cols-3 gap-3"
-            style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E5E5" }}
-          >
+          {/* Stat strip */}
+          <div className="grid grid-cols-4 gap-2">
             {[
-              {
-                label: "Language & Literacy",
-                secure: 14,
-                dev: 7,
-                beg: 2,
-                color: "#F5A623",
-              },
-              {
-                label: "Numeracy",
-                secure: 11,
-                dev: 9,
-                beg: 3,
-                color: "#7BA3D4",
-              },
-              {
-                label: "Social & Emotional",
-                secure: 9,
-                dev: 11,
-                beg: 3,
-                color: "#E8745A",
-              },
-            ].map((area) => (
-              <div key={area.label}>
-                <p
-                  className="text-xs font-semibold mb-2"
-                  style={{ color: area.color }}
-                >
-                  {area.label}
-                </p>
-                <div className="flex gap-1 h-2 rounded-full overflow-hidden">
-                  <div
-                    style={{
-                      width: `${(area.secure / 23) * 100}%`,
-                      backgroundColor: area.color,
-                    }}
-                  />
-                  <div
-                    style={{
-                      width: `${(area.dev / 23) * 100}%`,
-                      backgroundColor: area.color + "60",
-                    }}
-                  />
-                  <div
-                    style={{
-                      width: `${(area.beg / 23) * 100}%`,
-                      backgroundColor: "#E5E5E5",
-                    }}
-                  />
-                </div>
-                <p className="text-xs mt-1" style={{ color: "#999999" }}>
-                  {area.secure} Secure · {area.dev} Dev · {area.beg} Beg
-                </p>
+              { num: "16/19", label: "Present", color: "#34D399", bg: "#F0FDF4" },
+              { num: "5", label: "Activities", color: "#7BA3D4", bg: "#EEF4FB" },
+              { num: "12", label: "Obs. this week", color: "#F5A623", bg: "#FFFBEB" },
+              { num: "3", label: "Need attention", color: "#E8745A", bg: "#FEF2EF" },
+            ].map((s) => (
+              <div key={s.label} className="rounded-lg p-2 text-center" style={{ backgroundColor: s.bg, border: `1px solid ${s.color}25` }}>
+                <p className="text-sm font-extrabold" style={{ color: s.color }}>{s.num}</p>
+                <p className="text-xs leading-tight" style={{ color: "#888888", fontSize: 9 }}>{s.label}</p>
               </div>
             ))}
           </div>
 
-          {/* Child cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5">
-            {[
-              {
-                name: "Aiden T.",
-                ll: "Secure",
-                num: "Developing",
-                sed: "Secure",
-                flag: false,
-              },
-              {
-                name: "Sophia L.",
-                ll: "Developing",
-                num: "Secure",
-                sed: "Beginning",
-                flag: true,
-              },
-              {
-                name: "Marcus H.",
-                ll: "Beginning",
-                num: "Developing",
-                sed: "Secure",
-                flag: false,
-              },
-              {
-                name: "Priya K.",
-                ll: "Secure",
-                num: "Beginning",
-                sed: "Developing",
-                flag: false,
-              },
-              {
-                name: "Ethan W.",
-                ll: "Developing",
-                num: "Developing",
-                sed: "Secure",
-                flag: false,
-              },
-              {
-                name: "Layla M.",
-                ll: "Secure",
-                num: "Secure",
-                sed: "Developing",
-                flag: false,
-              },
-            ].map((child) => (
-              <div
-                key={child.name}
-                className="rounded-xl p-3"
-                style={{
-                  backgroundColor: "white",
-                  border: child.flag
-                    ? "1px solid #FBBF24"
-                    : "1px solid #F0F0F0",
-                }}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                      style={{ backgroundColor: "#FEF0E7", color: "#F79863" }}
-                    >
-                      {child.name[0]}
+          {/* Two-column lower area */}
+          <div className="flex gap-3 min-w-0">
+            {/* Children grid */}
+            <div className="flex-1 grid grid-cols-2 lg:grid-cols-3 gap-2 content-start">
+              {children.map((child) => (
+                <div
+                  key={child.name}
+                  className="rounded-lg p-2"
+                  style={{
+                    backgroundColor: "white",
+                    border: child.flag ? "1px solid #FBBF24" : "1px solid #F0F0F0",
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <div className="relative">
+                        <div
+                          className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+                          style={{ backgroundColor: "#FEF0E7", color: "#F79863" }}
+                        >
+                          {child.name[0]}
+                        </div>
+                        <div
+                          className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-white"
+                          style={{ backgroundColor: presenceColor(child.presence) }}
+                        />
+                      </div>
+                      <span className="text-xs font-semibold" style={{ color: "#333333", fontSize: 10 }}>
+                        {child.name}
+                      </span>
                     </div>
-                    <span
-                      className="text-xs font-semibold"
-                      style={{ color: "#333333" }}
-                    >
-                      {child.name}
-                    </span>
+                    {child.flag && <span style={{ color: "#FBBF24", fontSize: 10 }}>⚑</span>}
                   </div>
-                  {child.flag && (
-                    <span className="text-xs" style={{ color: "#FBBF24" }}>
-                      ⚑
-                    </span>
-                  )}
+                  <div className="flex gap-1">
+                    {child.dots.map((filled, di) => (
+                      <div
+                        key={di}
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{ backgroundColor: filled ? domainColors[di] : "#E5E5E5" }}
+                        title={["LL", "NUM", "SE", "Motor", "CA"][di]}
+                      />
+                    ))}
+                  </div>
                 </div>
-                <div className="flex gap-1 flex-wrap">
-                  {[
-                    { l: "LL", v: child.ll, c: "#F5A623" },
-                    { l: "NUM", v: child.num, c: "#7BA3D4" },
-                    { l: "SED", v: child.sed, c: "#E8745A" },
-                  ].map((a) => (
-                    <span
-                      key={a.l}
-                      className="text-xs px-1.5 py-0.5 rounded"
-                      style={{
-                        backgroundColor: a.c + "18",
-                        color: a.c,
-                        fontSize: 10,
-                        fontWeight: 600,
-                      }}
-                    >
-                      {a.l}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            {/* AI insight panel */}
+            <div
+              className="w-36 shrink-0 rounded-lg p-3 hidden lg:block"
+              style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E5E5" }}
+            >
+              <p className="text-xs font-semibold mb-1" style={{ color: "#F5A623", fontSize: 9 }}>AI INSIGHT</p>
+              <p className="text-xs leading-snug mb-2" style={{ color: "#444444", fontSize: 10 }}>
+                Amara hasn&apos;t had a Motor observation in 12 days. Today&apos;s outdoor block is a natural moment.
+              </p>
+              <button className="text-xs font-semibold" style={{ color: "#F79863", fontSize: 9 }}>
+                See suggestion →
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -269,6 +162,18 @@ export function HeroDashboardMockup() {
 }
 
 export function CohortViewMockup() {
+  const domainColors = ["#F5A623", "#7BA3D4", "#E8745A", "#4A9B6F", "#9B6FBD"];
+  const children = [
+    { name: "Aiden T.", presence: "present", dots: [true, true, true, false, false], flag: false },
+    { name: "Sophia L.", presence: "present", dots: [true, false, true, true, false], flag: true },
+    { name: "Marcus H.", presence: "late", dots: [false, true, true, false, true], flag: false },
+    { name: "Priya K.", presence: "present", dots: [true, true, false, true, false], flag: false },
+    { name: "Ethan W.", presence: "present", dots: [true, false, false, true, true], flag: false },
+    { name: "Layla M.", presence: "absent", dots: [false, false, false, false, false], flag: false },
+  ];
+  const presenceColor = (p: string) =>
+    p === "present" ? "#34D399" : p === "late" ? "#FBBF24" : "#D1D5DB";
+
   return (
     <div
       className="rounded-xl overflow-hidden"
@@ -279,63 +184,67 @@ export function CohortViewMockup() {
         style={{ borderColor: "#F0F0F0", backgroundColor: "#FAFAFA" }}
       >
         <span className="text-xs font-semibold" style={{ color: "#333333" }}>
-          Caterpillar Class · Week 11
+          Caterpillar Class · Thu 20 Mar
         </span>
         <div className="flex items-center gap-1.5">
-          <span
-            className="text-xs px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: "#FEF0E7", color: "#F79863" }}
-          >
-            23 children
+          <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "#F0FDF4", color: "#34D399" }}>
+            16 present
           </span>
-          <span
-            className="text-xs px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: "#FFF8E8", color: "#FBBF24" }}
-          >
-            2 flagged
+          <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "#FFF8E8", color: "#FBBF24" }}>
+            3 flagged
           </span>
         </div>
       </div>
-      <div className="p-4">
-        <div className="grid grid-cols-3 gap-2 mb-3">
-          {["LL", "NUM", "SED"].map((area, i) => {
-            const colors = ["#F5A623", "#7BA3D4", "#E8745A"];
-            const secure = [14, 11, 9];
-            const pct = Math.round((secure[i] / 23) * 100);
-            return (
-              <div
-                key={area}
-                className="rounded-lg p-2.5 text-center"
-                style={{
-                  backgroundColor: colors[i] + "0C",
-                  border: `1px solid ${colors[i]}25`,
-                }}
-              >
-                <p
-                  className="text-xs font-bold mb-1"
-                  style={{ color: colors[i] }}
-                >
-                  {area}
-                </p>
-                <p
-                  className="text-xl font-extrabold"
-                  style={{ color: colors[i] }}
-                >
-                  {pct}%
-                </p>
-                <p className="text-xs" style={{ color: "#999999" }}>
-                  Secure
-                </p>
+      {/* Domain legend */}
+      <div className="px-4 pt-3 pb-2 flex items-center gap-3">
+        {["LL", "NUM", "SE", "Motor", "CA"].map((d, i) => (
+          <div key={d} className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: domainColors[i] }} />
+            <span className="text-xs" style={{ color: "#888888", fontSize: 9 }}>{d}</span>
+          </div>
+        ))}
+      </div>
+      <div className="px-4 pb-4 grid grid-cols-2 gap-2">
+        {children.map((child) => (
+          <div
+            key={child.name}
+            className="rounded-lg p-2.5"
+            style={{
+              backgroundColor: "#FAFAFA",
+              border: child.flag ? "1px solid #FBBF24" : "1px solid #F0F0F0",
+            }}
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center gap-1.5">
+                <div className="relative">
+                  <div
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+                    style={{ backgroundColor: "#FEF0E7", color: "#F79863" }}
+                  >
+                    {child.name[0]}
+                  </div>
+                  <div
+                    className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-white"
+                    style={{ backgroundColor: presenceColor(child.presence) }}
+                  />
+                </div>
+                <span className="text-xs font-semibold" style={{ color: "#333333", fontSize: 10 }}>
+                  {child.name}
+                </span>
               </div>
-            );
-          })}
-        </div>
-        <button
-          className="w-full text-xs font-semibold py-1.5 rounded-lg"
-          style={{ backgroundColor: "#F5F5F5", color: "#666666" }}
-        >
-          View individual profiles →
-        </button>
+              {child.flag && <span style={{ color: "#FBBF24", fontSize: 10 }}>⚑</span>}
+            </div>
+            <div className="flex gap-1.5">
+              {child.dots.map((filled, di) => (
+                <div
+                  key={di}
+                  className="w-2.5 h-2.5 rounded-full"
+                  style={{ backgroundColor: filled ? domainColors[di] : "#E5E5E5" }}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -421,70 +330,67 @@ export function ReportDraftMockup() {
 }
 
 export function ChildProfileMockup() {
+  const blocks = [
+    { time: "9:00", duration: "30 min", name: "Morning Circle", domains: ["Language", "SE"], status: "done" },
+    { time: "9:30", duration: "45 min", name: "Outdoor Play", domains: ["Motor", "SE"], status: "in-progress" },
+    { time: "10:15", duration: "20 min", name: "Art Station", domains: ["Creative Arts"], status: "upcoming" },
+    { time: "10:35", duration: "25 min", name: "Number Time", domains: ["Numeracy"], status: "upcoming" },
+  ];
+  const statusStyle = (s: string) =>
+    s === "done"
+      ? { color: "#BBBBBB", textDecoration: "line-through" as const }
+      : s === "in-progress"
+        ? { color: "#F79863", fontWeight: 600 }
+        : { color: "#333333" };
+  const domainColor: Record<string, string> = {
+    Language: "#F5A623", SE: "#E8745A", Motor: "#4A9B6F", "Creative Arts": "#9B6FBD", Numeracy: "#7BA3D4",
+  };
+
   return (
     <div
       className="rounded-xl overflow-hidden"
       style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E5E5" }}
     >
       <div
-        className="px-4 py-3 border-b flex items-center gap-2.5"
+        className="px-4 py-3 border-b flex items-center justify-between"
         style={{ borderColor: "#F0F0F0", backgroundColor: "#FAFAFA" }}
       >
-        <div
-          className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
-          style={{ backgroundColor: "#FEF0E7", color: "#F79863" }}
-        >
-          S
-        </div>
-        <div>
-          <p className="text-xs font-bold" style={{ color: "#333333" }}>
-            Sophia L. · K2
-          </p>
-          <p className="text-xs" style={{ color: "#999999" }}>
-            Caterpillar Class
-          </p>
-        </div>
+        <p className="text-xs font-semibold" style={{ color: "#333333" }}>Today&apos;s Schedule</p>
+        <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: "#FEF0E7", color: "#F79863" }}>
+          1 in progress
+        </span>
       </div>
-      <div className="p-4 space-y-2">
-        {[
-          {
-            label: "Who she is",
-            text: "Methodical — she won't ask for help but rarely makes mistakes once she begins.",
-            color: "#F5A623",
-          },
-          {
-            label: "What works",
-            text: "Give a 2-minute transition warning before any activity change.",
-            color: "#ACD9CD",
-          },
-          {
-            label: "Current milestone",
-            text: "LL: Developing · 2 of 3 sessions passed · NUM: Secure",
-            color: "#7BA3D4",
-          },
-          {
-            label: "Family note",
-            text: "Parents prefer updates in English. Father travels Mon–Fri.",
-            color: "#E8745A",
-          },
-        ].map((s) => (
+      <div className="p-3 space-y-1.5">
+        {blocks.map((b) => (
           <div
-            key={s.label}
-            className="p-2.5 rounded-lg"
+            key={b.name}
+            className="flex items-start gap-3 rounded-lg px-3 py-2"
             style={{
-              backgroundColor: s.color + "0C",
-              border: `1px solid ${s.color}25`,
+              backgroundColor: b.status === "in-progress" ? "#FEF0E7" : "#FAFAFA",
+              border: b.status === "in-progress" ? "1px solid #F7986330" : "1px solid #F0F0F0",
             }}
           >
-            <p
-              className="text-xs font-semibold mb-0.5"
-              style={{ color: s.color }}
-            >
-              {s.label}
-            </p>
-            <p className="text-xs" style={{ color: "#666666" }}>
-              {s.text}
-            </p>
+            <div className="shrink-0 text-right" style={{ minWidth: 32 }}>
+              <p className="text-xs font-semibold" style={{ color: b.status === "done" ? "#BBBBBB" : "#333333" }}>{b.time}</p>
+              <p className="text-xs" style={{ color: "#BBBBBB", fontSize: 9 }}>{b.duration}</p>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold" style={statusStyle(b.status)}>{b.name}</p>
+              <div className="flex gap-1 mt-1 flex-wrap">
+                {b.domains.map((d) => (
+                  <span
+                    key={d}
+                    className="text-xs px-1.5 py-0.5 rounded"
+                    style={{ backgroundColor: (domainColor[d] || "#888") + "18", color: domainColor[d] || "#888", fontSize: 9, fontWeight: 600 }}
+                  >
+                    {d}
+                  </span>
+                ))}
+              </div>
+            </div>
+            {b.status === "in-progress" && (
+              <div className="w-2 h-2 rounded-full shrink-0 mt-1" style={{ backgroundColor: "#F79863" }} />
+            )}
           </div>
         ))}
       </div>
@@ -499,81 +405,44 @@ export function ActivityQueueMockup() {
       style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E5E5" }}
     >
       <div
-        className="px-4 py-3 border-b"
+        className="px-4 py-3 border-b flex items-center justify-between"
         style={{ borderColor: "#F0F0F0", backgroundColor: "#FAFAFA" }}
       >
-        <p className="text-xs font-semibold" style={{ color: "#333333" }}>
-          Week 12 queue · Aiden T.
-        </p>
-        <p className="text-xs" style={{ color: "#999999" }}>
-          Matched to current level
-        </p>
+        <div>
+          <p className="text-xs font-semibold" style={{ color: "#333333" }}>AI Insight</p>
+          <p className="text-xs" style={{ color: "#999999" }}>Active Teaching · 10:18 AM</p>
+        </div>
+        <span className="text-sm">✦</span>
       </div>
-      <div className="p-4 space-y-2">
-        {[
-          {
-            emoji: "🔤",
-            label: "Letter Sounds · Level 2",
-            sub: "LL · Beginning → Developing",
-            color: "#F5A623",
-            bg: "#FFF8EC",
-          },
-          {
-            emoji: "🔢",
-            label: "Count to 20",
-            sub: "NUM · Developing → Secure",
-            color: "#7BA3D4",
-            bg: "#F0F5FC",
-          },
-          {
-            emoji: "🤝",
-            label: "Share & Take Turns",
-            sub: "SED · Observation day 3/5",
-            color: "#E8745A",
-            bg: "#FEF2EF",
-          },
-        ].map((act) => (
-          <div
-            key={act.label}
-            className="flex items-center gap-3 p-2.5 rounded-xl"
-            style={{
-              backgroundColor: act.bg,
-              border: `1px solid ${act.color}25`,
-            }}
-          >
-            <span className="text-lg shrink-0" aria-hidden="true">
-              {act.emoji}
-            </span>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold" style={{ color: "#333333" }}>
-                {act.label}
-              </p>
-              <p className="text-xs" style={{ color: act.color }}>
-                {act.sub}
-              </p>
+      <div className="p-4 space-y-3">
+        {/* Insight card */}
+        <div
+          className="rounded-lg p-3"
+          style={{ backgroundColor: "#FFF8EC", border: "1px solid #F5A62330" }}
+        >
+          <p className="text-xs leading-relaxed" style={{ color: "#555555" }}>
+            Amara hasn&apos;t had a <strong style={{ color: "#F5A623" }}>Motor</strong> observation in 12 days. Today&apos;s outdoor play block is a natural moment to observe her running and climbing.
+          </p>
+        </div>
+        {/* Supporting data */}
+        <div className="space-y-1.5">
+          <p className="text-xs font-semibold" style={{ color: "#888888", fontSize: 9 }}>SUPPORTING DATA</p>
+          {[
+            { label: "Last Motor obs.", value: "8 Mar (12 days ago)", color: "#E8745A" },
+            { label: "Next outdoor block", value: "11:00 AM today", color: "#4A9B6F" },
+          ].map((row) => (
+            <div key={row.label} className="flex items-center justify-between rounded px-2.5 py-1.5" style={{ backgroundColor: "#FAFAFA", border: "1px solid #F0F0F0" }}>
+              <span className="text-xs" style={{ color: "#666666" }}>{row.label}</span>
+              <span className="text-xs font-semibold" style={{ color: row.color }}>{row.value}</span>
             </div>
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 14 14"
-              fill="none"
-              aria-hidden="true"
-              style={{ opacity: 0.35 }}
-              className="shrink-0"
-            >
-              <path
-                d="M3 7h8M8 4l3 3-3 3"
-                stroke="#333"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-        ))}
-        <p className="text-xs text-center pt-1" style={{ color: "#999999" }}>
-          Swap any activity at any time
-        </p>
+          ))}
+        </div>
+        <button
+          className="w-full text-xs font-semibold py-1.5 rounded-lg"
+          style={{ backgroundColor: "#F5F5F5", color: "#666666" }}
+        >
+          Dismiss · Next insight →
+        </button>
       </div>
     </div>
   );
@@ -586,60 +455,64 @@ export function ObservationMockup() {
       style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E5E5" }}
     >
       <div
-        className="px-4 py-3 border-b"
+        className="px-4 py-3 border-b flex items-center justify-between"
         style={{ borderColor: "#F0F0F0", backgroundColor: "#FAFAFA" }}
       >
-        <p className="text-xs font-semibold" style={{ color: "#333333" }}>
-          SED observation · Marcus H.
-        </p>
-        <p className="text-xs" style={{ color: "#999999" }}>
-          Today · 10:32 AM · Day 3 of 5
-        </p>
-      </div>
-      <div className="p-4">
-        <p
-          className="text-xs font-semibold mb-2.5"
-          style={{ color: "#666666" }}
-        >
-          What did you observe?
-        </p>
-        <div className="flex flex-wrap gap-1.5 mb-3">
-          {[
-            "Shared materials",
-            "Took turns",
-            "Helped a peer",
-            "Self-regulated",
-          ].map((b, i) => (
-            <span
-              key={b}
-              className="text-xs px-3 py-1.5 rounded-full font-medium"
-              style={{
-                backgroundColor: i === 0 ? "#E8745A" : "#F5F5F5",
-                color: i === 0 ? "white" : "#666666",
-              }}
-            >
-              {b}
-            </span>
-          ))}
+        <div>
+          <p className="text-xs font-semibold" style={{ color: "#333333" }}>Quick-log</p>
+          <p className="text-xs" style={{ color: "#999999" }}>Thu 20 Mar · 10:32 AM</p>
         </div>
-        <div
-          className="flex items-center gap-2 p-2.5 rounded-xl mb-3"
-          style={{ backgroundColor: "#FEF2EF", border: "1px solid #E8745A25" }}
-        >
+        <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: "#F0FDF4", color: "#34D399" }}>
+          &lt; 20 sec
+        </span>
+      </div>
+      <div className="p-4 space-y-3">
+        {/* Child selected */}
+        <div className="flex items-center gap-2 p-2.5 rounded-lg" style={{ backgroundColor: "#FEF0E7", border: "1px solid #F79863" + "30" }}>
           <div
-            className="w-1 rounded-full self-stretch"
-            style={{ backgroundColor: "#E8745A", minWidth: 4 }}
-          />
-          <p className="text-xs" style={{ color: "#666666" }}>
-            5 separate-day observations marks SED milestone achieved.{" "}
-            <strong style={{ color: "#E8745A" }}>2 more to go.</strong>
+            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+            style={{ backgroundColor: "#F79863", color: "white" }}
+          >
+            M
+          </div>
+          <div>
+            <p className="text-xs font-semibold" style={{ color: "#333333" }}>Marcus H.</p>
+            <p className="text-xs" style={{ color: "#888888" }}>Caterpillar Class</p>
+          </div>
+        </div>
+        {/* Note field */}
+        <div className="rounded-lg p-2.5" style={{ backgroundColor: "#FAFAFA", border: "1px solid #E5E5E5" }}>
+          <p className="text-xs" style={{ color: "#333333" }}>
+            Helped Priya build the block tower — stayed focused for 8 minutes...
           </p>
+          <p className="text-xs mt-1" style={{ color: "#BBBBBB" }}>|</p>
+        </div>
+        {/* Domain suggestion */}
+        <div>
+          <p className="text-xs mb-1.5" style={{ color: "#888888", fontSize: 10 }}>SUGGESTED DOMAIN</p>
+          <div className="flex gap-1.5">
+            <span
+              className="text-xs px-3 py-1.5 rounded-full font-semibold"
+              style={{ backgroundColor: "#4A9B6F", color: "white" }}
+            >
+              Motor ✓
+            </span>
+            {["Language", "SE"].map((d) => (
+              <span
+                key={d}
+                className="text-xs px-3 py-1.5 rounded-full"
+                style={{ backgroundColor: "#F5F5F5", color: "#666666" }}
+              >
+                {d}
+              </span>
+            ))}
+          </div>
         </div>
         <button
           className="w-full text-xs font-bold py-2 rounded-lg"
-          style={{ backgroundColor: "#E8745A", color: "white" }}
+          style={{ backgroundColor: "#F79863", color: "white" }}
         >
-          Save observation ✓
+          Save &amp; close ✓
         </button>
       </div>
     </div>
@@ -647,6 +520,13 @@ export function ObservationMockup() {
 }
 
 export function NELAlignmentMockup() {
+  const domains = [
+    { area: "Language & Literacy", abbr: "LL", color: "#F5A623", pct: 100 },
+    { area: "Numeracy", abbr: "NUM", color: "#7BA3D4", pct: 100 },
+    { area: "Social-Emotional", abbr: "SE", color: "#E8745A", pct: 100 },
+    { area: "Motor Skills", abbr: "MOT", color: "#4A9B6F", pct: 100 },
+    { area: "Creative Arts", abbr: "CA", color: "#9B6FBD", pct: 100 },
+  ];
   return (
     <div
       className="rounded-xl overflow-hidden"
@@ -657,7 +537,7 @@ export function NELAlignmentMockup() {
         style={{ borderColor: "#F0F0F0", backgroundColor: "#FAFAFA" }}
       >
         <span className="text-xs font-semibold" style={{ color: "#333333" }}>
-          NEL Framework alignment
+          NEL Framework — 5 domains
         </span>
         <span
           className="text-xs px-2 py-0.5 rounded-full font-semibold"
@@ -667,42 +547,34 @@ export function NELAlignmentMockup() {
         </span>
       </div>
       <div className="p-4 space-y-2">
-        {[
-          { area: "Language & Literacy", color: "#F5A623" },
-          { area: "Numeracy", color: "#7BA3D4" },
-          { area: "Social & Emotional Dev.", color: "#E8745A" },
-        ].map((a) => (
+        {domains.map((a) => (
           <div
             key={a.area}
             className="rounded-lg p-2.5"
             style={{ backgroundColor: "#FAFAFA", border: "1px solid #F0F0F0" }}
           >
             <div className="flex items-center justify-between mb-1.5">
-              <span
-                className="text-xs font-semibold"
-                style={{ color: a.color }}
-              >
-                {a.area}
-              </span>
-              <span className="text-xs" style={{ color: "#999999" }}>
-                10 milestones
+              <div className="flex items-center gap-1.5">
+                <span
+                  className="text-xs font-bold px-1.5 py-0.5 rounded"
+                  style={{ backgroundColor: a.color + "18", color: a.color, fontSize: 9 }}
+                >
+                  {a.abbr}
+                </span>
+                <span className="text-xs font-semibold" style={{ color: "#333333" }}>
+                  {a.area}
+                </span>
+              </div>
+              <span className="text-xs" style={{ color: "#999999", fontSize: 9 }}>
+                Fully aligned
               </span>
             </div>
-            <div
-              className="h-1.5 rounded-full overflow-hidden"
-              style={{ backgroundColor: "#E5E5E5" }}
-            >
-              <div
-                className="h-full rounded-full"
-                style={{ width: "100%", backgroundColor: a.color }}
-              />
+            <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "#E5E5E5" }}>
+              <div className="h-full rounded-full" style={{ width: "100%", backgroundColor: a.color }} />
             </div>
           </div>
         ))}
-        <p
-          className="text-xs text-center pt-1 font-semibold"
-          style={{ color: "#ACD9CD" }}
-        >
+        <p className="text-xs text-center pt-1 font-semibold" style={{ color: "#ACD9CD" }}>
           No translation required. Just teach.
         </p>
       </div>

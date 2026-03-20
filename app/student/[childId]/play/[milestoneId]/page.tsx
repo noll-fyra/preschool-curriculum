@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { getChildDisplayName } from "@/lib/display-name";
 import { getActivityConfig } from "@/lib/activity-data";
@@ -10,8 +10,10 @@ import Link from "next/link";
 export default function ActivityPlayerPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const childId = params.childId as string;
   const milestoneId = params.milestoneId as string;
+  const fromPlace = searchParams.get("from");
 
   const store = useStore();
   const { recordSession, activityConfigOverrides } = store;
@@ -42,7 +44,11 @@ export default function ActivityPlayerPage() {
 
   const handleComplete = (score: number) => {
     recordSession(childId, milestoneId, score);
-    router.push(`/student/${childId}`);
+    if (fromPlace) {
+      router.push(`/student/${childId}/place/${fromPlace}`);
+    } else {
+      router.push(`/student/${childId}`);
+    }
   };
 
   return (

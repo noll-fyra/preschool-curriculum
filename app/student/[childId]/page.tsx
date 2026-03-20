@@ -4,43 +4,78 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { getChildDisplayName } from "@/lib/display-name";
-import { getActivityConfig } from "@/lib/activity-data";
 import { autoSelectAssignments } from "@/lib/assignments";
-import { ChildAvatar } from "@/components/teacher/ChildAvatar";
+import { PLACES } from "@/lib/places";
 
-// Child-palette colours — hardcoded, never CSS variables (spec §Visual design system)
+// Child-palette colours — hardcoded, never CSS variables (spec §1)
 const C = {
   bg: "#FFF8F0",
   surface: "#FFFFFF",
   borderWarm: "#E8D5B0",
-  yellow: "#F5C518",
-  yellowLight: "#FFFBEB",
-  green: "#7DC873",
-  greenLight: "#F0FAF0",
   textDark: "#251B14",
-  textMuted: "#5C4A3A",
-  textAmber: "#5C4200",
+  textMuted: "#7A6A5A",
+  avatarBg: "#F5C518",
+  avatarText: "#251B14",
+  bubbleBg: "#FFFFFF",
+  bubbleBorder: "#E8D5B0",
 };
 
-export default function StudentActivityHomePage() {
+function CharacterBubble({ text }: { text: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 24 }}>
+      {/* Character — owl mascot */}
+      <div
+        style={{
+          flexShrink: 0,
+          width: 44,
+          height: 44,
+          borderRadius: "50%",
+          background: "#FFF8EC",
+          border: "2px solid #F5A623",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 24,
+        }}
+      >
+        🦉
+      </div>
+      <div
+        style={{
+          background: C.bubbleBg,
+          border: `2px solid ${C.bubbleBorder}`,
+          borderRadius: "0 16px 16px 16px",
+          padding: "10px 14px",
+          fontSize: 15,
+          lineHeight: 1.4,
+          color: C.textDark,
+          flex: 1,
+        }}
+      >
+        {text}
+      </div>
+    </div>
+  );
+}
+
+export default function StudentWorldHomePage() {
   const params = useParams();
   const childId = params.childId as string;
   const store = useStore();
 
   const child = store.children.find((c) => c.id === childId);
-  const activityConfigOverrides = store.activityConfigOverrides;
+
   if (!child) {
     return (
       <div style={{ padding: "32px 20px", textAlign: "center", background: C.bg, minHeight: "100vh" }}>
         <p style={{ color: C.textMuted }}>Child not found.</p>
-        <Link href="/student" style={{ display: "inline-block", marginTop: 16, fontSize: 14, color: C.green }}>
+        <Link href="/student" style={{ display: "inline-block", marginTop: 16, fontSize: 14, color: "#7DC873" }}>
           ← Back
         </Link>
       </div>
     );
   }
 
-  // Get milestones for this child — only LL and NUM have digital activities
   const allAssigned = autoSelectAssignments(
     childId,
     store.milestones,
@@ -48,220 +83,138 @@ export default function StudentActivityHomePage() {
     store.sessions,
     store.observations
   );
-  const digitalActivities = allAssigned.filter((m) => m.areaId !== "SED");
 
-  // Which activities has the child passed today?
-  const today = new Date().toISOString().slice(0, 10);
-  const passedTodayIds = new Set(
-    store.sessions
-      .filter((s) => s.childId === childId && s.passed && s.attemptedAt.slice(0, 10) === today)
-      .map((s) => s.milestoneId)
-  );
+  // Which area IDs have assigned activities today?
+  const assignedAreaIds = new Set(allAssigned.map((m) => m.areaId));
 
-  // Only the first not-yet-done activity is "active" (spec §Screen 1 — only one tile active at a time)
-  const firstActiveMilestoneId = digitalActivities.find((m) => !passedTodayIds.has(m.id))?.id ?? null;
+  // Find a place with an assigned activity to highlight in the character message
+  const highlightedPlace = PLACES.find((p) => assignedAreaIds.has(p.areaId));
 
-  // Recent teacher messages visible to this child
-  const visibleUpdates = store.chatMessages
-    .filter((m) => m.childId === childId && m.senderType === "teacher")
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 3);
+  // Build character greeting message
+  const firstName = child.firstName;
+  let bubbleText: string;
+  if (highlightedPlace) {
+    bubbleText = `Hi ${firstName}! Your teacher left something special in ${highlightedPlace.name} today! 🌟`;
+  } else {
+    bubbleText = `Hi ${firstName}! Which place do you want to visit today? 🌟`;
+  }
+
+  // Derive initials for the child avatar
+  const initials = `${child.firstName[0]}${child.lastName[0]}`.toUpperCase();
 
   return (
     <div style={{ background: C.bg, minHeight: "100vh" }}>
-      <div style={{ maxWidth: 440, margin: "0 auto", padding: "32px 20px 48px" }}>
-        {/* Back link — small, top */}
-        <Link
-          href="/student"
-          style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 14, color: C.textMuted, marginBottom: 24 }}
-        >
-          ← Back
-        </Link>
+      <div style={{ maxWidth: 480, margin: "0 auto", padding: "24px 20px 48px" }}>
 
-        {/* Child greeting — warm, personal */}
-        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 32 }}>
-          <ChildAvatar name={getChildDisplayName(child)} size="lg" />
-          <h1 style={{ fontSize: 26, fontWeight: 700, color: C.textDark, margin: 0 }}>
-            Hi {getChildDisplayName(child)}! 👋
-          </h1>
+        {/* Top row: character bubble + child avatar */}
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 8 }}>
+          {/* Character bubble — takes up most of the width */}
+          <div style={{ flex: 1 }}>
+            <CharacterBubble text={bubbleText} />
+          </div>
+
+          {/* Child avatar — taps to scrapbook */}
+          <Link
+            href={`/student/${childId}/scrapbook`}
+            style={{
+              flexShrink: 0,
+              width: 56,
+              height: 56,
+              borderRadius: "50%",
+              background: C.avatarBg,
+              color: C.avatarText,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 18,
+              fontWeight: 700,
+              textDecoration: "none",
+              border: "3px solid #E8B800",
+              marginTop: 4,
+            }}
+            title="My Scrapbook"
+          >
+            {initials}
+          </Link>
         </div>
 
-        {/* Teacher updates feed — class news for students */}
-        {visibleUpdates.length > 0 && (
-          <div
-            style={{
-              borderRadius: 20,
-              padding: 16,
-              marginBottom: 24,
-              border: `2px solid ${C.borderWarm}`,
-              background: C.surface,
-            }}
-          >
-            <p style={{ fontSize: 13, fontWeight: 600, color: C.textDark, marginBottom: 12 }}>
-              📢 News from your teacher
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {visibleUpdates.map((u) => (
-                <div
-                  key={u.id}
+        {/* Six place cards — 2×3 grid */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 14,
+          }}
+        >
+          {PLACES.map((place) => {
+            const hasAssigned = assignedAreaIds.has(place.areaId);
+            return (
+              <Link
+                key={place.id}
+                href={`/student/${childId}/place/${place.id}`}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  padding: "20px 12px",
+                  borderRadius: 20,
+                  background: place.bg,
+                  border: `3px solid ${hasAssigned ? place.color : C.borderWarm}`,
+                  textDecoration: "none",
+                  position: "relative",
+                  boxShadow: hasAssigned
+                    ? `0 0 0 3px ${place.color}40`
+                    : "none",
+                  minHeight: 120,
+                }}
+              >
+                {/* Assigned sparkle badge */}
+                {hasAssigned && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: 8,
+                      right: 10,
+                      fontSize: 16,
+                    }}
+                  >
+                    ✨
+                  </span>
+                )}
+
+                {/* Place emoji */}
+                <span style={{ fontSize: 40, lineHeight: 1 }}>{place.emoji}</span>
+
+                {/* Place name */}
+                <span
                   style={{
-                    padding: 12,
-                    borderRadius: 12,
-                    background: C.yellowLight,
-                    border: `1px solid ${C.yellow}`,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: C.textDark,
+                    textAlign: "center",
+                    lineHeight: 1.3,
                   }}
                 >
-                  <p style={{ fontSize: 14, color: C.textDark, lineHeight: 1.5, margin: 0 }}>
-                    {u.text}
-                  </p>
-                  {u.media.some((m) => m.type === "photo") && (
-                    <div style={{ marginTop: 8, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      {u.media
-                        .filter((m) => m.type === "photo")
-                        .map((m, i) => (
-                          <div
-                            key={i}
-                            style={{
-                              borderRadius: 8,
-                              overflow: "hidden",
-                              width: 80,
-                              height: 80,
-                              border: `1px solid ${C.borderWarm}`,
-                            }}
-                          >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={m.url}
-                              alt=""
-                              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = "none";
-                              }}
-                            />
-                          </div>
-                        ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+                  {place.name}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
 
-        {/* Activity tiles (spec §Screen 1 — Activity queue) */}
-        {digitalActivities.length === 0 ? (
-          <div
-            style={{
-              borderRadius: 20,
-              padding: 20,
-              textAlign: "center",
-              border: `2px solid ${C.borderWarm}`,
-              background: C.surface,
-            }}
-          >
-            <p style={{ color: C.textMuted, fontSize: 15 }}>No activities yet — check back soon!</p>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {digitalActivities.map((milestone) => {
-              const config = activityConfigOverrides[milestone.id] ?? getActivityConfig(milestone.id);
-              if (!config) return null;
-
-              const isDone = passedTodayIds.has(milestone.id);
-              const isActive = milestone.id === firstActiveMilestoneId;
-              // Remaining tiles are locked — the child cannot play out of order
-              const isLocked = !isDone && !isActive;
-
-              // Tile appearance (spec §Screen 1 — Activity tile states)
-              let tileBg = C.surface;
-              let tileBorder = C.borderWarm;
-              let tileOpacity = 1;
-
-              if (isDone) {
-                tileBg = C.greenLight;
-                tileBorder = C.green;
-              } else if (isActive) {
-                tileBg = C.yellowLight;
-                tileBorder = C.yellow;
-              } else {
-                tileOpacity = 0.6;
-              }
-
-              return (
-                <div
-                  key={milestone.id}
-                  style={{
-                    borderRadius: 20,
-                    border: `3px solid ${tileBorder}`,
-                    background: tileBg,
-                    opacity: tileOpacity,
-                    overflow: "hidden",
-                  }}
-                >
-                  <div style={{ padding: "16px 16px 12px", display: "flex", alignItems: "center", gap: 14 }}>
-                    {/* Emoji — large, child-legible */}
-                    <span style={{ fontSize: 36, lineHeight: 1 }}>{config.emoji}</span>
-
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      {/* Activity name — no area/level badges (children cannot interpret assessment language) */}
-                      <span style={{ fontSize: 17, fontWeight: 600, color: C.textDark, display: "block" }}>
-                        {config.name}
-                      </span>
-
-                      {/* Done badge — completion only, never performance (spec §Principle 5) */}
-                      {isDone && (
-                        <span
-                          style={{
-                            display: "inline-block",
-                            marginTop: 4,
-                            fontSize: 13,
-                            fontWeight: 600,
-                            color: C.green,
-                          }}
-                        >
-                          ✓ Done!
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Lock icon for locked tiles — friendly, not punitive (spec §Design note on locked tiles) */}
-                    {isLocked && (
-                      <span style={{ fontSize: 24, opacity: 0.5 }}>🔒</span>
-                    )}
-                  </div>
-
-                  {/* Play button — only on active tile; locked tiles show no button */}
-                  {(isActive || isDone) && (
-                    <div style={{ padding: "0 16px 16px" }}>
-                      <Link
-                        href={`/student/${childId}/play/${milestone.id}`}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: 8,
-                          width: "100%",
-                          padding: "14px",
-                          borderRadius: 32,
-                          border: "none",
-                          background: isDone ? C.borderWarm : C.yellow,
-                          color: isDone ? C.textMuted : C.textAmber,
-                          fontSize: 18,
-                          fontWeight: 700,
-                          cursor: "pointer",
-                          textDecoration: "none",
-                          boxSizing: "border-box",
-                        }}
-                      >
-                        {isDone ? "Play again" : "▶  Play"}
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
+        {/* Scrapbook hint */}
+        <p
+          style={{
+            marginTop: 28,
+            textAlign: "center",
+            fontSize: 13,
+            color: C.textMuted,
+          }}
+        >
+          Tap your initials to see your scrapbook
+        </p>
       </div>
     </div>
   );

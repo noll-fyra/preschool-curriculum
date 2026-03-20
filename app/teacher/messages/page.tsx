@@ -39,7 +39,8 @@ export default function TeacherMessagesPage() {
   const childrenWithLatest = classChildren.map((child) => {
     const msgs = store.chatMessages.filter((m) => m.childId === child.id);
     const last = getLastMessage(msgs);
-    return { child, last, msgCount: msgs.length };
+    const hasUnread = msgs.some((m) => m.senderType === "parent" && !m.readAt);
+    return { child, last, msgCount: msgs.length, hasUnread };
   }).sort((a, b) => {
     if (a.last && b.last) return new Date(b.last.createdAt).getTime() - new Date(a.last.createdAt).getTime();
     if (a.last) return -1;
@@ -76,8 +77,7 @@ export default function TeacherMessagesPage() {
       )}
 
       <div className="flex flex-col divide-y" style={{ borderColor: "var(--color-border)" }}>
-        {childrenWithLatest.map(({ child, last }) => {
-          const isParentLast = last?.senderType === "parent";
+        {childrenWithLatest.map(({ child, last, hasUnread }) => {
           return (
             <Link
               key={child.id}
@@ -88,23 +88,31 @@ export default function TeacherMessagesPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
                   <p
-                    className="font-semibold text-sm truncate"
-                    style={{ color: "var(--color-text-dark)", fontWeight: isParentLast ? 700 : 600 }}
+                    className="text-sm truncate"
+                    style={{ color: "var(--color-text-dark)", fontWeight: hasUnread ? 700 : 600 }}
                   >
                     {getChildDisplayName(child)}
                   </p>
-                  {last && (
-                    <span className="text-xs shrink-0" style={{ color: "var(--color-text-muted)" }}>
-                      {formatTime(last.createdAt)}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {hasUnread && (
+                      <span
+                        className="w-2 h-2 rounded-full shrink-0"
+                        style={{ background: "var(--color-primary)" }}
+                      />
+                    )}
+                    {last && (
+                      <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                        {formatTime(last.createdAt)}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {last ? (
                   <p
                     className="text-xs truncate mt-0.5"
                     style={{
-                      color: isParentLast ? "var(--color-text-dark)" : "var(--color-text-muted)",
-                      fontWeight: isParentLast ? 500 : 400,
+                      color: hasUnread ? "var(--color-text-dark)" : "var(--color-text-muted)",
+                      fontWeight: hasUnread ? 500 : 400,
                     }}
                   >
                     {last.senderType === "parent" ? "Parent: " : ""}

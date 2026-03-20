@@ -32,6 +32,9 @@ import type {
   StudentEnrollment,
   EmployeeRole,
   GeneratedDocument,
+  ChildAttendance,
+  AttendanceStatus,
+  DailyUpdate,
 } from "./types";
 import type { ActivityConfig } from "./activity-data";
 import {
@@ -51,6 +54,8 @@ import {
   DEMO_TEACHER_NOTES,
   DEMO_CALENDAR_HOLIDAYS,
   DEMO_CLASS_SCHEDULES,
+  DEMO_ATTENDANCE,
+  DEMO_DAILY_UPDATES,
   ORGANISATION,
   SCHOOL,
   EMPLOYEES,
@@ -116,12 +121,25 @@ export interface NurtureStore {
   calendarHolidays: CalendarHoliday[];
   classSchedules: ClassSchedule[];
   generatedDocuments: GeneratedDocument[];
+  attendance: ChildAttendance[];
+  dailyUpdates: DailyUpdate[];
+
+  // Quick-log sheet global state
+  quickLogOpen: boolean;
+  openQuickLog: () => void;
+  closeQuickLog: () => void;
+
+  // Notifications panel global state
+  notificationsOpen: boolean;
+  openNotifications: () => void;
+  closeNotifications: () => void;
 
   // Actions
   setActiveClass: (classId: string) => void;
+  markAttendance: (childId: string, date: string, status: AttendanceStatus, reason?: string) => void;
   setChildTeacherNote: (childId: string, note: string) => void;
   recordSession: (childId: string, milestoneId: string, score: number) => void;
-  logObservation: (childId: string, milestoneId: string) => void;
+  logObservation: (childId: string, milestoneId: string, note?: string, teacherId?: string) => void;
   undoObservation: (childId: string, milestoneId: string) => void;
   createActivity: (activity: Omit<PlannedActivity, "id" | "createdAt" | "classId">) => void;
   deleteActivity: (activityId: string) => void;
@@ -132,6 +150,7 @@ export interface NurtureStore {
   generateReport: (childId: string) => void;
   postChatMessage: (msg: Omit<ChatMessage, "id" | "createdAt">) => void;
   broadcastChatMessage: (classId: string, senderId: string, senderType: "teacher" | "parent", kind: ChatMessageKind, text: string, media: TeacherUpdateMedia[]) => void;
+  markThreadRead: (childId: string) => void;
   savePersonalitySnapshot: (childId: string, content: string) => void;
   saveTeacherStrategies: (childId: string, whatWorks: string, whatToWatch: string) => void;
   saveFamilyContext: (childId: string, content: string) => void;
@@ -139,6 +158,7 @@ export interface NurtureStore {
   deleteTeacherNote: (noteId: string) => void;
   saveGeneratedDocument: (doc: Omit<GeneratedDocument, "id" | "createdAt">) => void;
   deleteGeneratedDocument: (docId: string) => void;
+  createDailyUpdate: (update: Omit<DailyUpdate, "id" | "createdAt">) => void;
 
   // Admin actions
   addClass: (c: Omit<Class, "id">) => void;
@@ -229,9 +249,38 @@ export const useStore = create<NurtureStore>((set, get) => ({
   calendarHolidays: DEMO_CALENDAR_HOLIDAYS,
   classSchedules: DEMO_CLASS_SCHEDULES,
   generatedDocuments: [],
+  attendance: DEMO_ATTENDANCE,
+  dailyUpdates: DEMO_DAILY_UPDATES,
+
+  quickLogOpen: false,
+  openQuickLog: () => set({ quickLogOpen: true }),
+  closeQuickLog: () => set({ quickLogOpen: false }),
+
+  notificationsOpen: false,
+  openNotifications: () => set({ notificationsOpen: true }),
+  closeNotifications: () => set({ notificationsOpen: false }),
 
   // ── Switch active class ──────────────────────────────────────────────────
   setActiveClass: (classId) => set({ activeClassId: classId }),
+
+  markAttendance: (childId, date, status, reason) =>
+    set((state) => {
+      const existing = state.attendance.findIndex(
+        (a) => a.childId === childId && a.date === date
+      );
+      const patch = { status, absentReason: status === "absent" ? reason : undefined };
+      if (existing >= 0) {
+        const updated = [...state.attendance];
+        updated[existing] = { ...updated[existing], ...patch };
+        return { attendance: updated };
+      }
+      return {
+        attendance: [
+          ...state.attendance,
+          { id: `att-${childId}-${date}`, childId, date, ...patch },
+        ],
+      };
+    }),
 
   // ── Save a per-child teacher note ────────────────────────────────────────
   setChildTeacherNote: (childId, note) =>
@@ -275,7 +324,7 @@ export const useStore = create<NurtureStore>((set, get) => ({
   },
 
   // ── Log a teacher observation (SED) ─────────────────────────────────────
-  logObservation: (childId, milestoneId) => {
+  logObservation: (childId, milestoneId, note, teacherId) => {
     const today = new Date().toISOString().slice(0, 10);
     const { observations } = get();
 
@@ -289,6 +338,8 @@ export const useStore = create<NurtureStore>((set, get) => ({
       childId,
       milestoneId,
       observedAt: today,
+      ...(note ? { note } : {}),
+      ...(teacherId ? { teacherId } : {}),
     };
 
     set((state) => {
@@ -441,6 +492,18 @@ export const useStore = create<NurtureStore>((set, get) => ({
     set((s) => ({ chatMessages: [...s.chatMessages, ...newMessages] }));
   },
 
+  // ── Mark all parent messages in a thread as read ─────────────────────────
+  markThreadRead: (childId) => {
+    const now = new Date().toISOString();
+    set((s) => ({
+      chatMessages: s.chatMessages.map((m) =>
+        m.childId === childId && m.senderType === "parent" && !m.readAt
+          ? { ...m, readAt: now }
+          : m
+      ),
+    }));
+  },
+
   // ── Generate a new report draft ─────────────────────────────────────────
   generateReport: (childId) => {
     const state = get();
@@ -540,6 +603,15 @@ export const useStore = create<NurtureStore>((set, get) => ({
     set((state) => ({
       generatedDocuments: state.generatedDocuments.filter((d) => d.id !== docId),
     }));
+  },
+
+  createDailyUpdate: (update) => {
+    const newUpdate: DailyUpdate = {
+      ...update,
+      id: `du-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+    };
+    set((state) => ({ dailyUpdates: [...state.dailyUpdates, newUpdate] }));
   },
 
   // ── Admin: classes ────────────────────────────────────────────────────

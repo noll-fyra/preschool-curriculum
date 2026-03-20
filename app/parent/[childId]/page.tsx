@@ -4,25 +4,25 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { getChildDisplayName, getPronounFromGender } from "@/lib/display-name";
-import {
-  getProgressBarFill,
-  getProgressBarColor,
-  getWorkingOnText,
-  getRecencyLabel,
-  getFeedItems,
-  getHeroSummary,
-} from "@/lib/parent-summary";
-import { getChildLevelPerArea } from "@/lib/selectors";
-import { getWeekStart } from "@/lib/assignments";
-import { LEARNING_AREAS, LEVEL_LABELS, type LevelId } from "@/lib/types";
-import { ProgressChart } from "@/components/shared/ProgressChart";
+import { getFeedItems, type FeedItem } from "@/lib/parent-summary";
+import type { MoodType } from "@/lib/types";
 
-// ─── Spec colour system ───────────────────────────────────────────────────────
+// ─── Mood ─────────────────────────────────────────────────────────────────────
 
-const LEVEL_BADGE: Record<LevelId, { bg: string; text: string }> = {
-  B: { bg: "#FAECE7", text: "#712B13" },
-  D: { bg: "#FAEEDA", text: "#633806" },
-  S: { bg: "#EAF3DE", text: "#27500A" },
+const MOOD_EMOJI: Record<MoodType, string> = {
+  happy:   "😊",
+  settled: "😌",
+  tired:   "😴",
+  upset:   "😟",
+  excited: "🤩",
+};
+
+const MOOD_LABEL: Record<MoodType, string> = {
+  happy:   "Happy day",
+  settled: "Settled day",
+  tired:   "Tired today",
+  upset:   "Needed support",
+  excited: "Exciting day",
 };
 
 // ─── Greeting ─────────────────────────────────────────────────────────────────
@@ -34,46 +34,222 @@ function getGreeting(): string {
   return "Good evening";
 }
 
-// ─── Feed item icon ───────────────────────────────────────────────────────────
+// ─── Date formatting ──────────────────────────────────────────────────────────
 
-function FeedIcon({ type }: { type: "activity" | "milestone" | "teacher_update" }) {
-  if (type === "milestone") {
-    return (
-      <div className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center text-sm"
-        style={{ background: "#EAF3DE" }}>
-        ⭐
-      </div>
-    );
-  }
-  if (type === "teacher_update") {
-    return (
-      <div className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center text-sm"
-        style={{ background: "#FEF3D7" }}>
-        📝
-      </div>
-    );
-  }
-  return (
-    <div className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center text-sm"
-      style={{ background: "#E6F1FB" }}>
-      ✅
-    </div>
-  );
-}
-
-// ─── Feed timestamp ───────────────────────────────────────────────────────────
-
-function formatFeedTime(iso: string): string {
+function formatCardDate(iso: string): string {
   const d = new Date(iso);
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const then = new Date(d.getFullYear(), d.getMonth(), d.getDate());
   const diff = Math.floor((today.getTime() - then.getTime()) / (1000 * 60 * 60 * 24));
 
-  const time = d.toLocaleTimeString("en-SG", { hour: "numeric", minute: "2-digit", hour12: true });
-  if (diff === 0) return `Today, ${time}`;
-  if (diff === 1) return `Yesterday, ${time}`;
-  return d.toLocaleDateString("en-SG", { day: "numeric", month: "short" }) + `, ${time}`;
+  if (diff === 0) return "Today";
+  if (diff === 1) return "Yesterday";
+
+  return d.toLocaleDateString("en-SG", { weekday: "long", day: "numeric", month: "short" });
+}
+
+// ─── Card components ──────────────────────────────────────────────────────────
+
+function DailyUpdateCard({ item }: { item: FeedItem }) {
+  const mood = item.mood!;
+  return (
+    <div
+      className="rounded-2xl p-4"
+      style={{
+        background: "var(--color-bg-cream)",
+        border: "1px solid var(--color-border)",
+        borderLeft: "4px solid var(--color-primary)",
+      }}
+    >
+      {/* Header: mood + date */}
+      <div className="flex items-center gap-2 mb-3">
+        <span style={{ fontSize: 20 }}>{MOOD_EMOJI[mood]}</span>
+        <div>
+          <p className="font-medium" style={{ fontSize: 13, color: "var(--color-text-dark)" }}>
+            {MOOD_LABEL[mood]}
+          </p>
+          <p style={{ fontSize: 11, color: "var(--color-text-muted)" }}>
+            {formatCardDate(item.timestamp)}
+          </p>
+        </div>
+      </div>
+
+      {/* Text */}
+      <p style={{ fontSize: 14, color: "var(--color-text-mid)", lineHeight: 1.65 }}>
+        {item.text}
+      </p>
+
+      {/* Photos */}
+      {item.photos && item.photos.length > 0 && (
+        <div className="flex gap-2 mt-3 flex-wrap">
+          {item.photos.map((url, i) => (
+            <div key={i} className="rounded-xl overflow-hidden" style={{ maxWidth: 200 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={url}
+                alt=""
+                className="w-full object-cover"
+                style={{ maxHeight: 140 }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MilestoneCard({ item }: { item: FeedItem }) {
+  return (
+    <div
+      className="rounded-2xl border p-4"
+      style={{ background: "#FEF9EC", borderColor: "#F5C842" }}
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-3">
+        <span style={{ fontSize: 18 }}>⭐</span>
+        <p
+          className="font-semibold uppercase tracking-wide"
+          style={{ fontSize: 11, letterSpacing: "0.06em", color: "#8A6800" }}
+        >
+          Milestone reached
+        </p>
+      </div>
+
+      {/* Headline */}
+      <p
+        className="font-medium mb-3 leading-snug"
+        style={{ fontSize: 15, color: "#4A3200" }}
+      >
+        {item.headline}
+      </p>
+
+      {/* What this means */}
+      {item.whatThisMeans && (
+        <div
+          className="rounded-xl px-3 py-2"
+          style={{ background: "rgba(245, 200, 66, 0.18)" }}
+        >
+          <p
+            className="font-medium mb-0.5"
+            style={{ fontSize: 11, color: "#8A6800", letterSpacing: "0.04em" }}
+          >
+            What this means
+          </p>
+          <p style={{ fontSize: 13, color: "#5C4600", lineHeight: 1.55 }}>
+            {item.whatThisMeans}
+          </p>
+        </div>
+      )}
+
+      <p className="mt-3" style={{ fontSize: 11, color: "#8A6800" }}>
+        {formatCardDate(item.timestamp)}
+      </p>
+    </div>
+  );
+}
+
+function TeacherUpdateCard({ item }: { item: FeedItem }) {
+  return (
+    <div
+      className="rounded-2xl border p-4"
+      style={{ background: "white", borderColor: "var(--color-border)" }}
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <div
+          className="w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0"
+          style={{ background: "#E8F5EE" }}
+        >
+          📝
+        </div>
+        <div>
+          <p className="font-medium" style={{ fontSize: 13, color: "var(--color-text-dark)" }}>
+            {item.teacherName}
+          </p>
+          <p style={{ fontSize: 11, color: "var(--color-text-muted)" }}>
+            {formatCardDate(item.timestamp)}
+          </p>
+        </div>
+      </div>
+
+      <p style={{ fontSize: 14, color: "var(--color-text-mid)", lineHeight: 1.6 }}>
+        {item.updateText}
+      </p>
+
+      {item.media && item.media.length > 0 && (
+        <div className="flex gap-2 mt-3 flex-wrap">
+          {item.media.map((m, i) =>
+            m.type === "photo" ? (
+              <div key={i} className="rounded-xl overflow-hidden border" style={{ borderColor: "var(--color-border)", maxWidth: 180 }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={m.url}
+                  alt=""
+                  className="w-full h-24 object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                />
+              </div>
+            ) : (
+              <div
+                key={i}
+                className="rounded-xl border flex items-center gap-1 px-3 py-2"
+                style={{ borderColor: "var(--color-border)", background: "var(--color-bg-cream)" }}
+              >
+                <span className="text-sm">🎬</span>
+                <span style={{ fontSize: 12, color: "var(--color-text-muted)" }}>Video</span>
+              </div>
+            )
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function HomeLearningCard({ childId }: { childId: string }) {
+  return (
+    <Link
+      href={`/parent/${childId}/activities`}
+      className="block rounded-2xl border p-4 transition-colors active:opacity-80"
+      style={{ background: "#F0F7FF", borderColor: "#BDD8F5" }}
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <span style={{ fontSize: 18 }}>🏠</span>
+        <p
+          className="font-semibold uppercase tracking-wide"
+          style={{ fontSize: 11, letterSpacing: "0.06em", color: "#1A5FA8" }}
+        >
+          Activity for today
+        </p>
+      </div>
+
+      <p className="font-medium mb-1" style={{ fontSize: 14, color: "#0D3B6E" }}>
+        Tell me a story about your day
+      </p>
+      <p style={{ fontSize: 13, color: "#2D6CB5", lineHeight: 1.55 }}>
+        Supports language &amp; early literacy · About 10 minutes · No materials needed
+      </p>
+
+      <div className="mt-4 flex justify-end">
+        <span
+          className="rounded-full px-4 py-1.5 font-medium"
+          style={{ background: "#1A5FA8", color: "white", fontSize: 13 }}
+        >
+          See full activity
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+function FeedCard({ item, childId }: { item: FeedItem; childId: string }) {
+  void childId;
+  if (item.type === "daily_update") return <DailyUpdateCard item={item} />;
+  if (item.type === "milestone_achieved") return <MilestoneCard item={item} />;
+  if (item.type === "teacher_update") return <TeacherUpdateCard item={item} />;
+  return null;
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -95,39 +271,39 @@ export default function ParentHomePage() {
     );
   }
 
-  const levels = getChildLevelPerArea(childId, store);
-  const weekStart = getWeekStart();
-  const childClass = store.classes.find((c) => c.id === child.classId);
-  const academicYear = childClass?.academicYear ?? new Date().getFullYear();
+  const childName = getChildDisplayName(child);
+  void getPronounFromGender(child.gender);
+
   const feedItems = getFeedItems(
     childId,
-    child.classId,
     store.sessions,
     store.progress,
     store.milestones,
     store.chatMessages,
-    store.teachers
-  );
-  const heroText = getHeroSummary(
-    getChildDisplayName(child),
-    getPronounFromGender(child.gender),
-    childId,
-    store.sessions,
-    store.progress,
-    store.milestones,
-    weekStart
+    store.teachers,
+    store.dailyUpdates
   );
 
-  const totalMilestones = store.milestones.length;
-  const achievedCount = store.progress.filter(
-    (p) => p.childId === childId && p.status === "achieved"
-  ).length;
+  // Insert home learning card after the first daily update (or at top if none)
+  type EnrichedItem = FeedItem | { type: "__home_learning__" };
+  const enrichedFeed: EnrichedItem[] = [];
+  let homeLearningInserted = false;
+  for (const item of feedItems) {
+    enrichedFeed.push(item);
+    if (!homeLearningInserted && item.type === "daily_update") {
+      enrichedFeed.push({ type: "__home_learning__" });
+      homeLearningInserted = true;
+    }
+  }
+  if (!homeLearningInserted) {
+    enrichedFeed.unshift({ type: "__home_learning__" });
+  }
 
   return (
     <div className="px-4 py-5 max-w-lg mx-auto">
 
-      {/* 1. Greeting */}
-      <div className="mb-5">
+      {/* Greeting */}
+      <div className="mb-4">
         <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
           {getGreeting()}
         </p>
@@ -135,228 +311,70 @@ export default function ParentHomePage() {
           className="font-medium leading-tight mt-0.5"
           style={{ fontSize: 22, color: "var(--color-text-dark)" }}
         >
-          {getChildDisplayName(child)}&apos;s dashboard
+          {childName}&apos;s updates
         </h1>
       </div>
 
-      {/* 2. Hero card — emotional headline first */}
-      <div
-        className="rounded-2xl border p-4 mb-5"
-        style={{ background: "#EAF3DE", borderColor: "#97C459" }}
+      {/* Progress shortcut row */}
+      <Link
+        href={`/parent/${childId}/area`}
+        className="flex items-center justify-between rounded-2xl border px-4 py-3 mb-5 transition-colors active:opacity-80"
+        style={{ background: "white", borderColor: "var(--color-border)" }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "var(--color-bg-cream)"; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "white"; }}
       >
-        <p
-          className="font-medium uppercase tracking-wide mb-2"
-          style={{ fontSize: 11, letterSpacing: "0.06em", color: "#3B6D11" }}
-        >
-          This week
-        </p>
-        <p style={{ fontSize: 14, color: "#27500A", lineHeight: 1.6 }}>
-          {heroText}
-        </p>
-      </div>
+        <div className="flex items-center gap-3">
+          <div
+            className="w-9 h-9 rounded-xl flex items-center justify-center"
+            style={{ background: "var(--color-primary-wash)" }}
+          >
+            <span style={{ fontSize: 16 }}>📈</span>
+          </div>
+          <div>
+            <p className="font-medium" style={{ fontSize: 13, color: "var(--color-text-dark)" }}>
+              {childName}&apos;s progress
+            </p>
+            <p style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
+              Development across all 6 learning areas
+            </p>
+          </div>
+        </div>
+        <span style={{ fontSize: 16, color: "var(--color-primary)" }}>→</span>
+      </Link>
 
-      {/* 3. Learning areas */}
-      <p
-        className="font-medium uppercase tracking-wide mb-3"
-        style={{ fontSize: 11, letterSpacing: "0.06em", color: "var(--color-text-muted)" }}
-      >
-        Learning areas
-      </p>
-
-      <div className="flex flex-col gap-3 mb-5">
-        {LEARNING_AREAS.map((area) => {
-          const level = levels[area.id];
-          const badge = LEVEL_BADGE[level];
-          const fill = getProgressBarFill(store.milestones, store.progress, childId, area.id);
-          const barColor = getProgressBarColor(level);
-          const workingOn = getWorkingOnText(
-            store.milestones,
-            store.progress,
-            store.sessions,
-            store.observations,
-            childId,
-            area.id
-          );
-          const recency = getRecencyLabel(
-            store.sessions,
-            store.observations,
-            store.milestones,
-            childId,
-            area.id
-          );
-
-          return (
-            <Link
-              key={area.id}
-              href={`/parent/${childId}/area/${area.id}`}
-              className="block rounded-2xl border p-4 transition-colors active:opacity-80"
-              style={{ background: "white", borderColor: "var(--color-border)" }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.background = "var(--color-bg-cream)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.background = "white";
-              }}
-            >
-              {/* Area name + level badge */}
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-medium" style={{ fontSize: 14, color: "var(--color-text-dark)" }}>
-                  {area.name}
-                </span>
-                <span
-                  className="text-xs px-2 py-0.5 rounded-full font-medium"
-                  style={{ background: badge.bg, color: badge.text }}
-                >
-                  {LEVEL_LABELS[level]}
-                </span>
-              </div>
-
-              {/* Gestural progress bar — no percentage label */}
-              <div
-                className="w-full rounded-full overflow-hidden mb-3"
-                style={{ height: 6, background: "var(--color-bg-deep)" }}
-              >
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{ width: `${fill}%`, background: barColor }}
-                />
-              </div>
-
-              {/* Working on + recency */}
-              <p className="text-xs mb-1 leading-relaxed" style={{ color: "var(--color-text-mid)" }}>
-                <span className="font-medium" style={{ color: "var(--color-text-dark)" }}>
-                  Working on:{" "}
-                </span>
-                {workingOn}
-              </p>
-              <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                Last activity: {recency}
-              </p>
-            </Link>
-          );
-        })}
-      </div>
-
-      {/* 4. Progress chart */}
-      <div
-        className="rounded-2xl p-5 mb-5"
-        style={{ background: "white", border: "1px solid var(--color-border)" }}
-      >
-        <p
-          className="font-semibold mb-0.5"
-          style={{ color: "var(--color-text-dark)" }}
-        >
-          Progress over time
-        </p>
-        <p className="text-sm mb-4" style={{ color: "var(--color-text-muted)" }}>
-          Milestones achieved vs. expected this year. Tap a dot to see the milestone.
-        </p>
-        <ProgressChart childId={childId} academicYear={academicYear} />
-      </div>
-
-      {/* 5. Activity feed */}
-      <p
-        className="font-medium uppercase tracking-wide mb-3"
-        style={{ fontSize: 11, letterSpacing: "0.06em", color: "var(--color-text-muted)" }}
-      >
-        This week
-      </p>
-
-      {feedItems.length === 0 ? (
+      {/* Feed */}
+      {feedItems.length === 0 && !homeLearningInserted ? (
         <div
-          className="rounded-2xl border p-5 mb-5 text-center"
+          className="rounded-2xl border p-6 text-center"
           style={{ background: "var(--color-bg-cream)", borderColor: "var(--color-border)" }}
         >
-          <p style={{ fontSize: 13, color: "var(--color-text-muted)", lineHeight: 1.6 }}>
-            Nothing logged yet this week. {getChildDisplayName(child)}&apos;s activity queue is ready whenever{" "}
-            {getPronounFromGender(child.gender) === "they" ? "they are" : `${getPronounFromGender(child.gender) === "he" ? "he" : "she"} is`}.
+          <p style={{ fontSize: 14, color: "var(--color-text-muted)", lineHeight: 1.6 }}>
+            Updates from {childName}&apos;s teacher will appear here each school day.
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-2 mb-5">
-          {feedItems.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-start gap-3 rounded-xl border px-3 py-3"
-              style={{ background: "white", borderColor: "var(--color-border)" }}
-            >
-              <FeedIcon type={item.icon} />
-              <div className="flex-1 min-w-0">
-                <p className="font-medium" style={{ fontSize: 13, color: "var(--color-text-dark)" }}>
-                  {item.title}
-                </p>
-                <p
-                  className="mt-0.5 leading-snug"
-                  style={{ fontSize: 12, color: "var(--color-text-mid)" }}
-                >
-                  {item.subtitle}
-                </p>
-                {item.media && item.media.length > 0 && (
-                  <div className="flex gap-2 mt-2 flex-wrap">
-                    {item.media.map((m, i) =>
-                      m.type === "photo" ? (
-                        <div
-                          key={i}
-                          className="rounded-lg overflow-hidden border"
-                          style={{ borderColor: "var(--color-border)", maxWidth: 120 }}
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={m.url}
-                            alt=""
-                            className="w-full h-20 object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = "none";
-                            }}
-                          />
-                        </div>
-                      ) : (
-                        <div
-                          key={i}
-                          className="rounded-lg border flex items-center gap-1 px-2 py-1"
-                          style={{ borderColor: "var(--color-border)", background: "var(--color-bg-cream)" }}
-                        >
-                          <span className="text-sm">🎬</span>
-                          <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                            Video
-                          </span>
-                        </div>
-                      )
-                    )}
-                  </div>
-                )}
-                <p className="mt-1" style={{ fontSize: 11, color: "var(--color-text-muted)" }}>
-                  {formatFeedTime(item.timestamp)}
-                </p>
-              </div>
-            </div>
-          ))}
+        <div className="flex flex-col gap-3">
+          {enrichedFeed.map((item, i) => {
+            if (item.type === "__home_learning__") {
+              return <HomeLearningCard key="home-learning" childId={childId} />;
+            }
+            return <FeedCard key={(item as FeedItem).id ?? i} item={item as FeedItem} childId={childId} />;
+          })}
         </div>
       )}
 
-      {/* 5. P1 readiness banner */}
+      {/* P1 readiness footer link */}
       <Link
         href={`/parent/${childId}/p1`}
-        className="flex items-center justify-between rounded-xl border px-4 py-3 transition-colors active:opacity-80"
+        className="flex items-center justify-between mt-5 rounded-xl border px-4 py-3 transition-colors active:opacity-80"
         style={{ background: "white", borderColor: "var(--color-border)" }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLAnchorElement).style.background = "var(--color-bg-cream)";
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLAnchorElement).style.background = "white";
-        }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "var(--color-bg-cream)"; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "white"; }}
       >
-        <div>
-          <p className="font-medium uppercase tracking-wide" style={{ fontSize: 11, letterSpacing: "0.06em", color: "var(--color-text-muted)" }}>
-            P1 readiness
-          </p>
-          <p className="font-medium mt-0.5" style={{ fontSize: 13, color: "var(--color-text-dark)" }}>
-            {achievedCount} of {totalMilestones} milestones achieved
-          </p>
-        </div>
-        <span style={{ fontSize: 13, color: "var(--color-primary)" }}>
-          See details →
-        </span>
+        <p style={{ fontSize: 13, color: "var(--color-text-mid)" }}>
+          Primary 1 readiness
+        </p>
+        <span style={{ fontSize: 13, color: "var(--color-primary)" }}>See milestones →</span>
       </Link>
 
     </div>

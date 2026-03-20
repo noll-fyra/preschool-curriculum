@@ -17,38 +17,44 @@ interface Persona {
 }
 
 const TEACHER_PERSONAS: Persona[] = [
-  { id: "emp-siti",  label: "Siti Binte Rahmat", sub: "Kingfisher · K1" },
-  { id: "emp-lim",   label: "Lim Wei Ling",       sub: "Sparrow · K2"   },
+  { id: "emp-siti", label: "Siti Binte Rahmat", sub: "Kingfisher · N1" },
+  { id: "emp-lim", label: "Lim Wei Ling", sub: "Sparrow · K2" },
 ];
 
 const TEACHER_CLASS_MAP: Record<string, string> = {
   "emp-siti": "class-1",
-  "emp-lim":  "class-2",
+  "emp-lim": "class-2",
 };
 
 const CHILD_PERSONAS: Persona[] = [
   { id: "child-rayan", label: "Rayan", sub: "K1" },
-  { id: "child-amir",  label: "Amir",  sub: "K2" },
+  { id: "child-amir", label: "Amir", sub: "K2" },
 ];
 
 const PARENT_PERSONAS: Persona[] = [
-  { id: "parent-ahmed", label: "Mr Ahmed Al-Rashid", sub: "1 child"    },
-  { id: "parent-nur",   label: "Mdm Nur Hassan",     sub: "2 children" },
+  { id: "parent-ahmed", label: "Mr Ahmed Al-Rashid", sub: "1 child" },
+  { id: "parent-nur", label: "Mdm Nur Hassan", sub: "2 children" },
 ];
 
 const PARENT_DEFAULT_CHILD: Record<string, string> = {
   "parent-ahmed": "child-rayan",
-  "parent-nur":   "child-amir",
+  "parent-nur": "child-amir",
 };
 
 const SCHOOL_PERSONAS: Persona[] = [
-  { id: "org_admin",    label: "Priya Shankar",    sub: "Organisation Admin" },
-  { id: "school_admin", label: "David Tan",        sub: "School Admin"       },
+  { id: "org_admin", label: "Priya Shankar", sub: "Organisation Admin" },
+  { id: "school_admin", label: "David Tan", sub: "School Admin" },
 ];
 
 export function DemoPersonaBar({ role }: DemoPersonaBarProps) {
   const router = useRouter();
-  const { demoPersona, setDemoTeacher, setDemoParent, setDemoAdmin, setDemoStudent } = useStore();
+  const {
+    demoPersona,
+    setDemoTeacher,
+    setDemoParent,
+    setDemoAdmin,
+    setDemoStudent,
+  } = useStore();
 
   let personas: Persona[];
   let activeId: string;
@@ -93,7 +99,7 @@ export function DemoPersonaBar({ role }: DemoPersonaBarProps) {
       }
       case "school": {
         setDemoAdmin(persona.id as EmployeeRole);
-        router.push("/school/classes");
+        router.push("/school/dashboard");
         break;
       }
     }

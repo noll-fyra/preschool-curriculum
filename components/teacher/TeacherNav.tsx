@@ -1,16 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { getTeacherDisplayName } from "@/lib/display-name";
-import { StudentSearch } from "./StudentSearch";
 
 const NAV_ITEMS = [
   {
     href: "/teacher/class",
-    label: "Class",
+    label: "Home",
     icon: (
       <svg
         width="20"
@@ -148,7 +146,7 @@ const NAV_ITEMS = [
   },
   {
     href: "/teacher/calendar",
-    label: "Calendar",
+    label: "Schedule",
     icon: (
       <svg
         width="20"
@@ -264,12 +262,16 @@ const NAV_ITEMS = [
 
 export function TeacherNav() {
   const pathname = usePathname();
-  const { classes, teachers, activeClassId, setActiveClass } = useStore();
+  const { classes, teachers, activeClassId, children, chatMessages } = useStore();
   const activeClass = classes.find((c) => c.id === activeClassId) ?? classes[0];
   const activeTeacher = teachers.find((t) =>
     t.classIds.includes(activeClass.id),
   );
-  const [classMenuOpen, setClassMenuOpen] = useState(false);
+
+  const classChildIds = new Set(children.filter((c) => c.classId === activeClass.id).map((c) => c.id));
+  const unreadCount = chatMessages.filter(
+    (m) => m.senderType === "parent" && !m.readAt && classChildIds.has(m.childId)
+  ).length;
 
   return (
     <>
@@ -292,91 +294,6 @@ export function TeacherNav() {
             </span>
           </Link>
 
-          {/* Class picker */}
-          <div className="relative">
-            <button
-              onClick={() => setClassMenuOpen((o) => !o)}
-              className="w-full flex items-center justify-between gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors hover:bg-bg-cream"
-              style={{
-                color: "var(--color-text-mid)",
-                borderColor: "var(--color-border)",
-                background: classMenuOpen
-                  ? "var(--color-bg-cream)"
-                  : "transparent",
-              }}
-            >
-              <span className="truncate">{activeClass.name}</span>
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 12 12"
-                fill="none"
-                className="shrink-0 transition-transform"
-                style={{ transform: classMenuOpen ? "rotate(180deg)" : "none" }}
-              >
-                <path
-                  d="M2 4l4 4 4-4"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-
-            {classMenuOpen && (
-              <div
-                className="absolute left-0 right-0 mt-1 rounded-xl border bg-white shadow-lg z-50 overflow-hidden"
-                style={{ borderColor: "var(--color-border)" }}
-              >
-                {classes.map((cls) => (
-                  <button
-                    key={cls.id}
-                    onClick={() => {
-                      setActiveClass(cls.id);
-                      setClassMenuOpen(false);
-                    }}
-                    className="w-full text-left px-3 py-2 text-xs font-medium flex items-center gap-2 transition-colors hover:bg-bg-cream"
-                    style={{
-                      color:
-                        cls.id === activeClassId
-                          ? "var(--color-primary)"
-                          : "var(--color-text-dark)",
-                      background:
-                        cls.id === activeClassId
-                          ? "var(--color-primary-wash)"
-                          : "transparent",
-                    }}
-                  >
-                    {cls.id === activeClassId && (
-                      <svg
-                        width="10"
-                        height="10"
-                        viewBox="0 0 10 10"
-                        fill="none"
-                        className="shrink-0"
-                      >
-                        <path
-                          d="M1.5 5l2.5 2.5 4.5-4.5"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    )}
-                    {cls.id !== activeClassId && <span className="w-[10px]" />}
-                    {cls.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Search */}
-        <div className="px-3 pt-3 pb-1">
-          <StudentSearch />
         </div>
 
         {/* Nav links */}
@@ -400,25 +317,64 @@ export function TeacherNav() {
                     : "transparent",
                 }}
               >
-                {item.icon}
+                <span className="relative">
+                  {item.icon}
+                  {item.href === "/teacher/messages" && unreadCount > 0 && (
+                    <span
+                      className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full border border-white"
+                      style={{ background: "var(--color-primary)" }}
+                    />
+                  )}
+                </span>
                 {item.label}
               </Link>
             );
           })}
         </nav>
 
-        {/* Teacher info */}
-        <div
-          className="px-5 py-4 border-t border-[var(--color-border)]"
-          style={{ color: "var(--color-text-muted)" }}
-        >
-          <p
-            className="text-xs font-medium"
-            style={{ color: "var(--color-text-mid)" }}
-          >
+        {/* Bottom: teacher name + profile/settings links */}
+        <div className="border-t border-[var(--color-border)] px-3 py-3 flex flex-col gap-1">
+          <p className="px-3 pb-1 text-xs font-medium truncate" style={{ color: "var(--color-text-muted)" }}>
             {activeTeacher ? getTeacherDisplayName(activeTeacher) : "—"}
           </p>
-          <p className="text-xs">My First Skool</p>
+          {[
+            {
+              href: "/teacher/profile",
+              label: "Profile",
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <circle cx="9" cy="6" r="3" stroke="currentColor" strokeWidth="1.4" />
+                  <path d="M3 15c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                </svg>
+              ),
+            },
+            {
+              href: "/teacher/settings",
+              label: "Settings",
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.4" />
+                  <path d="M9 1.5v2M9 14.5v2M1.5 9h2M14.5 9h2M3.6 3.6l1.4 1.4M13 13l1.4 1.4M14.4 3.6l-1.4 1.4M5 13l-1.4 1.4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                </svg>
+              ),
+            },
+          ].map(({ href, label, icon }) => {
+            const active = pathname === href;
+            return (
+              <Link
+                key={href}
+                href={href}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                style={{
+                  color: active ? "var(--color-primary)" : "var(--color-text-mid)",
+                  background: active ? "var(--color-primary-wash)" : "transparent",
+                }}
+              >
+                {icon}
+                {label}
+              </Link>
+            );
+          })}
         </div>
       </aside>
 
@@ -439,7 +395,15 @@ export function TeacherNav() {
                   : "var(--color-text-muted)",
               }}
             >
-              {item.icon}
+              <span className="relative">
+                {item.icon}
+                {item.href === "/teacher/messages" && unreadCount > 0 && (
+                  <span
+                    className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full border border-white"
+                    style={{ background: "var(--color-primary)" }}
+                  />
+                )}
+              </span>
               {item.label}
             </Link>
           );

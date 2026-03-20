@@ -190,6 +190,8 @@ export interface TeacherObservation {
   childId: string;
   milestoneId: string;
   observedAt: string; // YYYY-MM-DD date string
+  note?: string;
+  teacherId?: string;
 }
 
 export interface WeeklyAssignment {
@@ -208,7 +210,22 @@ export interface PlannedActivity {
   milestoneId?: string; // optional link to a specific milestone
   childIds: string[];   // children this activity is assigned to
   date: string;         // YYYY-MM-DD — specific day the activity is scheduled
+  startTime?: string;   // "HH:MM" 24-hour, e.g. "09:00"
+  durationMins?: number; // e.g. 30
   createdAt: string;
+}
+
+// ─── Attendance ───────────────────────────────────────────────────────────────
+
+export type AttendanceStatus = "pending" | "present" | "absent" | "late";
+
+export interface ChildAttendance {
+  id: string;
+  childId: string;
+  date: string; // YYYY-MM-DD
+  status: AttendanceStatus;
+  /** Required when status is "absent"; reason provided by parent or teacher */
+  absentReason?: string;
 }
 
 export interface ActivityFeedback {
@@ -257,6 +274,8 @@ export interface ChatMessage {
   text: string;
   media: TeacherUpdateMedia[];
   createdAt: string;
+  /** ISO timestamp when the teacher read this message; undefined = unread (only relevant for parent-sent messages) */
+  readAt?: string;
 }
 
 export type NoteTag =
@@ -366,6 +385,21 @@ export const LEVEL_LABELS: Record<LevelId, string> = {
   D: "Developing",
   S: "Secure",
 };
+
+// ─── Daily Updates ────────────────────────────────────────────────────────
+
+export type MoodType = "happy" | "settled" | "tired" | "upset" | "excited";
+
+export interface DailyUpdate {
+  id: string;
+  childId: string;
+  teacherId: string;
+  text: string;
+  mood: MoodType;
+  photos: string[];
+  date: string;       // YYYY-MM-DD
+  createdAt: string;  // ISO datetime
+}
 
 // ─── AI-generated documents ────────────────────────────────────────────────
 

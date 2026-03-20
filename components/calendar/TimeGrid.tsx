@@ -4,20 +4,20 @@ import { DAY_START, DAY_END, formatHour } from "@/lib/calendar-utils";
 
 // ─── Layout constants ─────────────────────────────────────────────────────────
 
-const HOUR_PX    = 64;  // pixels per hour
-const TOTAL_PX   = ((DAY_END - DAY_START) / 60) * HOUR_PX; // 768 px (7 AM–7 PM)
-const HEADER_H   = 48;  // column header height
-const ALLDAY_H   = 36;  // all-day row height
-const GUTTER_W   = 64;  // left time-label gutter width
-const COL_MIN_W  = 130; // minimum column width
+const HOUR_PX = 64; // pixels per hour
+const TOTAL_PX = ((DAY_END - DAY_START) / 60) * HOUR_PX; // 768 px (7 AM–7 PM)
+const HEADER_H = 48; // column header height
+const ALLDAY_H = 36; // all-day row height
+const GUTTER_W = 64; // left time-label gutter width
+const COL_MIN_W = 130; // minimum column width
 
 const HOURS: number[] = Array.from(
   { length: (DAY_END - DAY_START) / 60 + 1 },
-  (_, i) => DAY_START / 60 + i
+  (_, i) => DAY_START / 60 + i,
 );
 
 const BORDER = "var(--color-border)";
-const BG     = "white";
+const BG = "white";
 
 function minutesToPx(minutes: number): number {
   return ((minutes - DAY_START) / 60) * HOUR_PX;
@@ -45,7 +45,7 @@ export interface AllDayEvent {
 
 export interface TimeColumn {
   key: string;
-  /** Primary label, e.g. "Mon 16" or "Kingfisher K1" */
+  /** Primary label, e.g. "Mon 16" or "Kingfisher N1" */
   label: string;
   /** Secondary label, e.g. month abbreviation or year level */
   sublabel?: string;
@@ -83,8 +83,12 @@ export function TimeGrid({
         background: BG,
       }}
     >
-      <div style={{ display: "flex", minWidth: columns.length * COL_MIN_W + GUTTER_W }}>
-
+      <div
+        style={{
+          display: "flex",
+          minWidth: columns.length * COL_MIN_W + GUTTER_W,
+        }}
+      >
         {/* ── Left gutter ─────────────────────────────────────────────── */}
         <div
           style={{
@@ -98,7 +102,9 @@ export function TimeGrid({
           }}
         >
           {/* Header spacer */}
-          <div style={{ height: HEADER_H, borderBottom: `1px solid ${BORDER}` }} />
+          <div
+            style={{ height: HEADER_H, borderBottom: `1px solid ${BORDER}` }}
+          />
 
           {/* "All day" label */}
           {hasAllDay && (
@@ -111,7 +117,15 @@ export function TimeGrid({
                 paddingLeft: 6,
               }}
             >
-              <span style={{ fontSize: 9, color: "var(--color-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <span
+                style={{
+                  fontSize: 9,
+                  color: "var(--color-text-muted)",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                }}
+              >
                 All day
               </span>
             </div>
@@ -169,14 +183,22 @@ export function TimeGrid({
                 style={{
                   fontSize: 13,
                   fontWeight: 700,
-                  color: col.isToday ? "var(--color-primary)" : "var(--color-text-dark)",
+                  color: col.isToday
+                    ? "var(--color-primary)"
+                    : "var(--color-text-dark)",
                   lineHeight: 1.2,
                 }}
               >
                 {col.label}
               </span>
               {col.sublabel && (
-                <span style={{ fontSize: 10, color: "var(--color-text-muted)", lineHeight: 1.2 }}>
+                <span
+                  style={{
+                    fontSize: 10,
+                    color: "var(--color-text-muted)",
+                    lineHeight: 1.2,
+                  }}
+                >
                   {col.sublabel}
                 </span>
               )}
@@ -215,7 +237,13 @@ export function TimeGrid({
                   </div>
                 ))}
                 {col.allDayEvents.length > 2 && (
-                  <div style={{ fontSize: 9, color: "var(--color-text-muted)", paddingLeft: 4 }}>
+                  <div
+                    style={{
+                      fontSize: 9,
+                      color: "var(--color-text-muted)",
+                      paddingLeft: 4,
+                    }}
+                  >
                     +{col.allDayEvents.length - 2} more
                   </div>
                 )}
@@ -223,8 +251,9 @@ export function TimeGrid({
             )}
 
             {/* Timed area */}
-            <div style={{ position: "relative", height: TOTAL_PX, background: BG }}>
-
+            <div
+              style={{ position: "relative", height: TOTAL_PX, background: BG }}
+            >
               {/* Hour grid lines */}
               {HOURS.map((h) => (
                 <div
@@ -267,23 +296,25 @@ export function TimeGrid({
                         flexShrink: 0,
                       }}
                     />
-                    <div style={{ flex: 1, height: 2, background: "#E74C3C" }} />
+                    <div
+                      style={{ flex: 1, height: 2, background: "#E74C3C" }}
+                    />
                   </div>
                 )}
 
               {/* Timed events */}
               {col.timedEvents.map((e) => {
                 const clampedStart = Math.max(e.startMinutes, DAY_START);
-                const clampedEnd   = Math.min(e.endMinutes, DAY_END);
-                const top    = minutesToPx(clampedStart);
-                const height = Math.max(minutesToPx(clampedEnd) - top, 22);
+                const clampedEnd = Math.min(e.endMinutes, DAY_END);
+                const top = minutesToPx(clampedStart);
+                const height = Math.max(minutesToPx(clampedEnd) - top - 3, 20);
                 return (
                   <div
                     key={e.id}
                     onClick={e.onClick}
                     style={{
                       position: "absolute",
-                      top,
+                      top: top + 2,
                       height,
                       left: 4,
                       right: 4,

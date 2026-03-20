@@ -75,6 +75,11 @@ export default function TeacherChatPage({ params }: { params: Promise<{ childId:
     }
   }, [messages.length]);
 
+  useEffect(() => {
+    store.markThreadRead(childId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [childId]);
+
   const handleSend = () => {
     const trimmed = text.trim();
     if (!trimmed || !child) return;
