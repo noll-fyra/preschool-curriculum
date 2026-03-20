@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
-import { Livvic } from "next/font/google";
+import { Livvic, Geist } from "next/font/google";
 import "./globals.css";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const livvic = Livvic({
   subsets: ["latin"],
@@ -21,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en-SG" className={livvic.variable}>
+    <html lang="en-SG" className={cn("font-sans", geist.variable)}>
       <body className="font-(family-name:--font-livvic) antialiased">
         <a href="#main" className="skip-link">
           Skip to main content
