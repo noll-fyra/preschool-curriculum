@@ -54,7 +54,7 @@ export function ScheduleTimeline({ activities }: ScheduleTimelineProps) {
             marginBottom: 10,
           }}
         >
-          Today&apos;s Schedule
+          Today's Schedule
         </h2>
         <p style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
           No activities planned for today.
@@ -76,7 +76,7 @@ export function ScheduleTimeline({ activities }: ScheduleTimelineProps) {
             marginBottom: 10,
           }}
         >
-          Today&apos;s Schedule
+          Today's Schedule
         </h2>
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
           {activities.map((activity) => {
@@ -127,7 +127,8 @@ export function ScheduleTimeline({ activities }: ScheduleTimelineProps) {
                       fontSize: 13,
                       fontWeight: 600,
                       color: "var(--color-text-dark)",
-                      textDecoration: activity.status === "done" ? "line-through" : "none",
+                      textDecoration:
+                        activity.status === "done" ? "line-through" : "none",
                       marginBottom: activity.areaId ? 4 : 0,
                     }}
                   >
@@ -150,11 +151,19 @@ export function ScheduleTimeline({ activities }: ScheduleTimelineProps) {
                     )}
                   </div>
                   {activity.areaId && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 6 }}
+                    >
                       <DomainTag areaId={activity.areaId} size="sm" />
                       {activity.childCount > 0 && (
-                        <span style={{ fontSize: 11, color: "var(--color-text-muted)" }}>
-                          {activity.childCount} {activity.childCount === 1 ? "child" : "children"}
+                        <span
+                          style={{
+                            fontSize: 11,
+                            color: "var(--color-text-muted)",
+                          }}
+                        >
+                          {activity.childCount}{" "}
+                          {activity.childCount === 1 ? "child" : "children"}
                         </span>
                       )}
                     </div>
@@ -171,7 +180,9 @@ export function ScheduleTimeline({ activities }: ScheduleTimelineProps) {
         <div
           className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.45)" }}
-          onClick={(e) => { if (e.target === e.currentTarget) setSelected(null); }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelected(null);
+          }}
         >
           <div className="w-full max-w-sm rounded-2xl bg-white shadow-2xl p-5">
             {/* Status badge */}
@@ -182,8 +193,8 @@ export function ScheduleTimeline({ activities }: ScheduleTimelineProps) {
                   selected.status === "in_progress"
                     ? "var(--color-primary-wash)"
                     : selected.status === "done"
-                    ? "var(--color-bg-deep)"
-                    : "var(--color-bg-cream)",
+                      ? "var(--color-bg-deep)"
+                      : "var(--color-bg-cream)",
                 color:
                   selected.status === "in_progress"
                     ? "var(--color-primary)"
@@ -193,8 +204,8 @@ export function ScheduleTimeline({ activities }: ScheduleTimelineProps) {
               {selected.status === "in_progress"
                 ? "Happening now"
                 : selected.status === "done"
-                ? "Completed"
-                : "Upcoming"}
+                  ? "Completed"
+                  : "Upcoming"}
             </span>
 
             <h2
@@ -211,7 +222,9 @@ export function ScheduleTimeline({ activities }: ScheduleTimelineProps) {
             >
               {formatTimeRange(selected.startTime, selected.endTime)}
               {selected.durationMins && (
-                <span style={{ color: "var(--color-text-muted)", marginLeft: 6 }}>
+                <span
+                  style={{ color: "var(--color-text-muted)", marginLeft: 6 }}
+                >
                   · {selected.durationMins} min
                 </span>
               )}

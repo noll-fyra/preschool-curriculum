@@ -39,7 +39,8 @@ export default function PhoneMockup() {
           borderRadius: "40px",
           border: "3px solid #2D3A2E",
           height: "480px",
-          boxShadow: "0 20px 48px rgba(45, 58, 46, 0.18), 0 4px 12px rgba(45, 58, 46, 0.1)",
+          boxShadow:
+            "0 20px 48px rgba(45, 58, 46, 0.18), 0 4px 12px rgba(45, 58, 46, 0.1)",
         }}
         role="img"
         aria-label="Phone screen showing Aisha's progress feed with recent activity completions"
@@ -55,11 +56,17 @@ export default function PhoneMockup() {
           className="flex items-center justify-between px-5 pt-9 pb-2"
           style={{ backgroundColor: "#FFFDF8" }}
         >
-          <span className="text-xs font-bold" style={{ color: "#2D3A2E" }}>9:41</span>
+          <span className="text-xs font-bold" style={{ color: "#2D3A2E" }}>
+            9:41
+          </span>
           <div className="flex gap-1 items-center">
             <div className="flex gap-0.5">
               {[3, 4, 5, 5].map((h, i) => (
-                <div key={i} className="w-1 rounded-sm" style={{ height: h, backgroundColor: "#2D3A2E" }} />
+                <div
+                  key={i}
+                  className="w-1 rounded-sm"
+                  style={{ height: h, backgroundColor: "#2D3A2E" }}
+                />
               ))}
             </div>
           </div>
@@ -71,7 +78,7 @@ export default function PhoneMockup() {
           style={{ backgroundColor: "#4A9B6F" }}
         >
           <div>
-            <p className="text-white font-bold text-sm">Aisha&apos;s Progress</p>
+            <p className="text-white font-bold text-sm">Aisha's Progress</p>
             <p className="text-white text-xs opacity-80">Kindergarten 1</p>
           </div>
           {/* Notification dot */}
@@ -80,9 +87,21 @@ export default function PhoneMockup() {
               className="w-8 h-8 rounded-full flex items-center justify-center"
               style={{ backgroundColor: "rgba(255,255,255,0.2)" }}
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6V9.5L2 11v0.5h12V11L12.5 9.5V6C12.5 3.5 10.5 1.5 8 1.5Z" fill="white"/>
-                <path d="M6.5 12C6.5 12.8 7.2 13.5 8 13.5C8.8 13.5 9.5 12.8 9.5 12H6.5Z" fill="white"/>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6V9.5L2 11v0.5h12V11L12.5 9.5V6C12.5 3.5 10.5 1.5 8 1.5Z"
+                  fill="white"
+                />
+                <path
+                  d="M6.5 12C6.5 12.8 7.2 13.5 8 13.5C8.8 13.5 9.5 12.8 9.5 12H6.5Z"
+                  fill="white"
+                />
               </svg>
             </div>
             <div
@@ -97,8 +116,10 @@ export default function PhoneMockup() {
           className="overflow-hidden relative"
           style={{
             height: "calc(100% - 130px)",
-            maskImage: "linear-gradient(to bottom, black 60%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(to bottom, black 60%, transparent 100%)",
+            maskImage:
+              "linear-gradient(to bottom, black 60%, transparent 100%)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, black 60%, transparent 100%)",
           }}
         >
           <div className="p-3 space-y-2.5">
@@ -124,7 +145,10 @@ export default function PhoneMockup() {
                       {item.sub}
                     </p>
                   </div>
-                  <span className="text-xs flex-shrink-0" style={{ color: "#9DAE9E" }}>
+                  <span
+                    className="text-xs flex-shrink-0"
+                    style={{ color: "#9DAE9E" }}
+                  >
                     {item.time}
                   </span>
                 </div>

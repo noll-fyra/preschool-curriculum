@@ -14,24 +14,38 @@ import { getChildDisplayName } from "@/lib/display-name";
 function formatRelativeDate(iso: string): string {
   const date = new Date(iso);
   const now = new Date();
-  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+  const diffDays = Math.floor(
+    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
+  );
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return date.toLocaleDateString("en-SG", { weekday: "long" });
+  if (diffDays < 7)
+    return date.toLocaleDateString("en-SG", { weekday: "long" });
   if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-  return date.toLocaleDateString("en-SG", { day: "numeric", month: "short", year: "numeric" });
+  return date.toLocaleDateString("en-SG", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 // ─── Insight panel ────────────────────────────────────────────────────────────
 
 function InsightPanel({ childId }: { childId: string }) {
-  const { children, observations, sessions, milestones, openQuickLog } = useStore();
+  const { children, observations, sessions, milestones, openQuickLog } =
+    useStore();
   const child = children.find((c) => c.id === childId);
   const weekStart = getWeekStart(new Date());
   const today = new Date().toISOString().slice(0, 10);
 
   const coverage = useMemo(() => {
-    return getWeeklyDomainCoverage(childId, observations, sessions, milestones, weekStart);
+    return getWeeklyDomainCoverage(
+      childId,
+      observations,
+      sessions,
+      milestones,
+      weekStart,
+    );
   }, [childId, observations, sessions, milestones, weekStart]);
 
   const childObs = observations.filter((o) => o.childId === childId);
@@ -54,8 +68,12 @@ function InsightPanel({ childId }: { childId: string }) {
   if (!child) return null;
 
   const AREA_COLORS: Record<LearningAreaId, string> = {
-    LL: "#7BA3D4", NUM: "#F5A623", SED: "#4A9B6F",
-    ACE: "#E8745A", DOW: "#9B6B9B", HMS: "#6BA3A3",
+    LL: "#7BA3D4",
+    NUM: "#F5A623",
+    SED: "#4A9B6F",
+    ACE: "#E8745A",
+    DOW: "#9B6B9B",
+    HMS: "#6BA3A3",
   };
 
   return (
@@ -69,10 +87,23 @@ function InsightPanel({ childId }: { childId: string }) {
         top: 20,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          marginBottom: 14,
+        }}
+      >
         <ChildAvatar name={child.firstName} size="sm" />
         <div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: "var(--color-text-dark)" }}>
+          <div
+            style={{
+              fontSize: 14,
+              fontWeight: 700,
+              color: "var(--color-text-dark)",
+            }}
+          >
             {getChildDisplayName(child)}
           </div>
           <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
@@ -81,29 +112,63 @@ function InsightPanel({ childId }: { childId: string }) {
         </div>
       </div>
 
-      <div style={{ fontSize: 12, fontWeight: 600, color: "var(--color-text-muted)", marginBottom: 8 }}>
+      <div
+        style={{
+          fontSize: 12,
+          fontWeight: 600,
+          color: "var(--color-text-muted)",
+          marginBottom: 8,
+        }}
+      >
         THIS WEEK
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 5, marginBottom: 14 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 5,
+          marginBottom: 14,
+        }}
+      >
         {LEARNING_AREAS.map((area) => {
           const last = lastPerDomain.get(area.id);
           const days = last
-            ? Math.round((new Date(today).getTime() - new Date(last).getTime()) / (1000 * 60 * 60 * 24))
+            ? Math.round(
+                (new Date(today).getTime() - new Date(last).getTime()) /
+                  (1000 * 60 * 60 * 24),
+              )
             : null;
           return (
-            <div key={area.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div
+              key={area.id}
+              style={{ display: "flex", alignItems: "center", gap: 8 }}
+            >
               <span
                 style={{
                   width: 8,
                   height: 8,
                   borderRadius: "50%",
-                  background: coverage[area.id] ? AREA_COLORS[area.id] : "var(--color-border)",
+                  background: coverage[area.id]
+                    ? AREA_COLORS[area.id]
+                    : "var(--color-border)",
                   flexShrink: 0,
                 }}
               />
-              <span style={{ fontSize: 12, color: "var(--color-text-mid)", flex: 1 }}>{area.id}</span>
+              <span
+                style={{
+                  fontSize: 12,
+                  color: "var(--color-text-mid)",
+                  flex: 1,
+                }}
+              >
+                {area.id}
+              </span>
               <span style={{ fontSize: 11, color: "var(--color-text-muted)" }}>
-                {days === null ? "Never" : days === 0 ? "Today" : `${days}d ago`}
+                {days === null
+                  ? "Never"
+                  : days === 0
+                    ? "Today"
+                    : `${days}d ago`}
               </span>
             </div>
           );
@@ -142,7 +207,7 @@ function InsightPanel({ childId }: { childId: string }) {
           cursor: "pointer",
         }}
       >
-        Export {child.firstName}&apos;s log
+        Export {child.firstName}'s log
       </button>
     </div>
   );
@@ -151,13 +216,8 @@ function InsightPanel({ childId }: { childId: string }) {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function ObservationsPage() {
-  const {
-    observations,
-    children,
-    milestones,
-    employees,
-    activeClassId,
-  } = useStore();
+  const { observations, children, milestones, employees, activeClassId } =
+    useStore();
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -172,22 +232,25 @@ export default function ObservationsPage() {
 
   const classChildren = useMemo(
     () => children.filter((c) => c.classId === activeClassId),
-    [children, activeClassId]
+    [children, activeClassId],
   );
 
   const classChildIds = useMemo(
     () => new Set(classChildren.map((c) => c.id)),
-    [classChildren]
+    [classChildren],
   );
 
   const milestoneMap = useMemo(
     () => new Map(milestones.map((m) => [m.id, m])),
-    [milestones]
+    [milestones],
   );
 
   const employeeMap = useMemo(
-    () => new Map(employees.map((e) => [e.id, `${e.firstName} ${e.lastName}`.trim()])),
-    [employees]
+    () =>
+      new Map(
+        employees.map((e) => [e.id, `${e.firstName} ${e.lastName}`.trim()]),
+      ),
+    [employees],
   );
 
   // Filter observations
@@ -199,7 +262,9 @@ export default function ObservationsPage() {
     }
 
     if (areaFilter) {
-      list = list.filter((o) => milestoneMap.get(o.milestoneId)?.areaId === areaFilter);
+      list = list.filter(
+        (o) => milestoneMap.get(o.milestoneId)?.areaId === areaFilter,
+      );
     }
 
     if (dateFrom) list = list.filter((o) => o.observedAt >= dateFrom);
@@ -207,21 +272,43 @@ export default function ObservationsPage() {
 
     if (teacherFilter) list = list.filter((o) => o.teacherId === teacherFilter);
 
-    if (untaggedOnly) list = list.filter((o) => !o.note || o.note.trim() === "");
+    if (untaggedOnly)
+      list = list.filter((o) => !o.note || o.note.trim() === "");
 
     // Sort: most recent first
     return [...list].sort((a, b) => b.observedAt.localeCompare(a.observedAt));
-  }, [observations, classChildIds, childFilter, areaFilter, dateFrom, dateTo, teacherFilter, untaggedOnly, milestoneMap]);
+  }, [
+    observations,
+    classChildIds,
+    childFilter,
+    areaFilter,
+    dateFrom,
+    dateTo,
+    teacherFilter,
+    untaggedOnly,
+    milestoneMap,
+  ]);
 
   const unnotedCount = useMemo(
-    () => observations.filter((o) => classChildIds.has(o.childId) && (!o.note || o.note.trim() === "")).length,
-    [observations, classChildIds]
+    () =>
+      observations.filter(
+        (o) =>
+          classChildIds.has(o.childId) && (!o.note || o.note.trim() === ""),
+      ).length,
+    [observations, classChildIds],
   );
 
   // Unique teachers who have logged observations for this class
   const activeTeachers = useMemo(() => {
-    const ids = new Set(observations.filter((o) => classChildIds.has(o.childId) && o.teacherId).map((o) => o.teacherId!));
-    return Array.from(ids).map((id) => ({ id, name: employeeMap.get(id) ?? id }));
+    const ids = new Set(
+      observations
+        .filter((o) => classChildIds.has(o.childId) && o.teacherId)
+        .map((o) => o.teacherId!),
+    );
+    return Array.from(ids).map((id) => ({
+      id,
+      name: employeeMap.get(id) ?? id,
+    }));
   }, [observations, classChildIds, employeeMap]);
 
   const showInsightPanel = childFilter.length === 1;
@@ -229,14 +316,30 @@ export default function ObservationsPage() {
   return (
     <div style={{ display: "flex", height: "100%", overflow: "hidden" }}>
       {/* Main content */}
-      <div style={{ flex: 1, minWidth: 0, overflowY: "auto", padding: "20px 20px 40px" }}>
+      <div
+        style={{
+          flex: 1,
+          minWidth: 0,
+          overflowY: "auto",
+          padding: "20px 20px 40px",
+        }}
+      >
         {/* Header */}
         <div style={{ marginBottom: 16 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--color-text-dark)", marginBottom: 4 }}>
+          <h1
+            style={{
+              fontSize: 22,
+              fontWeight: 700,
+              color: "var(--color-text-dark)",
+              marginBottom: 4,
+            }}
+          >
             Observations
           </h1>
           <p style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
-            {filtered.length} of {observations.filter((o) => classChildIds.has(o.childId)).length} observations shown
+            {filtered.length} of{" "}
+            {observations.filter((o) => classChildIds.has(o.childId)).length}{" "}
+            observations shown
           </p>
         </div>
 
@@ -255,7 +358,8 @@ export default function ObservationsPage() {
             }}
           >
             <span style={{ fontSize: 13, color: "#A06010", flex: 1 }}>
-              {unnotedCount} observation{unnotedCount !== 1 ? "s" : ""} have no note — tap to review.
+              {unnotedCount} observation{unnotedCount !== 1 ? "s" : ""} have no
+              note — tap to review.
             </span>
             <button
               onClick={() => setUntaggedOnly(true)}
@@ -276,7 +380,15 @@ export default function ObservationsPage() {
         )}
 
         {/* Filter bar */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16, alignItems: "center" }}>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 8,
+            marginBottom: 16,
+            alignItems: "center",
+          }}
+        >
           {/* Child filter */}
           <div style={{ position: "relative" }}>
             <button
@@ -286,17 +398,27 @@ export default function ObservationsPage() {
                 borderRadius: 8,
                 fontSize: 12,
                 fontWeight: 600,
-                background: childFilter.length > 0 ? "var(--color-primary-wash)" : "var(--color-bg-warm)",
-                border: childFilter.length > 0 ? "1.5px solid var(--color-primary)" : "1px solid var(--color-border)",
-                color: childFilter.length > 0 ? "var(--color-primary)" : "var(--color-text-mid)",
+                background:
+                  childFilter.length > 0
+                    ? "var(--color-primary-wash)"
+                    : "var(--color-bg-warm)",
+                border:
+                  childFilter.length > 0
+                    ? "1.5px solid var(--color-primary)"
+                    : "1px solid var(--color-border)",
+                color:
+                  childFilter.length > 0
+                    ? "var(--color-primary)"
+                    : "var(--color-text-mid)",
                 cursor: "pointer",
               }}
             >
               {childFilter.length === 0
                 ? "All children"
                 : childFilter.length === 1
-                ? classChildren.find((c) => c.id === childFilter[0])?.firstName ?? "1 child"
-                : `${childFilter.length} children`}
+                  ? (classChildren.find((c) => c.id === childFilter[0])
+                      ?.firstName ?? "1 child")
+                  : `${childFilter.length} children`}
             </button>
             {childPickerOpen && (
               <div
@@ -317,8 +439,22 @@ export default function ObservationsPage() {
                 }}
               >
                 <button
-                  onClick={() => { setChildFilter([]); setChildPickerOpen(false); }}
-                  style={{ display: "block", width: "100%", padding: "6px 8px", borderRadius: 6, border: "none", background: "none", textAlign: "left", fontSize: 13, cursor: "pointer", color: "var(--color-text-mid)" }}
+                  onClick={() => {
+                    setChildFilter([]);
+                    setChildPickerOpen(false);
+                  }}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    padding: "6px 8px",
+                    borderRadius: 6,
+                    border: "none",
+                    background: "none",
+                    textAlign: "left",
+                    fontSize: 13,
+                    cursor: "pointer",
+                    color: "var(--color-text-mid)",
+                  }}
                 >
                   All children
                 </button>
@@ -328,7 +464,11 @@ export default function ObservationsPage() {
                     <button
                       key={c.id}
                       onClick={() => {
-                        setChildFilter(isSelected ? childFilter.filter((id) => id !== c.id) : [...childFilter, c.id]);
+                        setChildFilter(
+                          isSelected
+                            ? childFilter.filter((id) => id !== c.id)
+                            : [...childFilter, c.id],
+                        );
                       }}
                       style={{
                         display: "flex",
@@ -338,11 +478,15 @@ export default function ObservationsPage() {
                         padding: "6px 8px",
                         borderRadius: 6,
                         border: "none",
-                        background: isSelected ? "var(--color-primary-wash)" : "none",
+                        background: isSelected
+                          ? "var(--color-primary-wash)"
+                          : "none",
                         textAlign: "left",
                         fontSize: 13,
                         cursor: "pointer",
-                        color: isSelected ? "var(--color-primary)" : "var(--color-text-dark)",
+                        color: isSelected
+                          ? "var(--color-primary)"
+                          : "var(--color-text-dark)",
                         fontWeight: isSelected ? 600 : 400,
                       }}
                     >
@@ -359,15 +503,21 @@ export default function ObservationsPage() {
           {LEARNING_AREAS.map((area) => (
             <button
               key={area.id}
-              onClick={() => setAreaFilter(areaFilter === area.id ? null : area.id)}
+              onClick={() =>
+                setAreaFilter(areaFilter === area.id ? null : area.id)
+              }
               style={{
                 padding: "5px 10px",
                 borderRadius: 8,
                 fontSize: 11,
                 fontWeight: 600,
-                background: areaFilter === area.id ? "var(--color-text-dark)" : "var(--color-bg-warm)",
+                background:
+                  areaFilter === area.id
+                    ? "var(--color-text-dark)"
+                    : "var(--color-bg-warm)",
                 border: "1px solid var(--color-border)",
-                color: areaFilter === area.id ? "#fff" : "var(--color-text-mid)",
+                color:
+                  areaFilter === area.id ? "#fff" : "var(--color-text-mid)",
                 cursor: "pointer",
               }}
             >
@@ -421,7 +571,9 @@ export default function ObservationsPage() {
             >
               <option value="">All teachers</option>
               {activeTeachers.map((t) => (
-                <option key={t.id} value={t.id}>{t.name}</option>
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
               ))}
             </select>
           )}
@@ -435,7 +587,9 @@ export default function ObservationsPage() {
               fontSize: 12,
               fontWeight: 600,
               background: untaggedOnly ? "#FEF3D7" : "var(--color-bg-warm)",
-              border: untaggedOnly ? "1px solid #F5A623" : "1px solid var(--color-border)",
+              border: untaggedOnly
+                ? "1px solid #F5A623"
+                : "1px solid var(--color-border)",
               color: untaggedOnly ? "#A06010" : "var(--color-text-muted)",
               cursor: "pointer",
             }}
@@ -444,7 +598,12 @@ export default function ObservationsPage() {
           </button>
 
           {/* Clear filters */}
-          {(childFilter.length > 0 || areaFilter || dateFrom || dateTo || teacherFilter || untaggedOnly) && (
+          {(childFilter.length > 0 ||
+            areaFilter ||
+            dateFrom ||
+            dateTo ||
+            teacherFilter ||
+            untaggedOnly) && (
             <button
               onClick={() => {
                 setChildFilter([]);
@@ -472,7 +631,13 @@ export default function ObservationsPage() {
 
         {/* Observation feed */}
         {filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "48px 0", color: "var(--color-text-muted)" }}>
+          <div
+            style={{
+              textAlign: "center",
+              padding: "48px 0",
+              color: "var(--color-text-muted)",
+            }}
+          >
             No observations match the current filters.
           </div>
         ) : (
@@ -486,7 +651,9 @@ export default function ObservationsPage() {
               const hasNote = obs.note && obs.note.trim().length > 0;
               const noteExcerpt = hasNote ? obs.note!.slice(0, 120) : null;
               const needsExpand = obs.note && obs.note.length > 120;
-              const teacherName = obs.teacherId ? employeeMap.get(obs.teacherId) : null;
+              const teacherName = obs.teacherId
+                ? employeeMap.get(obs.teacherId)
+                : null;
 
               return (
                 <div
@@ -502,16 +669,32 @@ export default function ObservationsPage() {
                   }}
                 >
                   {/* Avatar */}
-                  <Link href={`/teacher/child/${child.id}`} style={{ flexShrink: 0, textDecoration: "none" }}>
+                  <Link
+                    href={`/teacher/child/${child.id}`}
+                    style={{ flexShrink: 0, textDecoration: "none" }}
+                  >
                     <ChildAvatar name={child.firstName} size="sm" />
                   </Link>
 
                   {/* Content */}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        flexWrap: "wrap",
+                        marginBottom: 4,
+                      }}
+                    >
                       <Link
                         href={`/teacher/child/${child.id}`}
-                        style={{ fontSize: 13, fontWeight: 700, color: "var(--color-text-dark)", textDecoration: "none" }}
+                        style={{
+                          fontSize: 13,
+                          fontWeight: 700,
+                          color: "var(--color-text-dark)",
+                          textDecoration: "none",
+                        }}
                       >
                         {getChildDisplayName(child)}
                       </Link>
@@ -531,12 +714,26 @@ export default function ObservationsPage() {
                       )}
                     </div>
 
-                    <div style={{ fontSize: 12, color: "var(--color-text-dark)", lineHeight: 1.5, marginBottom: 4 }}>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: "var(--color-text-dark)",
+                        lineHeight: 1.5,
+                        marginBottom: 4,
+                      }}
+                    >
                       {milestone.statement}
                     </div>
 
                     {hasNote && (
-                      <div style={{ fontSize: 12, color: "var(--color-text-mid)", lineHeight: 1.5, marginBottom: 4 }}>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: "var(--color-text-mid)",
+                          lineHeight: 1.5,
+                          marginBottom: 4,
+                        }}
+                      >
                         {isExpanded ? obs.note : noteExcerpt}
                         {needsExpand && !isExpanded && "…"}
                         {needsExpand && (
@@ -547,7 +744,15 @@ export default function ObservationsPage() {
                               else next.add(obs.id);
                               setExpandedIds(next);
                             }}
-                            style={{ marginLeft: 4, fontSize: 12, color: "var(--color-primary)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                            style={{
+                              marginLeft: 4,
+                              fontSize: 12,
+                              color: "var(--color-primary)",
+                              background: "none",
+                              border: "none",
+                              cursor: "pointer",
+                              padding: 0,
+                            }}
                           >
                             {isExpanded ? "Show less" : "Show more"}
                           </button>
@@ -555,7 +760,9 @@ export default function ObservationsPage() {
                       </div>
                     )}
 
-                    <div style={{ fontSize: 11, color: "var(--color-text-muted)" }}>
+                    <div
+                      style={{ fontSize: 11, color: "var(--color-text-muted)" }}
+                    >
                       {formatRelativeDate(obs.observedAt)}
                       {teacherName && ` · ${teacherName}`}
                     </div>
@@ -571,7 +778,12 @@ export default function ObservationsPage() {
       {showInsightPanel && (
         <div
           className="hidden lg:block"
-          style={{ width: 260, flexShrink: 0, padding: "20px 16px 20px 0", overflowY: "auto" }}
+          style={{
+            width: 260,
+            flexShrink: 0,
+            padding: "20px 16px 20px 0",
+            overflowY: "auto",
+          }}
           onClick={() => childPickerOpen && setChildPickerOpen(false)}
         >
           <InsightPanel childId={childFilter[0]} />

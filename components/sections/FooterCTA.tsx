@@ -31,7 +31,7 @@ export default function FooterCTA() {
                 style={{ color: "#2D4A46" }}
               >
                 Try the demo, request a walkthrough, or get in touch to discuss
-                how Nurture fits your school&apos;s curriculum.
+                how Nurture fits your school's curriculum.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link
@@ -182,7 +182,7 @@ export default function FooterCTA() {
             className="text-xs text-center"
             style={{ color: "rgba(255,255,255,0.6)" }}
           >
-            A learning platform for Singapore&apos;s preschools · Aligned to NEL
+            A learning platform for Singapore's preschools · Aligned to NEL
             Framework
           </p>
           <p className="text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>

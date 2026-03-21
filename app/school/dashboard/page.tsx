@@ -38,7 +38,7 @@ function StatusPanel({
         className={cn(
           "h-full transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-md",
           "ring-2",
-          levelRing[level]
+          levelRing[level],
         )}
       >
         <CardHeader className="pb-2">
@@ -70,7 +70,7 @@ function Metric({
       <span
         className={cn(
           "text-sm font-semibold tabular-nums text-foreground",
-          flag && "text-destructive"
+          flag && "text-destructive",
         )}
       >
         {value}
@@ -194,7 +194,9 @@ export default function AdminDashboardPage() {
 
       <Card>
         <CardHeader className="pb-0">
-          <CardTitle className="text-sm font-semibold">Today&apos;s Activity</CardTitle>
+          <CardTitle className="text-sm font-semibold">
+            Today's Activity
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 pt-4">
           <Separator />

@@ -153,9 +153,7 @@ function TodayView() {
               >
                 {s.value}
               </div>
-              <div
-                className="text-muted-foreground mt-0.5 text-xs"
-              >
+              <div className="text-muted-foreground mt-0.5 text-xs">
                 {s.label}
               </div>
             </CardContent>
@@ -394,7 +392,7 @@ function TrendsView() {
       >
         <p className="text-xs" style={{ color: "var(--color-text-mid)" }}>
           Attendance patterns can be an early signal of family stress or health
-          issues. The admin&apos;s role is to ensure the teacher is aware and can
+          issues. The admin's role is to ensure the teacher is aware and can
           have a supportive conversation with the family.
         </p>
       </div>
@@ -522,7 +520,12 @@ function AbsencesView() {
                   </td>
                   <td className="px-5 py-3 text-right">
                     {a.status === "unexplained" && (
-                      <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs">
+                      <Button
+                        type="button"
+                        variant="link"
+                        size="sm"
+                        className="h-auto p-0 text-xs"
+                      >
                         Flag teacher
                       </Button>
                     )}
@@ -551,7 +554,9 @@ export default function AttendancePage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-6 pb-24 md:pb-8">
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-foreground">Attendance Overview</h1>
+        <h1 className="text-xl font-bold text-foreground">
+          Attendance Overview
+        </h1>
         <p className="text-muted-foreground mt-0.5 text-sm">
           School-wide attendance tracking and absence management.
         </p>

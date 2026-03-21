@@ -23,16 +23,16 @@ export default function Milestones() {
                   letterSpacing: "-0.02em",
                 }}
               >
-                Built on Singapore&apos;s NEL Framework —{" "}
+                Built on Singapore's NEL Framework —{" "}
                 <span style={{ color: "#F79863" }}>
                   structured, but never rigid.
                 </span>
               </h2>
               <p className="leading-relaxed mb-6" style={{ color: "#666666" }}>
-                Nurture&apos;s milestone schema is mapped directly to the
-                Ministry of Education&apos;s Nurturing Early Learners (NEL)
-                Framework. Every learning goal is translated into observable,
-                sequenced milestones — from{" "}
+                Nurture's milestone schema is mapped directly to the Ministry of
+                Education's Nurturing Early Learners (NEL) Framework. Every
+                learning goal is translated into observable, sequenced
+                milestones — from{" "}
                 <strong style={{ color: "#333333" }}>Beginning</strong> through{" "}
                 <strong style={{ color: "#333333" }}>Developing</strong> to{" "}
                 <strong style={{ color: "#333333" }}>Secure</strong> — aligned

@@ -670,7 +670,7 @@ export default function OutcomesPage() {
       <div className="mb-6">
         <h1 className="text-xl font-bold text-foreground">Learning Outcomes</h1>
         <p className="text-muted-foreground mt-0.5 text-sm">
-          Programme-level view of whether the school&apos;s curriculum is working.
+          Programme-level view of whether the school's curriculum is working.
         </p>
       </div>
 

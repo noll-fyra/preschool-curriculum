@@ -26,10 +26,13 @@ function ParentHomeMockup() {
     >
       <div
         className="px-4 py-3 flex items-center justify-between"
-        style={{ backgroundColor: "#FAFAFA", borderBottom: "1px solid #F0F0F0" }}
+        style={{
+          backgroundColor: "#FAFAFA",
+          borderBottom: "1px solid #F0F0F0",
+        }}
       >
         <span className="text-xs font-semibold" style={{ color: "#333333" }}>
-          Aisha&apos;s week
+          Aisha's week
         </span>
         <span
           className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
@@ -53,8 +56,8 @@ function ParentHomeMockup() {
             Aisha had a great week. 🌱
           </p>
           <p className="text-xs mt-1" style={{ color: "#737373" }}>
-            She completed 3 activities and unlocked a new milestone in
-            Language &amp; Literacy.
+            She completed 3 activities and unlocked a new milestone in Language
+            &amp; Literacy.
           </p>
         </div>
         <div className="grid grid-cols-3 gap-2">
@@ -116,10 +119,7 @@ function ParentProgressMockup() {
         border: "1px solid #E5E5E5",
       }}
     >
-      <p
-        className="text-xs font-semibold mb-2"
-        style={{ color: "#4A9B6F" }}
-      >
+      <p className="text-xs font-semibold mb-2" style={{ color: "#4A9B6F" }}>
         Milestones
       </p>
       <div className="space-y-1.5">
@@ -214,7 +214,7 @@ export default function ForParentsPage() {
 
         {/* Section 2: Category positioning line */}
         <PositioningLine>
-          Your child&apos;s progress, in plain language — not once a term, but
+          Your child's progress, in plain language — not once a term, but
           always.
         </PositioningLine>
 
@@ -223,7 +223,7 @@ export default function ForParentsPage() {
           sectionEyebrow="The parent dashboard"
           sectionHeadline={
             <>
-              A live view of your child&apos;s learning,
+              A live view of your child's learning,
               <br />
               written for you — not a report.
             </>
@@ -261,7 +261,7 @@ export default function ForParentsPage() {
             },
             {
               eyebrow: "Teacher messaging",
-              headline: "A direct line to your child&apos;s teacher.",
+              headline: "A direct line to your child's teacher.",
               body: "Questions, updates, and teacher notes all live in the same app as the progress data. No switching between apps. No chasing messages across multiple platforms. One place for everything.",
               visual: <ParentHomeMockup />,
             },
@@ -273,14 +273,14 @@ export default function ForParentsPage() {
           sectionEyebrow="Connected to school"
           sectionHeadline={
             <>
-              Connected to your child&apos;s school,
+              Connected to your child's school,
               <br />
               in real time.
             </>
           }
           heroFeature={{
             eyebrow: "School-day visibility",
-            headline: "What happens at school doesn&apos;t stay at school.",
+            headline: "What happens at school doesn't stay at school.",
             body: "Every activity your child completes in the classroom feeds directly into the app you hold. Their teacher's observations, their milestone achievements, their daily learning — you see it all, framed in language that makes sense, within the same day it happens.",
             bullets: [
               "Updates appear as teachers log activities and observations",
@@ -364,7 +364,7 @@ export default function ForParentsPage() {
             {
               icon: "⭐",
               name: "Milestone explanations",
-              desc: "Every milestone explained in plain language, with one \"try at home\" suggestion.",
+              desc: 'Every milestone explained in plain language, with one "try at home" suggestion.',
               iconBg: "#FFF8E8",
             },
             {
@@ -410,8 +410,8 @@ export default function ForParentsPage() {
             },
             {
               icon: "🏫",
-              title: "Ask your child&apos;s school",
-              desc: "Share Nurture with your child&apos;s preschool and invite them to join the pilot.",
+              title: "Ask your child's school",
+              desc: "Share Nurture with your child's preschool and invite them to join the pilot.",
               ctaLabel: "Share with school →",
               ctaHref: "mailto:hello@nurture.edu.sg",
             },
@@ -435,7 +435,7 @@ export default function ForParentsPage() {
             },
             {
               q: "Will I be able to see how my child compares to the rest of the class?",
-              a: "No — and this is intentional. Nurture never shows class averages, percentile rankings, or any data that implies comparison to other children. Your child's progress is measured only against their own journey. There is no data point in Nurture that could make you feel your child is \"behind.\"",
+              a: 'No — and this is intentional. Nurture never shows class averages, percentile rankings, or any data that implies comparison to other children. Your child\'s progress is measured only against their own journey. There is no data point in Nurture that could make you feel your child is "behind."',
             },
             {
               q: "Is this app separate from what the school uses?",

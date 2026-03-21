@@ -22,13 +22,20 @@ const C = {
   textAmber: "#5C4200",
 };
 
-const CONFETTI_COLOURS = ["#F5C518", "#7DC873", "#E8604A", "#7BA3D4", "#F4A8C4", "#C5B3E6"];
+const CONFETTI_COLOURS = [
+  "#F5C518",
+  "#7DC873",
+  "#E8604A",
+  "#7BA3D4",
+  "#F4A8C4",
+  "#C5B3E6",
+];
 
 function mulberry32(seed: number) {
   let a = seed >>> 0;
   return () => {
     a |= 0;
-    a = (a + 0x6D2B79F5) | 0;
+    a = (a + 0x6d2b79f5) | 0;
     let t = Math.imul(a ^ (a >>> 15), 1 | a);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
@@ -44,7 +51,10 @@ interface ActivityPlayerProps {
 
 type Phase = "intro" | "question" | "feedback" | "result";
 
-function pickQuestions(config: ActivityConfig, childName: string): ActivityQuestion[] {
+function pickQuestions(
+  config: ActivityConfig,
+  childName: string,
+): ActivityQuestion[] {
   let pool: ActivityQuestion[];
   if (config.isDynamic) {
     pool = generateNameCardQuestions(childName);
@@ -124,7 +134,7 @@ function HomeButton({ onExit }: { onExit: () => void }) {
 
 // Confetti: 28 CSS-animated squares (spec §Screen 6)
 function Confetti() {
-  const rng = mulberry32(0xC0FFEE);
+  const rng = mulberry32(0xc0ffee);
   const pieces = Array.from({ length: 28 }, (_, i) => ({
     id: i,
     left: `${(rng() * 100).toFixed(2)}%`,
@@ -134,7 +144,15 @@ function Confetti() {
   }));
 
   return (
-    <div style={{ position: "fixed", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: 0 }}>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        pointerEvents: "none",
+        overflow: "hidden",
+        zIndex: 0,
+      }}
+    >
       {pieces.map((p) => (
         <div
           key={p.id}
@@ -154,9 +172,15 @@ function Confetti() {
   );
 }
 
-export function ActivityPlayer({ childName, config, onComplete }: ActivityPlayerProps) {
+export function ActivityPlayer({
+  childName,
+  config,
+  onComplete,
+}: ActivityPlayerProps) {
   const router = useRouter();
-  const [questions] = useState<ActivityQuestion[]>(() => pickQuestions(config, childName));
+  const [questions] = useState<ActivityQuestion[]>(() =>
+    pickQuestions(config, childName),
+  );
   const [questionIndex, setQuestionIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("intro");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -199,7 +223,7 @@ export function ActivityPlayer({ childName, config, onComplete }: ActivityPlayer
         // else: stay on question, hint pulse kicks in after 1 wrong
       }
     },
-    [phase, current, wrongAttempts, lastWrongId]
+    [phase, current, wrongAttempts, lastWrongId],
   );
 
   const handleNext = useCallback(() => {
@@ -290,7 +314,14 @@ export function ActivityPlayer({ childName, config, onComplete }: ActivityPlayer
                 borderTop: `16px solid ${C.borderWarm}`,
               }}
             />
-            <p style={{ fontSize: 16, color: C.textDark, margin: 0, lineHeight: 1.5 }}>
+            <p
+              style={{
+                fontSize: 16,
+                color: C.textDark,
+                margin: 0,
+                lineHeight: 1.5,
+              }}
+            >
               {config.name}
             </p>
           </div>
@@ -311,7 +342,7 @@ export function ActivityPlayer({ childName, config, onComplete }: ActivityPlayer
               boxShadow: `0 4px 0 ${C.yellowDark}`,
             }}
           >
-            Let&apos;s go! ▶
+            Let's go! ▶
           </button>
         </div>
       </>
@@ -341,7 +372,12 @@ export function ActivityPlayer({ childName, config, onComplete }: ActivityPlayer
           }}
         >
           {/* Character placeholder — celebration emoji (Pip would go here) */}
-          <div style={{ fontSize: 80, animation: "celebration-dance 0.6s ease-in-out 3" }}>
+          <div
+            style={{
+              fontSize: 80,
+              animation: "celebration-dance 0.6s ease-in-out 3",
+            }}
+          >
             🐣
           </div>
 
@@ -363,7 +399,14 @@ export function ActivityPlayer({ childName, config, onComplete }: ActivityPlayer
 
           {/* Always celebratory — no performance language (spec Principle 5) */}
           <div>
-            <h2 style={{ fontSize: 26, fontWeight: 700, color: C.textDark, margin: 0 }}>
+            <h2
+              style={{
+                fontSize: 26,
+                fontWeight: 700,
+                color: C.textDark,
+                margin: 0,
+              }}
+            >
               {childName}! You finished!
             </h2>
             <p style={{ fontSize: 16, color: C.textMuted, marginTop: 6 }}>
@@ -422,7 +465,14 @@ export function ActivityPlayer({ childName, config, onComplete }: ActivityPlayer
         {/* Top row: progress dots + home button */}
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {/* Progress dots (spec §Screens 3–5 — no fraction counter) */}
-          <div style={{ display: "flex", gap: 8, flex: 1, justifyContent: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              flex: 1,
+              justifyContent: "center",
+            }}
+          >
             {questions.map((_, i) => {
               const done = i < questionIndex;
               const current = i === questionIndex;
@@ -433,7 +483,11 @@ export function ActivityPlayer({ childName, config, onComplete }: ActivityPlayer
                     width: current ? 14 : 10,
                     height: current ? 14 : 10,
                     borderRadius: "50%",
-                    background: done ? C.green : current ? C.yellow : C.borderWarm,
+                    background: done
+                      ? C.green
+                      : current
+                        ? C.yellow
+                        : C.borderWarm,
                     transition: "all 0.2s ease",
                   }}
                 />
@@ -454,20 +508,43 @@ export function ActivityPlayer({ childName, config, onComplete }: ActivityPlayer
               textAlign: "center",
             }}
           >
-            <p style={{ fontSize: 22, color: C.textDark, margin: 0, lineHeight: 1.5, fontWeight: 500 }}>
+            <p
+              style={{
+                fontSize: 22,
+                color: C.textDark,
+                margin: 0,
+                lineHeight: 1.5,
+                fontWeight: 500,
+              }}
+            >
               {current.scene}
             </p>
           </div>
         )}
 
         {/* Prompt — spoken by character, text for parents */}
-        <p style={{ fontSize: 18, fontWeight: 700, color: C.textDark, margin: 0, lineHeight: 1.4 }}>
+        <p
+          style={{
+            fontSize: 18,
+            fontWeight: 700,
+            color: C.textDark,
+            margin: 0,
+            lineHeight: 1.4,
+          }}
+        >
           {current.prompt}
         </p>
 
         {/* Warm re-prompt after 1 wrong attempt (spec §Wrong answer flow) */}
         {phase === "question" && wrongAttempts === 1 && (
-          <p style={{ fontSize: 15, color: C.textMuted, textAlign: "center", margin: 0 }}>
+          <p
+            style={{
+              fontSize: 15,
+              color: C.textMuted,
+              textAlign: "center",
+              margin: 0,
+            }}
+          >
             Have another look! Which one do you think?
           </p>
         )}
@@ -503,7 +580,8 @@ export function ActivityPlayer({ childName, config, onComplete }: ActivityPlayer
             const isShaking = option.id === shakingId;
 
             // Hint pulse: after 1 wrong attempt on question phase, pulse the correct answer
-            const showHintPulse = phase === "question" && wrongAttempts >= 1 && isCorrect;
+            const showHintPulse =
+              phase === "question" && wrongAttempts >= 1 && isCorrect;
 
             // Feedback phase styling
             let bg = C.surface;
@@ -555,12 +633,13 @@ export function ActivityPlayer({ childName, config, onComplete }: ActivityPlayer
                   justifyContent: "center",
                   gap: 4,
                   padding: "8px 4px",
-                  transition: "opacity 0.2s, background 0.2s, border-color 0.2s",
+                  transition:
+                    "opacity 0.2s, background 0.2s, border-color 0.2s",
                   animation: isShaking
                     ? "shake 0.4s ease-out"
                     : showHintPulse
-                    ? "hint-pulse 0.6s ease-in-out infinite"
-                    : undefined,
+                      ? "hint-pulse 0.6s ease-in-out infinite"
+                      : undefined,
                 }}
               >
                 {option.label}

@@ -61,7 +61,7 @@ export function ReportEditor({
               strokeLinejoin="round"
             />
           </svg>
-          Report published to {childName}&apos;s parent
+          Report published to {childName}'s parent
           {report.publishedAt && (
             <span className="ml-auto opacity-70">
               {new Date(report.publishedAt).toLocaleDateString("en-SG", {
@@ -155,7 +155,10 @@ export function ReportEditor({
                 <div
                   key={i}
                   className="h-4 rounded animate-pulse"
-                  style={{ background: "var(--color-bg-deep)", width: `${70 + i * 10}%` }}
+                  style={{
+                    background: "var(--color-bg-deep)",
+                    width: `${70 + i * 10}%`,
+                  }}
                 />
               ))}
             </div>
@@ -191,7 +194,10 @@ export function ReportEditor({
               (optional)
             </span>
           </h3>
-          <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>
+          <p
+            className="text-xs mt-0.5"
+            style={{ color: "var(--color-text-muted)" }}
+          >
             Add qualitative observations, anecdotes, or areas to highlight
           </p>
         </div>

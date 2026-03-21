@@ -15,7 +15,7 @@ const LEVEL_COLORS: Record<LevelId, { bg: string; text: string }> = {
 };
 
 const AREA_COLORS: Record<string, { bg: string; text: string }> = {
-  LL:  { bg: "#E8EFF8", text: "#3A5EA0" },
+  LL: { bg: "#E8EFF8", text: "#3A5EA0" },
   NUM: { bg: "#E8F5EE", text: "#2D7A4F" },
 };
 
@@ -39,19 +39,28 @@ export default function ParentActivitiesPage() {
     store.milestones,
     store.progress,
     store.sessions,
-    store.observations
+    store.observations,
   );
   const digitalActivities = allAssigned.filter((m) => m.areaId !== "SED");
 
   const today = new Date().toISOString().slice(0, 10);
   const passedTodayIds = new Set(
     store.sessions
-      .filter((s) => s.childId === childId && s.passed && s.attemptedAt.slice(0, 10) === today)
-      .map((s) => s.milestoneId)
+      .filter(
+        (s) =>
+          s.childId === childId &&
+          s.passed &&
+          s.attemptedAt.slice(0, 10) === today,
+      )
+      .map((s) => s.milestoneId),
   );
 
   const himHer =
-    getPronounFromGender(child.gender) === "he" ? "him" : getPronounFromGender(child.gender) === "she" ? "her" : "them";
+    getPronounFromGender(child.gender) === "he"
+      ? "him"
+      : getPronounFromGender(child.gender) === "she"
+        ? "her"
+        : "them";
 
   return (
     <div className="px-4 py-5 max-w-lg mx-auto">
@@ -63,15 +72,22 @@ export default function ParentActivitiesPage() {
         >
           Activities
         </h1>
-        <p className="mt-1" style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
-          {getChildDisplayName(child)}&apos;s personalised queue — updated weekly by the class teacher.
+        <p
+          className="mt-1"
+          style={{ fontSize: 13, color: "var(--color-text-muted)" }}
+        >
+          {getChildDisplayName(child)}'s personalised queue — updated weekly by
+          the class teacher.
         </p>
       </div>
 
       {digitalActivities.length === 0 ? (
         <div
           className="rounded-2xl border p-5 text-center"
-          style={{ background: "var(--color-bg-cream)", borderColor: "var(--color-border)" }}
+          style={{
+            background: "var(--color-bg-cream)",
+            borderColor: "var(--color-border)",
+          }}
         >
           <p style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
             No activities assigned yet — check back soon.
@@ -80,11 +96,16 @@ export default function ParentActivitiesPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {digitalActivities.map((milestone) => {
-            const config = activityConfigOverrides[milestone.id] ?? getActivityConfig(milestone.id);
+            const config =
+              activityConfigOverrides[milestone.id] ??
+              getActivityConfig(milestone.id);
             if (!config) return null;
 
             const doneToday = passedTodayIds.has(milestone.id);
-            const areaColors = AREA_COLORS[milestone.areaId] ?? { bg: "#E8F5EE", text: "#2D7A4F" };
+            const areaColors = AREA_COLORS[milestone.areaId] ?? {
+              bg: "#E8F5EE",
+              text: "#2D7A4F",
+            };
             const levelColors = LEVEL_COLORS[milestone.levelId];
 
             return (
@@ -103,7 +124,10 @@ export default function ParentActivitiesPage() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span
                           className="font-medium"
-                          style={{ fontSize: 14, color: "var(--color-text-dark)" }}
+                          style={{
+                            fontSize: 14,
+                            color: "var(--color-text-dark)",
+                          }}
                         >
                           {config.name}
                         </span>
@@ -118,7 +142,10 @@ export default function ParentActivitiesPage() {
                         {!doneToday && (
                           <span
                             className="text-xs px-2 py-0.5 rounded-full font-medium"
-                            style={{ background: "var(--color-bg-deep)", color: "var(--color-text-muted)" }}
+                            style={{
+                              background: "var(--color-bg-deep)",
+                              color: "var(--color-text-muted)",
+                            }}
                           >
                             Ready to play
                           </span>
@@ -127,13 +154,19 @@ export default function ParentActivitiesPage() {
                       <div className="flex items-center gap-2 mt-1 flex-wrap">
                         <span
                           className="text-xs px-2 py-0.5 rounded-full font-medium"
-                          style={{ background: areaColors.bg, color: areaColors.text }}
+                          style={{
+                            background: areaColors.bg,
+                            color: areaColors.text,
+                          }}
                         >
                           {milestone.areaId === "LL" ? "Language" : "Numeracy"}
                         </span>
                         <span
                           className="text-xs px-2 py-0.5 rounded-full font-medium"
-                          style={{ background: levelColors.bg, color: levelColors.text }}
+                          style={{
+                            background: levelColors.bg,
+                            color: levelColors.text,
+                          }}
                         >
                           {LEVEL_LABELS[milestone.levelId]}
                         </span>
@@ -147,12 +180,16 @@ export default function ParentActivitiesPage() {
                     href={`/student/${childId}`}
                     className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-medium text-sm transition-opacity hover:opacity-90"
                     style={{
-                      background: doneToday ? "var(--color-bg-deep)" : "var(--color-primary)",
+                      background: doneToday
+                        ? "var(--color-bg-deep)"
+                        : "var(--color-primary)",
                       color: doneToday ? "var(--color-text-mid)" : "white",
                       fontSize: 14,
                     }}
                   >
-                    {doneToday ? "Play again" : `Let ${getChildDisplayName(child)} play →`}
+                    {doneToday
+                      ? "Play again"
+                      : `Let ${getChildDisplayName(child)} play →`}
                   </Link>
                 </div>
               </div>
@@ -166,7 +203,8 @@ export default function ParentActivitiesPage() {
         className="text-center mt-5"
         style={{ fontSize: 13, color: "var(--color-text-muted)" }}
       >
-        Tap an activity to start it with {getChildDisplayName(child)}, or let {himHer} tap it alone.
+        Tap an activity to start it with {getChildDisplayName(child)}, or let{" "}
+        {himHer} tap it alone.
       </p>
     </div>
   );

@@ -311,7 +311,7 @@ export default function ParentHomePage() {
           className="font-medium leading-tight mt-0.5"
           style={{ fontSize: 22, color: "var(--color-text-dark)" }}
         >
-          {childName}&apos;s updates
+          {childName}'s updates
         </h1>
       </div>
 
@@ -332,7 +332,7 @@ export default function ParentHomePage() {
           </div>
           <div>
             <p className="font-medium" style={{ fontSize: 13, color: "var(--color-text-dark)" }}>
-              {childName}&apos;s progress
+              {childName}'s progress
             </p>
             <p style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
               Development across all 6 learning areas
@@ -349,7 +349,7 @@ export default function ParentHomePage() {
           style={{ background: "var(--color-bg-cream)", borderColor: "var(--color-border)" }}
         >
           <p style={{ fontSize: 14, color: "var(--color-text-muted)", lineHeight: 1.6 }}>
-            Updates from {childName}&apos;s teacher will appear here each school day.
+            Updates from {childName}'s teacher will appear here each school day.
           </p>
         </div>
       ) : (

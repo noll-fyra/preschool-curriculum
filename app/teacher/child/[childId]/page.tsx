@@ -22,9 +22,16 @@ import { ProgressChart } from "@/components/shared/ProgressChart";
 
 type Tab = "overview" | "observations" | "milestones" | "family";
 
-const NOTE_TAG_STYLES: Record<NoteTag, { label: string; bg: string; text: string }> = {
+const NOTE_TAG_STYLES: Record<
+  NoteTag,
+  { label: string; bg: string; text: string }
+> = {
   learning: { label: "Learning", bg: "#EFF6FF", text: "#1D4ED8" },
-  milestone_moment: { label: "Milestone moment", bg: "#E8F5EE", text: "#2D7A4F" },
+  milestone_moment: {
+    label: "Milestone moment",
+    bg: "#E8F5EE",
+    text: "#2D7A4F",
+  },
   behaviour: { label: "Behaviour", bg: "#FFFBF2", text: "#A06010" },
   social: { label: "Social", bg: "#EFF6FF", text: "#1D4ED8" },
   welfare: { label: "Welfare", bg: "#FDECEA", text: "#B91C1C" },
@@ -44,7 +51,7 @@ function formatRelativeDate(iso: string): string {
   const date = new Date(iso);
   const now = new Date();
   const diffDays = Math.floor(
-    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
   );
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Yesterday";
@@ -105,14 +112,16 @@ export default function ChildProfilePage({
   const sedMilestones = getSEDMilestones(store);
   const todayLogged = getTodayObservationMilestoneIds(childId, store);
   // Profile section data
-  const snapshot = store.personalitySnapshots.find((s) => s.childId === childId);
+  const snapshot = store.personalitySnapshots.find(
+    (s) => s.childId === childId,
+  );
   const strategies = store.teacherStrategies.find((s) => s.childId === childId);
   const familyCtx = store.familyContexts.find((f) => f.childId === childId);
   const childNotes = store.teacherNotes
     .filter((n) => n.childId === childId && !n.deletedAt)
     .sort(
       (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
 
   // Profile completeness (weights per spec)
@@ -123,7 +132,7 @@ export default function ChildProfilePage({
     .split("\n")
     .filter((s) => s.trim().length > 0);
   const thirtyDaysAgo = new Date(
-    Date.now() - 30 * 24 * 60 * 60 * 1000
+    Date.now() - 30 * 24 * 60 * 60 * 1000,
   ).toISOString();
   const hasRecentNote = childNotes.some((n) => n.createdAt >= thirtyDaysAgo);
   const completeness =
@@ -140,32 +149,27 @@ export default function ChildProfilePage({
       store.milestones,
       store.progress,
       childId,
-      areaId as "LL" | "NUM" | "SED"
+      areaId as "LL" | "NUM" | "SED",
     );
     const levelMilestones = store.milestones
       .filter((m) => m.areaId === areaId && m.levelId === level)
       .sort((a, b) => a.sequence - b.sequence);
 
     const allAreaMilestones = store.milestones.filter(
-      (m) => m.areaId === areaId
+      (m) => m.areaId === areaId,
     );
     const allAreaAchieved = allAreaMilestones.every(
-      (m) =>
-        allProgress.find((p) => p.id === m.id)?.status === "achieved"
+      (m) => allProgress.find((p) => p.id === m.id)?.status === "achieved",
     );
 
     const achievedInLevel = levelMilestones.filter(
-      (m) =>
-        allProgress.find((p) => p.id === m.id)?.status === "achieved"
+      (m) => allProgress.find((p) => p.id === m.id)?.status === "achieved",
     ).length;
     const fillPct =
-      levelMilestones.length > 0
-        ? achievedInLevel / levelMilestones.length
-        : 0;
+      levelMilestones.length > 0 ? achievedInLevel / levelMilestones.length : 0;
 
     const inProgressMilestone = levelMilestones.find(
-      (m) =>
-        allProgress.find((p) => p.id === m.id)?.status === "in_progress"
+      (m) => allProgress.find((p) => p.id === m.id)?.status === "in_progress",
     );
     const inProgressData = inProgressMilestone
       ? allProgress.find((p) => p.id === inProgressMilestone.id)
@@ -184,7 +188,7 @@ export default function ChildProfilePage({
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const activityFeed = useMemo(() => {
     const cutoff = new Date(
-      Date.now() - 14 * 24 * 60 * 60 * 1000
+      Date.now() - 14 * 24 * 60 * 60 * 1000,
     ).toISOString();
     type FeedItem = {
       id: string;
@@ -198,7 +202,7 @@ export default function ChildProfilePage({
 
     // Sessions — deduplicate: keep latest per (milestoneId, day)
     const recentSessions = store.sessions.filter(
-      (s) => s.childId === childId && s.attemptedAt >= cutoff
+      (s) => s.childId === childId && s.attemptedAt >= cutoff,
     );
     const sessionsByKey = new Map<string, (typeof recentSessions)[0]>();
     for (const s of recentSessions) {
@@ -225,8 +229,7 @@ export default function ChildProfilePage({
 
     // Milestone achievements
     for (const p of store.progress.filter(
-      (p) =>
-        p.childId === childId && p.achievedAt && p.achievedAt >= cutoff
+      (p) => p.childId === childId && p.achievedAt && p.achievedAt >= cutoff,
     )) {
       const milestone = store.milestones.find((m) => m.id === p.milestoneId);
       items.push({
@@ -240,8 +243,7 @@ export default function ChildProfilePage({
 
     // SED observations
     for (const o of store.observations.filter(
-      (o) =>
-        o.childId === childId && o.observedAt >= cutoff.slice(0, 10)
+      (o) => o.childId === childId && o.observedAt >= cutoff.slice(0, 10),
     )) {
       const milestone = store.milestones.find((m) => m.id === o.milestoneId);
       items.push({
@@ -264,10 +266,8 @@ export default function ChildProfilePage({
       });
     }
 
-    return items
-      .sort((a, b) => b.date.localeCompare(a.date))
-      .slice(0, 5);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    return items.sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     store.sessions,
     store.observations,
@@ -309,7 +309,7 @@ export default function ChildProfilePage({
 
   function toggleNoteTag(tag: NoteTag) {
     setNoteTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
   }
 
@@ -386,7 +386,13 @@ export default function ChildProfilePage({
           }
         }}
         className="inline-flex items-center gap-1.5 text-sm mb-5"
-        style={{ color: "var(--color-text-muted)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+        style={{
+          color: "var(--color-text-muted)",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: 0,
+        }}
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path
@@ -431,14 +437,16 @@ export default function ChildProfilePage({
       {/* ── Tab: Overview ─────────────────────────────────────────────────── */}
       {activeTab === "overview" && (
         <div className="flex flex-col gap-5">
-
           {/* Section 2: Personality snapshot */}
           <div
             className="rounded-2xl border px-4 py-3.5"
             style={{ background: "#F0FAF4", borderColor: "#A8D9BC" }}
           >
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-sm font-bold" style={{ color: "var(--color-text-dark)" }}>
+              <h2
+                className="text-sm font-bold"
+                style={{ color: "var(--color-text-dark)" }}
+              >
                 Personality snapshot
               </h2>
               {!editingSnapshot && (
@@ -457,9 +465,12 @@ export default function ChildProfilePage({
 
             {editingSnapshot ? (
               <div>
-                <p className="text-xs mb-2" style={{ color: "var(--color-text-muted)" }}>
-                  Write 2–4 sentences. How do they approach new things? What settles
-                  them? What upsets them? Who are they close to?
+                <p
+                  className="text-xs mb-2"
+                  style={{ color: "var(--color-text-muted)" }}
+                >
+                  Write 2–4 sentences. How do they approach new things? What
+                  settles them? What upsets them? Who are they close to?
                 </p>
                 <textarea
                   value={snapshotDraft}
@@ -493,10 +504,16 @@ export default function ChildProfilePage({
               </div>
             ) : snapshot?.content ? (
               <div>
-                <p className="text-sm leading-relaxed" style={{ color: "var(--color-text-dark)" }}>
+                <p
+                  className="text-sm leading-relaxed"
+                  style={{ color: "var(--color-text-dark)" }}
+                >
                   {snapshot.content}
                 </p>
-                <p className="text-xs mt-2" style={{ color: "var(--color-text-muted)" }}>
+                <p
+                  className="text-xs mt-2"
+                  style={{ color: "var(--color-text-muted)" }}
+                >
                   Updated {formatRelativeDate(snapshot.updatedAt)}
                 </p>
               </div>
@@ -520,11 +537,17 @@ export default function ChildProfilePage({
                 background: "var(--color-bg-cream)",
               }}
             >
-              <h2 className="text-sm font-bold" style={{ color: "var(--color-text-dark)" }}>
+              <h2
+                className="text-sm font-bold"
+                style={{ color: "var(--color-text-dark)" }}
+              >
                 Learning snapshot
               </h2>
             </div>
-            <div className="divide-y" style={{ borderColor: "var(--color-border)" }}>
+            <div
+              className="divide-y"
+              style={{ borderColor: "var(--color-border)" }}
+            >
               {LEARNING_AREAS.map((area) => {
                 const {
                   level,
@@ -539,7 +562,10 @@ export default function ChildProfilePage({
                 return (
                   <div key={area.id} className="px-4 py-3.5">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-semibold" style={{ color: "var(--color-text-dark)" }}>
+                      <span
+                        className="text-sm font-semibold"
+                        style={{ color: "var(--color-text-dark)" }}
+                      >
                         {area.id === "SED" ? "Social & Emotional" : area.name}
                       </span>
                       <StatusBadge level={level as LevelId} />
@@ -556,7 +582,10 @@ export default function ChildProfilePage({
                         }}
                       />
                     </div>
-                    <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                    <p
+                      className="text-xs"
+                      style={{ color: "var(--color-text-muted)" }}
+                    >
                       {allAreaAchieved ? (
                         <span style={{ color: "#2D7A4F", fontWeight: 600 }}>
                           P1 ready
@@ -566,7 +595,8 @@ export default function ChildProfilePage({
                           Working on: {inProgressMilestone.statement}
                           {inProgressData && (
                             <span className="ml-1">
-                              · {inProgressData.masteryCount}/{inProgressData.masteryTotal}{" "}
+                              · {inProgressData.masteryCount}/
+                              {inProgressData.masteryTotal}{" "}
                               {area.assessmentType === "behaviour"
                                 ? "observations"
                                 : "sessions"}
@@ -595,27 +625,45 @@ export default function ChildProfilePage({
                 background: "var(--color-bg-cream)",
               }}
             >
-              <h2 className="text-sm font-bold" style={{ color: "var(--color-text-dark)" }}>
+              <h2
+                className="text-sm font-bold"
+                style={{ color: "var(--color-text-dark)" }}
+              >
                 Recent activity
               </h2>
             </div>
             {activityFeed.length === 0 ? (
-              <p className="px-4 py-4 text-sm" style={{ color: "var(--color-text-muted)" }}>
+              <p
+                className="px-4 py-4 text-sm"
+                style={{ color: "var(--color-text-muted)" }}
+              >
                 No recent activity in the last 14 days.
               </p>
             ) : (
-              <div className="divide-y" style={{ borderColor: "var(--color-border)" }}>
+              <div
+                className="divide-y"
+                style={{ borderColor: "var(--color-border)" }}
+              >
                 {activityFeed.map((item) => (
-                  <div key={item.id} className="px-4 py-3 flex items-start gap-3">
+                  <div
+                    key={item.id}
+                    className="px-4 py-3 flex items-start gap-3"
+                  >
                     <span
                       className="mt-1.5 inline-block w-2 h-2 rounded-full shrink-0"
                       style={{ background: item.color }}
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm" style={{ color: "var(--color-text-dark)" }}>
+                      <p
+                        className="text-sm"
+                        style={{ color: "var(--color-text-dark)" }}
+                      >
                         {item.text}
                       </p>
-                      <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>
+                      <p
+                        className="text-xs mt-0.5"
+                        style={{ color: "var(--color-text-muted)" }}
+                      >
                         {formatRelativeDate(item.date)}
                         {item.sub && ` · ${item.sub}`}
                       </p>
@@ -632,7 +680,10 @@ export default function ChildProfilePage({
             style={{ borderColor: "var(--color-border)", background: "white" }}
           >
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold" style={{ color: "var(--color-text-dark)" }}>
+              <h2
+                className="text-sm font-bold"
+                style={{ color: "var(--color-text-dark)" }}
+              >
                 What works / What to watch
               </h2>
               {!editingStrategies && (
@@ -653,11 +704,18 @@ export default function ChildProfilePage({
             {editingStrategies ? (
               <div className="flex flex-col gap-3">
                 <div>
-                  <label className="block text-xs font-semibold mb-1" style={{ color: "var(--color-text-mid)" }}>
+                  <label
+                    className="block text-xs font-semibold mb-1"
+                    style={{ color: "var(--color-text-mid)" }}
+                  >
                     What works
                   </label>
-                  <p className="text-xs mb-1.5" style={{ color: "var(--color-text-muted)" }}>
-                    One item per line. Specific strategies that help {displayName} engage or settle.
+                  <p
+                    className="text-xs mb-1.5"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
+                    One item per line. Specific strategies that help{" "}
+                    {displayName} engage or settle.
                   </p>
                   <textarea
                     value={whatWorksDraft}
@@ -669,15 +727,24 @@ export default function ChildProfilePage({
                       background: "white",
                       color: "var(--color-text-dark)",
                     }}
-                    placeholder={"Give her a helper role at the start of an activity\n2-minute transition warning before switching activities"}
+                    placeholder={
+                      "Give her a helper role at the start of an activity\n2-minute transition warning before switching activities"
+                    }
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold mb-1" style={{ color: "var(--color-text-mid)" }}>
+                  <label
+                    className="block text-xs font-semibold mb-1"
+                    style={{ color: "var(--color-text-mid)" }}
+                  >
                     What to watch
                   </label>
-                  <p className="text-xs mb-1.5" style={{ color: "var(--color-text-muted)" }}>
-                    One item per line. Patterns or signals a new teacher should know about.
+                  <p
+                    className="text-xs mb-1.5"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
+                    One item per line. Patterns or signals a new teacher should
+                    know about.
                   </p>
                   <textarea
                     value={whatToWatchDraft}
@@ -712,7 +779,10 @@ export default function ChildProfilePage({
             ) : (
               <div className="flex flex-col gap-4">
                 <div>
-                  <p className="text-xs font-semibold mb-1.5 uppercase tracking-wide" style={{ color: "var(--color-text-mid)" }}>
+                  <p
+                    className="text-xs font-semibold mb-1.5 uppercase tracking-wide"
+                    style={{ color: "var(--color-text-mid)" }}
+                  >
                     What works
                   </p>
                   {whatWorksItems.length > 0 ? (
@@ -732,13 +802,19 @@ export default function ChildProfilePage({
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-sm italic" style={{ color: "var(--color-text-muted)" }}>
+                    <p
+                      className="text-sm italic"
+                      style={{ color: "var(--color-text-muted)" }}
+                    >
                       What strategies help {displayName} engage or settle?
                     </p>
                   )}
                 </div>
                 <div>
-                  <p className="text-xs font-semibold mb-1.5 uppercase tracking-wide" style={{ color: "var(--color-text-mid)" }}>
+                  <p
+                    className="text-xs font-semibold mb-1.5 uppercase tracking-wide"
+                    style={{ color: "var(--color-text-mid)" }}
+                  >
                     What to watch
                   </p>
                   {whatToWatchItems.length > 0 ? (
@@ -758,8 +834,12 @@ export default function ChildProfilePage({
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-sm italic" style={{ color: "var(--color-text-muted)" }}>
-                      Are there patterns or signals this child&apos;s teacher should know about?
+                    <p
+                      className="text-sm italic"
+                      style={{ color: "var(--color-text-muted)" }}
+                    >
+                      Are there patterns or signals this child's teacher should
+                      know about?
                     </p>
                   )}
                 </div>
@@ -774,11 +854,33 @@ export default function ChildProfilePage({
             style={{ borderColor: "var(--color-border)", background: "white" }}
           >
             <div>
-              <p className="text-sm font-semibold" style={{ color: "var(--color-text-dark)" }}>Family &amp; contacts</p>
-              <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>Guardian contacts, medical notes, family context, messages</p>
+              <p
+                className="text-sm font-semibold"
+                style={{ color: "var(--color-text-dark)" }}
+              >
+                Family &amp; contacts
+              </p>
+              <p
+                className="text-xs mt-0.5"
+                style={{ color: "var(--color-text-muted)" }}
+              >
+                Guardian contacts, medical notes, family context, messages
+              </p>
             </div>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ opacity: 0.4, flexShrink: 0 }}>
-              <path d="M5 2l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              style={{ opacity: 0.4, flexShrink: 0 }}
+            >
+              <path
+                d="M5 2l5 5-5 5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
 
@@ -794,7 +896,10 @@ export default function ChildProfilePage({
                 background: "var(--color-bg-cream)",
               }}
             >
-              <h2 className="text-sm font-bold" style={{ color: "var(--color-text-dark)" }}>
+              <h2
+                className="text-sm font-bold"
+                style={{ color: "var(--color-text-dark)" }}
+              >
                 Teacher notes
               </h2>
               <button
@@ -843,7 +948,9 @@ export default function ChildProfilePage({
                         style={{
                           background: selected ? s.bg : "white",
                           color: selected ? s.text : "var(--color-text-muted)",
-                          borderColor: selected ? s.text : "var(--color-border)",
+                          borderColor: selected
+                            ? s.text
+                            : "var(--color-border)",
                         }}
                       >
                         {s.label}
@@ -886,10 +993,14 @@ export default function ChildProfilePage({
                 className="px-4 py-4 text-sm"
                 style={{ color: "var(--color-text-muted)" }}
               >
-                No notes yet. Use notes to record observations, behaviour, and family updates.
+                No notes yet. Use notes to record observations, behaviour, and
+                family updates.
               </p>
             ) : (
-              <div className="divide-y" style={{ borderColor: "var(--color-border)" }}>
+              <div
+                className="divide-y"
+                style={{ borderColor: "var(--color-border)" }}
+              >
                 {(showAllNotes ? childNotes : childNotes.slice(0, 3)).map(
                   (note) => (
                     <div
@@ -942,7 +1053,7 @@ export default function ChildProfilePage({
                         </button>
                       )}
                     </div>
-                  )
+                  ),
                 )}
                 {childNotes.length > 3 && (
                   <button
@@ -967,7 +1078,10 @@ export default function ChildProfilePage({
       {/* ── Tab: Observations ─────────────────────────────────────────────── */}
       {activeTab === "observations" && (
         <div>
-          <p className="text-sm mb-4" style={{ color: "var(--color-text-muted)" }}>
+          <p
+            className="text-sm mb-4"
+            style={{ color: "var(--color-text-muted)" }}
+          >
             Log observed Social &amp; Emotional behaviours. One observation per
             milestone per day.
           </p>
@@ -977,13 +1091,29 @@ export default function ChildProfilePage({
               { label: "Previous days", bg: "var(--color-primary)" },
               { label: "Logged today", bg: "#F5A623" },
             ].map(({ label, bg }) => (
-              <span key={label} className="flex items-center gap-1.5 text-xs" style={{ color: "var(--color-text-muted)" }}>
-                <span className="w-2.5 h-2.5 rounded-full" style={{ background: bg }} />
+              <span
+                key={label}
+                className="flex items-center gap-1.5 text-xs"
+                style={{ color: "var(--color-text-muted)" }}
+              >
+                <span
+                  className="w-2.5 h-2.5 rounded-full"
+                  style={{ background: bg }}
+                />
                 {label}
               </span>
             ))}
-            <span className="flex items-center gap-1.5 text-xs" style={{ color: "var(--color-text-muted)" }}>
-              <span className="w-2.5 h-2.5 rounded-full border" style={{ background: "white", borderColor: "var(--color-border)" }} />
+            <span
+              className="flex items-center gap-1.5 text-xs"
+              style={{ color: "var(--color-text-muted)" }}
+            >
+              <span
+                className="w-2.5 h-2.5 rounded-full border"
+                style={{
+                  background: "white",
+                  borderColor: "var(--color-border)",
+                }}
+              />
               Not yet
             </span>
           </div>
@@ -995,7 +1125,7 @@ export default function ChildProfilePage({
                 const { previousDays, hasToday } = getSEDObservationBreakdown(
                   childId,
                   milestone.id,
-                  store
+                  store,
                 );
                 const totalCount = previousDays + (hasToday ? 1 : 0);
                 const achieved = totalCount >= 5;
@@ -1005,7 +1135,8 @@ export default function ChildProfilePage({
                     key={milestone.id}
                     className="flex items-center gap-4 px-4 py-3.5"
                     style={{
-                      background: alreadyToday && !achieved ? "#FFFBF2" : undefined,
+                      background:
+                        alreadyToday && !achieved ? "#FFFBF2" : undefined,
                       opacity: achieved ? 0.55 : 1,
                     }}
                   >
@@ -1013,16 +1144,21 @@ export default function ChildProfilePage({
                       <div className="flex gap-1">
                         {Array.from({ length: 5 }).map((_, i) => {
                           const isFilled = i < totalCount;
-                          const isToday = isFilled && i === previousDays && hasToday;
+                          const isToday =
+                            isFilled && i === previousDays && hasToday;
                           return (
                             <span
                               key={i}
                               className="w-2.5 h-2.5 rounded-full"
                               style={{
                                 background: isFilled
-                                  ? isToday ? "#F5A623" : "var(--color-primary)"
+                                  ? isToday
+                                    ? "#F5A623"
+                                    : "var(--color-primary)"
                                   : "transparent",
-                                border: isFilled ? "none" : "1.5px solid var(--color-border)",
+                                border: isFilled
+                                  ? "none"
+                                  : "1.5px solid var(--color-border)",
                               }}
                             />
                           );
@@ -1030,10 +1166,16 @@ export default function ChildProfilePage({
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium" style={{ color: "var(--color-text-dark)" }}>
+                      <p
+                        className="text-sm font-medium"
+                        style={{ color: "var(--color-text-dark)" }}
+                      >
                         {milestone.statement}
                       </p>
-                      <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>
+                      <p
+                        className="text-xs mt-0.5"
+                        style={{ color: "var(--color-text-muted)" }}
+                      >
                         {totalCount}/5 observations
                         {hasToday && !achieved && " · logged today"}
                       </p>
@@ -1083,23 +1225,34 @@ export default function ChildProfilePage({
       {/* ── Tab: Family ───────────────────────────────────────────────────── */}
       {activeTab === "family" && (
         <div className="flex flex-col gap-5">
-
           {/* Guardian contact */}
           {child.primaryGuardian ? (
             <div
               className="rounded-2xl border px-4 py-3.5"
-              style={{ borderColor: "var(--color-border)", background: "white" }}
+              style={{
+                borderColor: "var(--color-border)",
+                background: "white",
+              }}
             >
-              <h2 className="text-sm font-bold mb-3" style={{ color: "var(--color-text-dark)" }}>
+              <h2
+                className="text-sm font-bold mb-3"
+                style={{ color: "var(--color-text-dark)" }}
+              >
                 Family contacts
               </h2>
               <div className="flex items-center gap-3">
                 <ChildAvatar name={child.primaryGuardian.name} size="sm" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium" style={{ color: "var(--color-text-dark)" }}>
+                  <p
+                    className="text-sm font-medium"
+                    style={{ color: "var(--color-text-dark)" }}
+                  >
                     {child.primaryGuardian.name}
                   </p>
-                  <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                  <p
+                    className="text-xs"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
                     Primary contact
                   </p>
                 </div>
@@ -1108,7 +1261,10 @@ export default function ChildProfilePage({
                     <a
                       href={`tel:${child.primaryGuardian.phone.replace(/\s+/g, "")}`}
                       className="rounded-full px-2.5 py-1 font-medium"
-                      style={{ background: "var(--color-primary-wash)", color: "var(--color-primary)" }}
+                      style={{
+                        background: "var(--color-primary-wash)",
+                        color: "var(--color-primary)",
+                      }}
                     >
                       Call
                     </a>
@@ -1126,19 +1282,63 @@ export default function ChildProfilePage({
               </div>
             </div>
           ) : (
-            <div className="rounded-2xl border px-4 py-4" style={{ borderColor: "var(--color-border)", background: "white" }}>
-              <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>No guardian contact details on record.</p>
+            <div
+              className="rounded-2xl border px-4 py-4"
+              style={{
+                borderColor: "var(--color-border)",
+                background: "white",
+              }}
+            >
+              <p
+                className="text-sm"
+                style={{ color: "var(--color-text-muted)" }}
+              >
+                No guardian contact details on record.
+              </p>
             </div>
           )}
 
           {/* Allergy / medical flags */}
           {child.flags && Object.values(child.flags).some(Boolean) && (
-            <div className="rounded-2xl border px-4 py-3.5" style={{ borderColor: "#F5A623", background: "#FFFBF2" }}>
-              <h2 className="text-sm font-bold mb-2" style={{ color: "#A06010" }}>Medical &amp; welfare notes</h2>
-              {child.flags.allergy && <p className="text-sm mb-1" style={{ color: "var(--color-text-dark)" }}><strong>Allergy:</strong> {child.flags.allergy}</p>}
-              {child.flags.medicalNote && <p className="text-sm mb-1" style={{ color: "var(--color-text-dark)" }}><strong>Medical:</strong> {child.flags.medicalNote}</p>}
-              {child.flags.specialNeed && <p className="text-sm mb-1" style={{ color: "var(--color-text-dark)" }}><strong>Special need:</strong> {child.flags.specialNeed}</p>}
-              {child.flags.welfareConcern && <p className="text-sm" style={{ color: "#B91C1C" }}><strong>Welfare:</strong> {child.flags.welfareConcern}</p>}
+            <div
+              className="rounded-2xl border px-4 py-3.5"
+              style={{ borderColor: "#F5A623", background: "#FFFBF2" }}
+            >
+              <h2
+                className="text-sm font-bold mb-2"
+                style={{ color: "#A06010" }}
+              >
+                Medical &amp; welfare notes
+              </h2>
+              {child.flags.allergy && (
+                <p
+                  className="text-sm mb-1"
+                  style={{ color: "var(--color-text-dark)" }}
+                >
+                  <strong>Allergy:</strong> {child.flags.allergy}
+                </p>
+              )}
+              {child.flags.medicalNote && (
+                <p
+                  className="text-sm mb-1"
+                  style={{ color: "var(--color-text-dark)" }}
+                >
+                  <strong>Medical:</strong> {child.flags.medicalNote}
+                </p>
+              )}
+              {child.flags.specialNeed && (
+                <p
+                  className="text-sm mb-1"
+                  style={{ color: "var(--color-text-dark)" }}
+                >
+                  <strong>Special need:</strong> {child.flags.specialNeed}
+                </p>
+              )}
+              {child.flags.welfareConcern && (
+                <p className="text-sm" style={{ color: "#B91C1C" }}>
+                  <strong>Welfare:</strong> {child.flags.welfareConcern}
+                </p>
+              )}
             </div>
           )}
 
@@ -1148,10 +1348,15 @@ export default function ChildProfilePage({
             style={{ background: "#FFFBF2", borderColor: "#F5A623" }}
           >
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-sm font-bold" style={{ color: "#A06010" }}>Family context</h2>
+              <h2 className="text-sm font-bold" style={{ color: "#A06010" }}>
+                Family context
+              </h2>
               {!editingContext && (
                 <button
-                  onClick={() => { setContextDraft(familyCtx?.content ?? ""); setEditingContext(true); }}
+                  onClick={() => {
+                    setContextDraft(familyCtx?.content ?? "");
+                    setEditingContext(true);
+                  }}
                   className="text-xs font-medium"
                   style={{ color: "#A06010" }}
                 >
@@ -1167,21 +1372,49 @@ export default function ChildProfilePage({
                   rows={4}
                   autoFocus
                   className="w-full rounded-xl border px-3 py-2 text-sm resize-none mb-3"
-                  style={{ borderColor: "#F5A623", background: "white", color: "var(--color-text-dark)" }}
+                  style={{
+                    borderColor: "#F5A623",
+                    background: "white",
+                    color: "var(--color-text-dark)",
+                  }}
                   placeholder="E.g. parents separated, pickup schedule, cultural context, professional support..."
                 />
                 <div className="flex gap-2">
-                  <button onClick={handleSaveContext} className="px-4 py-1.5 rounded-lg text-sm font-semibold" style={{ background: "#F5A623", color: "white" }}>Save</button>
-                  <button onClick={() => setEditingContext(false)} className="px-4 py-1.5 rounded-lg text-sm font-medium" style={{ color: "var(--color-text-muted)" }}>Cancel</button>
+                  <button
+                    onClick={handleSaveContext}
+                    className="px-4 py-1.5 rounded-lg text-sm font-semibold"
+                    style={{ background: "#F5A623", color: "white" }}
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setEditingContext(false)}
+                    className="px-4 py-1.5 rounded-lg text-sm font-medium"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
+                    Cancel
+                  </button>
                 </div>
               </div>
             ) : familyCtx?.content ? (
               <div>
-                <p className="text-sm leading-relaxed" style={{ color: "var(--color-text-dark)" }}>{familyCtx.content}</p>
-                <p className="text-xs mt-2" style={{ color: "#A06010", opacity: 0.7 }}>Updated {formatRelativeDate(familyCtx.updatedAt)}</p>
+                <p
+                  className="text-sm leading-relaxed"
+                  style={{ color: "var(--color-text-dark)" }}
+                >
+                  {familyCtx.content}
+                </p>
+                <p
+                  className="text-xs mt-2"
+                  style={{ color: "#A06010", opacity: 0.7 }}
+                >
+                  Updated {formatRelativeDate(familyCtx.updatedAt)}
+                </p>
               </div>
             ) : (
-              <p className="text-sm italic" style={{ color: "#A06010" }}>No family context note yet.</p>
+              <p className="text-sm italic" style={{ color: "#A06010" }}>
+                No family context note yet.
+              </p>
             )}
           </div>
 
@@ -1189,14 +1422,40 @@ export default function ChildProfilePage({
           <a
             href={`/teacher/messages/${childId}`}
             className="rounded-2xl border px-4 py-3.5 flex items-center justify-between"
-            style={{ borderColor: "var(--color-border)", background: "white", textDecoration: "none" }}
+            style={{
+              borderColor: "var(--color-border)",
+              background: "white",
+              textDecoration: "none",
+            }}
           >
             <div>
-              <p className="text-sm font-semibold" style={{ color: "var(--color-text-dark)" }}>Parent messages</p>
-              <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>View full message thread with {displayName}&apos;s family</p>
+              <p
+                className="text-sm font-semibold"
+                style={{ color: "var(--color-text-dark)" }}
+              >
+                Parent messages
+              </p>
+              <p
+                className="text-xs mt-0.5"
+                style={{ color: "var(--color-text-muted)" }}
+              >
+                View full message thread with {displayName}'s family
+              </p>
             </div>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ opacity: 0.4, flexShrink: 0 }}>
-              <path d="M5 2l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              style={{ opacity: 0.4, flexShrink: 0 }}
+            >
+              <path
+                d="M5 2l5 5-5 5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </a>
         </div>
@@ -1206,14 +1465,23 @@ export default function ChildProfilePage({
       {activeTab === "milestones" && (
         <div
           className="rounded-2xl p-5"
-          style={{ background: "white", border: "1px solid var(--color-border)" }}
+          style={{
+            background: "white",
+            border: "1px solid var(--color-border)",
+          }}
         >
-          <h2 className="text-base font-semibold mb-1" style={{ color: "var(--color-text-dark)" }}>
+          <h2
+            className="text-base font-semibold mb-1"
+            style={{ color: "var(--color-text-dark)" }}
+          >
             Milestone progress
           </h2>
-          <p className="text-sm mb-4" style={{ color: "var(--color-text-muted)" }}>
-            Cumulative milestones achieved vs. expected linear progress.
-            Tap a dot to see which milestone was reached.
+          <p
+            className="text-sm mb-4"
+            style={{ color: "var(--color-text-muted)" }}
+          >
+            Cumulative milestones achieved vs. expected linear progress. Tap a
+            dot to see which milestone was reached.
           </p>
           <ProgressChart childId={childId} academicYear={academicYear} />
         </div>

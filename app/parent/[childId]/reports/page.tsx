@@ -41,7 +41,10 @@ function ReportCard({ report }: { report: Report }) {
           >
             Developmental Report
           </p>
-          <p className="text-xs mt-0.5" style={{ color: "var(--color-text-mid)" }}>
+          <p
+            className="text-xs mt-0.5"
+            style={{ color: "var(--color-text-mid)" }}
+          >
             Published {formatPublishedDate(report.publishedAt!)}
           </p>
         </div>
@@ -78,7 +81,7 @@ function ReportCard({ report }: { report: Report }) {
                   className="font-semibold text-xs uppercase tracking-wide mb-1"
                   style={{ color: "var(--color-text-muted)" }}
                 >
-                  Teacher&apos;s note
+                  Teacher's note
                 </p>
                 <p
                   className="leading-relaxed"
@@ -132,7 +135,10 @@ export default function ParentReportsPage() {
         >
           Reports
         </h1>
-        <p className="text-sm mt-0.5" style={{ color: "var(--color-text-muted)" }}>
+        <p
+          className="text-sm mt-0.5"
+          style={{ color: "var(--color-text-muted)" }}
+        >
           End-of-term developmental summaries from the teacher
         </p>
       </div>
@@ -140,14 +146,25 @@ export default function ParentReportsPage() {
       {publishedReports.length === 0 ? (
         <div
           className="rounded-2xl border p-8 text-center"
-          style={{ background: "var(--color-bg-cream)", borderColor: "var(--color-border)" }}
+          style={{
+            background: "var(--color-bg-cream)",
+            borderColor: "var(--color-border)",
+          }}
         >
           <div
             className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center"
             style={{ background: "var(--color-primary-wash)" }}
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-              stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--color-primary)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <rect x="4" y="2" width="16" height="20" rx="2" />
               <path d="M9 7h6M9 11h6M9 15h4" />
             </svg>

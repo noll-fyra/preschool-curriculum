@@ -16,14 +16,16 @@ export default function P1ReadinessPage() {
     return (
       <div className="px-5 py-8 text-center">
         <p style={{ color: "var(--color-text-muted)" }}>Child not found.</p>
-        <Link href="/parent" style={{ color: "var(--color-primary)" }}>← Back</Link>
+        <Link href="/parent" style={{ color: "var(--color-primary)" }}>
+          ← Back
+        </Link>
       </div>
     );
   }
 
   const totalMilestones = store.milestones.length;
   const achievedAll = store.progress.filter(
-    (p) => p.childId === childId && p.status === "achieved"
+    (p) => p.childId === childId && p.status === "achieved",
   ).length;
 
   // Per area breakdown
@@ -32,13 +34,19 @@ export default function P1ReadinessPage() {
     const total = areaMilestones.length;
     const achieved = areaMilestones.filter((m) =>
       store.progress.some(
-        (p) => p.childId === childId && p.milestoneId === m.id && p.status === "achieved"
-      )
+        (p) =>
+          p.childId === childId &&
+          p.milestoneId === m.id &&
+          p.status === "achieved",
+      ),
     ).length;
     const inProgress = areaMilestones.filter((m) =>
       store.progress.some(
-        (p) => p.childId === childId && p.milestoneId === m.id && p.status === "in_progress"
-      )
+        (p) =>
+          p.childId === childId &&
+          p.milestoneId === m.id &&
+          p.status === "in_progress",
+      ),
     ).length;
     return { area, total, achieved, inProgress };
   });
@@ -69,9 +77,14 @@ export default function P1ReadinessPage() {
         className="leading-relaxed mb-5"
         style={{ fontSize: 13, color: "var(--color-text-mid)" }}
       >
-        This shows how {getChildDisplayName(child)} is progressing toward the skills expected at the start of
-        Primary 1. There&apos;s no rush — {getPronounFromGender(child.gender) === "they" ? "they have" : getPronounFromGender(child.gender) === "he" ? "he has" : "she has"} time.{" "}
-        This is a guide, not a test.
+        This shows how {getChildDisplayName(child)} is progressing toward the
+        skills expected at the start of Primary 1. There's no rush —{" "}
+        {getPronounFromGender(child.gender) === "they"
+          ? "they have"
+          : getPronounFromGender(child.gender) === "he"
+            ? "he has"
+            : "she has"}{" "}
+        time. This is a guide, not a test.
       </p>
 
       {/* Three area progress cards */}
@@ -82,7 +95,10 @@ export default function P1ReadinessPage() {
             <div
               key={area.id}
               className="rounded-2xl border p-4"
-              style={{ background: "white", borderColor: "var(--color-border)" }}
+              style={{
+                background: "white",
+                borderColor: "var(--color-border)",
+              }}
             >
               <p
                 className="font-medium mb-2"
@@ -100,11 +116,16 @@ export default function P1ReadinessPage() {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <span className="font-medium" style={{ fontSize: 13, color: "#27500A" }}>
+                <span
+                  className="font-medium"
+                  style={{ fontSize: 13, color: "#27500A" }}
+                >
                   {achieved} of {total} milestones achieved
                 </span>
                 {inProgress > 0 && (
-                  <span style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
+                  <span
+                    style={{ fontSize: 12, color: "var(--color-text-muted)" }}
+                  >
                     {inProgress} in progress
                   </span>
                 )}
@@ -117,22 +138,26 @@ export default function P1ReadinessPage() {
       {/* Calibrating note */}
       <div
         className="rounded-2xl border p-4"
-        style={{ background: "var(--color-bg-cream)", borderColor: "var(--color-border)" }}
+        style={{
+          background: "var(--color-bg-cream)",
+          borderColor: "var(--color-border)",
+        }}
       >
         <p
           className="leading-relaxed"
           style={{ fontSize: 13, color: "var(--color-text-mid)" }}
         >
-          These milestones represent what children typically know and are able to do by the end of
-          Kindergarten 2 — aligned to Singapore&apos;s NEL Framework.{" "}
+          These milestones represent what children typically know and are able
+          to do by the end of Kindergarten 2 — aligned to Singapore's NEL
+          Framework.{" "}
           {isOnTrack ? (
             <span style={{ color: "var(--color-text-dark)", fontWeight: 500 }}>
               {getChildDisplayName(child)} is on track.
             </span>
           ) : (
             <span style={{ color: "var(--color-text-mid)" }}>
-              Ms Priya can discuss {getChildDisplayName(child)}&apos;s progress in more detail at your next
-              check-in.
+              Ms Priya can discuss {getChildDisplayName(child)}'s progress in
+              more detail at your next check-in.
             </span>
           )}
         </p>

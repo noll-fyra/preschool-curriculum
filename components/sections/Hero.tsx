@@ -41,7 +41,7 @@ export default function Hero() {
             }}
           >
             Personalised learning activities, real-time progress updates, and
-            way less paperwork — all in one platform built for Singapore&apos;s
+            way less paperwork — all in one platform built for Singapore's
             preschools.
           </p>
         </AnimateIn>
