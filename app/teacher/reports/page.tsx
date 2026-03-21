@@ -6,9 +6,10 @@ import { useStore } from "@/lib/store";
 import { getChildDisplayName } from "@/lib/display-name";
 import { getActiveClassChildren } from "@/lib/selectors";
 import { ChildAvatar } from "@/components/teacher/ChildAvatar";
-import type { LearningAreaId } from "@/lib/types";
-
-const ALL_AREAS: LearningAreaId[] = ["LL", "NUM", "SED", "ACE", "DOW", "HMS"];
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 // Term end date — hardcoded for demo (end of current Singapore school term)
 const TERM_END = new Date("2026-03-28");
@@ -28,19 +29,28 @@ function daysUntil(date: Date): number {
 }
 
 function ConfidenceBadge({ level }: { level: ConfidenceLevel }) {
-  const styles: Record<ConfidenceLevel, { bg: string; text: string; label: string }> = {
-    rich: { bg: "#E8F5EE", text: "#2D7A4F", label: "Rich" },
-    thin: { bg: "#FEF3D7", text: "#A06010", label: "Thin" },
-    incomplete: { bg: "#FEE9E5", text: "#B84C3A", label: "Incomplete" },
+  const map: Record<ConfidenceLevel, { label: string; className: string }> = {
+    rich: {
+      label: "Rich",
+      className: "bg-emerald-100 text-emerald-800 border-emerald-200/80",
+    },
+    thin: {
+      label: "Thin",
+      className: "bg-amber-100 text-amber-900 border-amber-200/80",
+    },
+    incomplete: {
+      label: "Incomplete",
+      className: "bg-red-100 text-red-800 border-red-200/80",
+    },
   };
-  const s = styles[level];
+  const s = map[level];
   return (
-    <span
-      className="text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0"
-      style={{ background: s.bg, color: s.text }}
+    <Badge
+      variant="outline"
+      className={cn("shrink-0 font-medium", s.className)}
     >
       {s.label}
-    </span>
+    </Badge>
   );
 }
 
@@ -82,42 +92,46 @@ export default function ReportsPage() {
   const daysLeft = daysUntil(TERM_END);
 
   return (
-    <div className="px-5 py-6 md:px-8 md:py-8 max-w-2xl">
+    <div className="mx-auto max-w-2xl px-4 py-6 md:px-6">
       {/* Header */}
       <div className="mb-5">
-        <h1 className="text-2xl font-bold" style={{ color: "var(--color-text-dark)" }}>
-          Developmental Reports
-        </h1>
-        <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>
+        <h1 className="text-2xl font-bold text-foreground">Developmental Reports</h1>
+        <p className="text-muted-foreground mt-1 text-sm">
           End-of-term summaries for families
         </p>
       </div>
 
       {/* Progress bar */}
-      <div
-        className="rounded-2xl p-4 mb-6 flex items-center gap-4"
-        style={{ background: "#fff", border: "1px solid var(--color-border)" }}
-      >
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-sm font-semibold" style={{ color: "var(--color-text-dark)" }}>
-              {sentCount} of {totalChildren} sent
-            </span>
-            <span className="text-xs" style={{ color: daysLeft <= 7 ? "#B84C3A" : "var(--color-text-muted)" }}>
-              {daysLeft === 0 ? "Due today" : `Due in ${daysLeft} day${daysLeft === 1 ? "" : "s"}`}
-            </span>
+      <Card className="mb-6 shadow-none">
+        <CardContent className="flex items-center gap-4 pt-4">
+          <div className="min-w-0 flex-1">
+            <div className="mb-1.5 flex items-center justify-between">
+              <span className="text-sm font-semibold text-foreground">
+                {sentCount} of {totalChildren} sent
+              </span>
+              <span
+                className={cn(
+                  "text-xs",
+                  daysLeft <= 7 ? "text-destructive font-medium" : "text-muted-foreground"
+                )}
+              >
+                {daysLeft === 0
+                  ? "Due today"
+                  : `Due in ${daysLeft} day${daysLeft === 1 ? "" : "s"}`}
+              </span>
+            </div>
+            <div className="bg-muted h-2 overflow-hidden rounded-full">
+              <div
+                className="bg-primary h-full rounded-full transition-all"
+                style={{
+                  width:
+                    totalChildren > 0 ? `${(sentCount / totalChildren) * 100}%` : "0%",
+                }}
+              />
+            </div>
           </div>
-          <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--color-bg-warm)" }}>
-            <div
-              className="h-full rounded-full transition-all"
-              style={{
-                width: totalChildren > 0 ? `${(sentCount / totalChildren) * 100}%` : "0%",
-                background: "var(--color-primary)",
-              }}
-            />
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Section 1 — Drafts */}
       {draftChildren.length > 0 && (
@@ -125,37 +139,40 @@ export default function ReportsPage() {
           {draftChildren.map(({ child, obsCount, areasCovered }) => {
             const level = getConfidence(obsCount, areasCovered);
             return (
-              <div
-                key={child.id}
-                className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white border border-[var(--color-border)]"
-              >
-                <ChildAvatar name={getChildDisplayName(child)} size="sm" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm" style={{ color: "var(--color-text-dark)" }}>
-                    {getChildDisplayName(child)}
-                  </p>
-                  <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>
-                    {obsCount} observation{obsCount !== 1 ? "s" : ""} · {areasCovered}/6 areas
-                  </p>
-                </div>
-                <ConfidenceBadge level={level} />
-                {level !== "rich" ? (
-                  <Link
-                    href={`/teacher/observations?child=${child.id}`}
-                    className="text-xs font-semibold px-3 py-1.5 rounded-lg flex-shrink-0 whitespace-nowrap"
-                    style={{ background: "var(--color-bg-warm)", color: "var(--color-text-mid)", border: "1px solid var(--color-border)" }}
+              <Card key={child.id} className="shadow-none">
+                <CardContent className="flex items-center gap-3 py-4">
+                  <ChildAvatar name={getChildDisplayName(child)} size="sm" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-foreground">
+                      {getChildDisplayName(child)}
+                    </p>
+                    <p className="text-muted-foreground mt-0.5 text-xs">
+                      {obsCount} observation{obsCount !== 1 ? "s" : ""} ·{" "}
+                      {areasCovered}/6 areas
+                    </p>
+                  </div>
+                  <ConfidenceBadge level={level} />
+                  {level !== "rich" ? (
+                    <Link
+                      href={`/teacher/observations?child=${child.id}`}
+                      className={cn(
+                        buttonVariants({ variant: "outline", size: "sm" }),
+                        "shrink-0 whitespace-nowrap text-xs font-semibold"
+                      )}
+                    >
+                      Add obs →
+                    </Link>
+                  ) : null}
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="shrink-0 text-xs font-semibold"
+                    onClick={() => generateReport(child.id)}
                   >
-                    Add obs →
-                  </Link>
-                ) : null}
-                <button
-                  onClick={() => generateReport(child.id)}
-                  className="text-xs font-semibold px-3 py-1.5 rounded-lg flex-shrink-0"
-                  style={{ background: "var(--color-primary)", color: "white" }}
-                >
-                  Generate
-                </button>
-              </div>
+                    Generate
+                  </Button>
+                </CardContent>
+              </Card>
             );
           })}
         </Section>
@@ -171,34 +188,36 @@ export default function ReportsPage() {
               ? new Date(report.generatedAt).toLocaleDateString("en-SG", { day: "numeric", month: "short" })
               : null;
             return (
-              <div
-                key={child.id}
-                className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white border border-[var(--color-border)]"
-              >
-                <ChildAvatar name={getChildDisplayName(child)} size="sm" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm" style={{ color: "var(--color-text-dark)" }}>
-                    {getChildDisplayName(child)}
-                  </p>
-                  <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>
-                    {obsCount} obs{generatedDate ? ` · Generated ${generatedDate}` : ""}
-                  </p>
-                </div>
-                <ConfidenceBadge level={level} />
-                <span
-                  className="text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0"
-                  style={{ background: "#FEF3D7", color: "#A06010" }}
-                >
-                  Draft
-                </span>
-                <Link
-                  href={`/teacher/reports/${child.id}`}
-                  className="text-xs font-semibold px-3 py-1.5 rounded-lg flex-shrink-0"
-                  style={{ background: "var(--color-primary-wash)", color: "var(--color-primary)" }}
-                >
-                  Review
-                </Link>
-              </div>
+              <Card key={child.id} className="shadow-none">
+                <CardContent className="flex items-center gap-3 py-4">
+                  <ChildAvatar name={getChildDisplayName(child)} size="sm" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-foreground">
+                      {getChildDisplayName(child)}
+                    </p>
+                    <p className="text-muted-foreground mt-0.5 text-xs">
+                      {obsCount} obs
+                      {generatedDate ? ` · Generated ${generatedDate}` : ""}
+                    </p>
+                  </div>
+                  <ConfidenceBadge level={level} />
+                  <Badge
+                    variant="outline"
+                    className="shrink-0 border-amber-200 bg-amber-100 text-amber-900"
+                  >
+                    Draft
+                  </Badge>
+                  <Link
+                    href={`/teacher/reports/${child.id}`}
+                    className={cn(
+                      buttonVariants({ variant: "secondary", size: "sm" }),
+                      "shrink-0 text-xs font-semibold"
+                    )}
+                  >
+                    Review
+                  </Link>
+                </CardContent>
+              </Card>
             );
           })}
         </Section>
@@ -213,43 +232,45 @@ export default function ReportsPage() {
               ? new Date(report.publishedAt).toLocaleDateString("en-SG", { day: "numeric", month: "short" })
               : null;
             return (
-              <div
-                key={child.id}
-                className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white border border-[var(--color-border)]"
-              >
-                <ChildAvatar name={getChildDisplayName(child)} size="sm" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm" style={{ color: "var(--color-text-dark)" }}>
-                    {getChildDisplayName(child)}
-                  </p>
-                  <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>
-                    {obsCount} obs{publishedDate ? ` · Sent ${publishedDate}` : ""}
-                  </p>
-                </div>
-                <span
-                  className="text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0 flex items-center gap-1"
-                  style={{ background: "#E8F5EE", color: "#2D7A4F" }}
-                >
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-                    <path d="M2 5l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  Delivered
-                </span>
-                <Link
-                  href={`/teacher/reports/${child.id}`}
-                  className="text-xs font-semibold px-3 py-1.5 rounded-lg flex-shrink-0"
-                  style={{ background: "var(--color-bg-warm)", color: "var(--color-text-mid)", border: "1px solid var(--color-border)" }}
-                >
-                  View
-                </Link>
-              </div>
+              <Card key={child.id} className="shadow-none">
+                <CardContent className="flex items-center gap-3 py-4">
+                  <ChildAvatar name={getChildDisplayName(child)} size="sm" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-foreground">
+                      {getChildDisplayName(child)}
+                    </p>
+                    <p className="text-muted-foreground mt-0.5 text-xs">
+                      {obsCount} obs
+                      {publishedDate ? ` · Sent ${publishedDate}` : ""}
+                    </p>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="flex shrink-0 items-center gap-1 border-emerald-200 bg-emerald-100 text-emerald-800"
+                  >
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                      <path d="M2 5l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Delivered
+                  </Badge>
+                  <Link
+                    href={`/teacher/reports/${child.id}`}
+                    className={cn(
+                      buttonVariants({ variant: "outline", size: "sm" }),
+                      "shrink-0 text-xs font-semibold"
+                    )}
+                  >
+                    View
+                  </Link>
+                </CardContent>
+              </Card>
             );
           })}
         </Section>
       )}
 
       {activeChildren.length === 0 && (
-        <p className="text-sm text-center py-12" style={{ color: "var(--color-text-muted)" }}>
+        <p className="text-muted-foreground py-12 text-center text-sm">
           No children enrolled in this class.
         </p>
       )}
@@ -268,16 +289,13 @@ function Section({
 }) {
   return (
     <div className="mb-6">
-      <div className="flex items-center gap-2 mb-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide" style={{ color: "var(--color-text-muted)" }}>
+      <div className="mb-3 flex items-center gap-2">
+        <h2 className="text-muted-foreground text-sm font-semibold tracking-wide uppercase">
           {title}
         </h2>
-        <span
-          className="text-xs font-semibold px-1.5 py-0.5 rounded-full"
-          style={{ background: "var(--color-bg-warm)", color: "var(--color-text-muted)" }}
-        >
+        <Badge variant="secondary" className="font-semibold tabular-nums">
           {count}
-        </span>
+        </Badge>
       </div>
       <div className="flex flex-col gap-2">{children}</div>
     </div>

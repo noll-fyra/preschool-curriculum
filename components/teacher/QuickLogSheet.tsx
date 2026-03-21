@@ -60,8 +60,6 @@ export function QuickLogSheet() {
     }
   }, [quickLogOpen]);
 
-  if (!quickLogOpen) return null;
-
   // ── Handlers ────────────────────────────────────────────────────────────────
 
   function handleChildTap(childId: string) {
@@ -121,46 +119,58 @@ export function QuickLogSheet() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
+  if (!quickLogOpen) return null;
+
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop + centering wrapper */}
       <div
+        className="fixed inset-0 z-100 flex items-end justify-center bg-black/40 md:items-center"
         onClick={closeQuickLog}
-        style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 50 }}
-      />
-
-      {/* Sheet — bottom sheet on mobile, centered modal on desktop */}
-      <div
-        className={[
-          // Mobile: bottom sheet
-          "fixed bottom-0 left-0 right-0 z-[51] bg-white rounded-t-[20px]",
-          // Desktop: centred modal, fixed width, not full-width
-          "md:bottom-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2",
-          "md:w-[500px] md:rounded-2xl md:shadow-2xl",
-          // Shared
-          "max-h-[88vh] overflow-y-auto",
-        ].join(" ")}
-        style={{ padding: "20px 20px 32px" }}
       >
+        {/* Modal panel — stops click propagation so backdrop doesn't close it */}
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Log Observation"
+          className="w-full max-h-[88vh] overflow-y-auto rounded-t-[20px] bg-white px-5 pb-8 pt-6 md:w-[500px] md:max-w-[calc(100vw-2rem)] md:rounded-2xl md:shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 18 }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20 }}>
           <div>
             <div style={{ fontSize: 16, fontWeight: 700, color: "var(--color-text-dark)" }}>
               Log Observation
             </div>
             {subheading && (
-              <div style={{ fontSize: 12, color: "var(--color-text-muted)", marginTop: 2 }}>
+              <div style={{ fontSize: 13, color: "var(--color-text-muted)", marginTop: 2 }}>
                 {subheading}
               </div>
             )}
           </div>
-          <button onClick={closeQuickLog} style={closeBtn}>×</button>
+          <button
+            onClick={closeQuickLog}
+            aria-label="Close"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "var(--color-text-muted)",
+              padding: 4,
+              marginTop: -2,
+              flexShrink: 0,
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <path d="M4 4l10 10M14 4L4 14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
+          </button>
         </div>
 
-        {/* Step: Select child */}
+        {/* Step content */}
         {step.name === "select_child" && (
           <SelectChildStep
-            children={classChildren}
+            students={classChildren}
             attendanceMap={attendanceMap}
             multiMode={step.multiMode}
             selectedIds={step.selectedIds}
@@ -172,7 +182,6 @@ export function QuickLogSheet() {
           />
         )}
 
-        {/* Step: Select milestone */}
         {step.name === "select_milestone" && (
           <SelectMilestoneStep
             milestones={milestones}
@@ -183,25 +192,24 @@ export function QuickLogSheet() {
           />
         )}
 
-        {/* Step: Add note */}
         {step.name === "add_note" && (
           <AddNoteStep
-            children={selectedChildren}
+            students={selectedChildren}
             milestone={step.milestone}
             todayActivities={todayActivities}
-            onLog={(text, activityId) => handleLog(step.childIds, step.milestone.id, text)}
+            onLog={(text) => handleLog(step.childIds, step.milestone.id, text)}
             onBack={() => setStep({ name: "select_milestone", childIds: step.childIds })}
           />
         )}
 
-        {/* Step: Done */}
         {step.name === "done" && (
           <DoneStep
-            children={classChildren.filter((c) => step.childIds.includes(c.id))}
+            students={classChildren.filter((c) => step.childIds.includes(c.id))}
             onLogAnother={reset}
             onDone={closeQuickLog}
           />
         )}
+        </div>
       </div>
     </>
   );
@@ -210,7 +218,7 @@ export function QuickLogSheet() {
 // ── Step: Select child ────────────────────────────────────────────────────────
 
 function SelectChildStep({
-  children,
+  students,
   attendanceMap,
   multiMode,
   selectedIds,
@@ -218,7 +226,7 @@ function SelectChildStep({
   onChildTap,
   onConfirmMulti,
 }: {
-  children: Child[];
+  students: Child[];
   attendanceMap: Map<string, AttendanceStatus>;
   multiMode: boolean;
   selectedIds: string[];
@@ -251,7 +259,7 @@ function SelectChildStep({
 
       {/* Child grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
-        {children.map((child) => {
+        {students.map((child) => {
           const status = attendanceMap.get(child.id) ?? "pending";
           const isSelected = selectedIds.includes(child.id);
 
@@ -425,13 +433,13 @@ function SelectMilestoneStep({
 // ── Step: Add note (optional) ─────────────────────────────────────────────────
 
 function AddNoteStep({
-  children,
+  students,
   milestone,
   todayActivities,
   onLog,
   onBack,
 }: {
-  children: Child[];
+  students: Child[];
   milestone: Milestone;
   todayActivities: { id: string; title: string }[];
   onLog: (text: string, activityId?: string) => void;
@@ -466,9 +474,9 @@ function AddNoteStep({
       </div>
 
       {/* Child list (if multiple) */}
-      {children.length > 1 && (
+      {students.length > 1 && (
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-          {children.map((c) => (
+          {students.map((c) => (
             <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 4 }}>
               <ChildAvatar name={c.firstName} size="xs" />
               <span style={{ fontSize: 12, fontWeight: 600, color: "var(--color-text-dark)" }}>{c.firstName}</span>
@@ -577,20 +585,20 @@ function AddNoteStep({
 // ── Step: Done ────────────────────────────────────────────────────────────────
 
 function DoneStep({
-  children,
+  students,
   onLogAnother,
   onDone,
 }: {
-  children: Child[];
+  students: Child[];
   onLogAnother: () => void;
   onDone: () => void;
 }) {
   const names =
-    children.length === 1
-      ? children[0].firstName
-      : children.length === 2
-      ? `${children[0].firstName} & ${children[1].firstName}`
-      : `${children[0].firstName} and ${children.length - 1} others`;
+    students.length === 1
+      ? students[0].firstName
+      : students.length === 2
+      ? `${students[0].firstName} & ${students[1].firstName}`
+      : `${students[0].firstName} and ${students.length - 1} others`;
 
   return (
     <div style={{ textAlign: "center", padding: "24px 0" }}>
@@ -653,17 +661,3 @@ const secondaryBtn: React.CSSProperties = {
   cursor: "pointer",
 };
 
-const closeBtn: React.CSSProperties = {
-  width: 30,
-  height: 30,
-  borderRadius: "50%",
-  background: "var(--color-bg-warm)",
-  border: "none",
-  cursor: "pointer",
-  fontSize: 18,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  color: "var(--color-text-mid)",
-  flexShrink: 0,
-};

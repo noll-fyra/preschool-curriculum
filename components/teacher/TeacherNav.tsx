@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { getTeacherDisplayName } from "@/lib/display-name";
+import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   {
@@ -53,6 +54,30 @@ const NAV_ITEMS = [
           fill="currentColor"
           opacity="0.4"
         />
+      </svg>
+    ),
+  },
+  {
+    href: "/teacher/children",
+    label: "Children",
+    activeOn: ["/teacher/children", "/teacher/child/"],
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <circle cx="7" cy="7" r="3" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="14" cy="7" r="2.5" stroke="currentColor" strokeWidth="1.5" opacity="0.6" />
+        <path d="M2 17c0-2.761 2.239-4 5-4s5 1.239 5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M14 13c1.8 0 4 .8 4 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+      </svg>
+    ),
+  },
+  {
+    href: "/teacher/observations",
+    label: "Observations",
+    activeOn: ["/teacher/observations", "/teacher/observe"],
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
       </svg>
     ),
   },
@@ -276,54 +301,39 @@ export function TeacherNav() {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex flex-col w-[220px] min-h-screen border-r border-[var(--color-border)] bg-white flex-shrink-0">
+      <aside className="hidden min-h-screen w-[220px] shrink-0 flex-col border-r bg-card md:flex">
         {/* Logo + class switcher */}
-        <div className="px-6 py-5 border-b border-[var(--color-border)]">
-          <Link href="/teacher/class" className="flex items-center gap-2 mb-3">
-            <span
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-sm font-bold"
-              style={{ background: "var(--color-primary)" }}
-            >
+        <div className="border-b px-6 py-5">
+          <Link href="/teacher/class" className="mb-3 flex items-center gap-2">
+            <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
               N
             </span>
-            <span
-              className="font-bold text-base"
-              style={{ color: "var(--color-text-dark)" }}
-            >
-              Nurture
-            </span>
+            <span className="text-base font-bold text-foreground">Nurture</span>
           </Link>
-
         </div>
 
         {/* Nav links */}
-        <nav className="flex flex-col gap-1 px-3 py-4 flex-1">
+        <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
           {NAV_ITEMS.map((item) => {
+            const paths = (item as { activeOn?: string[] }).activeOn ?? [item.href];
             const active =
               pathname === item.href ||
-              (item.href !== "/teacher/class" &&
-                pathname.startsWith(item.href));
+              paths.some((p) => p !== "/teacher/class" && pathname.startsWith(p));
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
-                style={{
-                  color: active
-                    ? "var(--color-primary)"
-                    : "var(--color-text-mid)",
-                  background: active
-                    ? "var(--color-primary-wash)"
-                    : "transparent",
-                }}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  active
+                    ? "bg-accent text-primary"
+                    : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                )}
               >
                 <span className="relative">
                   {item.icon}
                   {item.href === "/teacher/messages" && unreadCount > 0 && (
-                    <span
-                      className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full border border-white"
-                      style={{ background: "var(--color-primary)" }}
-                    />
+                    <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full border border-card bg-primary" />
                   )}
                 </span>
                 {item.label}
@@ -333,8 +343,8 @@ export function TeacherNav() {
         </nav>
 
         {/* Bottom: teacher name + profile/settings links */}
-        <div className="border-t border-[var(--color-border)] px-3 py-3 flex flex-col gap-1">
-          <p className="px-3 pb-1 text-xs font-medium truncate" style={{ color: "var(--color-text-muted)" }}>
+        <div className="flex flex-col gap-1 border-t px-3 py-3">
+          <p className="truncate px-3 pb-1 text-xs font-medium text-muted-foreground">
             {activeTeacher ? getTeacherDisplayName(activeTeacher) : "—"}
           </p>
           {[
@@ -364,11 +374,12 @@ export function TeacherNav() {
               <Link
                 key={href}
                 href={href}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                style={{
-                  color: active ? "var(--color-primary)" : "var(--color-text-mid)",
-                  background: active ? "var(--color-primary-wash)" : "transparent",
-                }}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  active
+                    ? "bg-accent text-primary"
+                    : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                )}
               >
                 {icon}
                 {label}
@@ -378,30 +389,26 @@ export function TeacherNav() {
         </div>
       </aside>
 
-      {/* Mobile bottom tab bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[var(--color-border)] flex z-50">
-        {NAV_ITEMS.map((item) => {
+      {/* Mobile bottom tab bar — cap at 5 primary items */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex border-t bg-card md:hidden">
+        {NAV_ITEMS.slice(0, 5).map((item) => {
+          const paths = (item as { activeOn?: string[] }).activeOn ?? [item.href];
           const active =
             pathname === item.href ||
-            (item.href !== "/teacher/class" && pathname.startsWith(item.href));
+            paths.some((p) => p !== "/teacher/class" && pathname.startsWith(p));
           return (
             <Link
               key={item.href}
               href={item.href}
-              className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-[10px] font-medium"
-              style={{
-                color: active
-                  ? "var(--color-primary)"
-                  : "var(--color-text-muted)",
-              }}
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium",
+                active ? "text-primary" : "text-muted-foreground"
+              )}
             >
               <span className="relative">
                 {item.icon}
                 {item.href === "/teacher/messages" && unreadCount > 0 && (
-                  <span
-                    className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full border border-white"
-                    style={{ background: "var(--color-primary)" }}
-                  />
+                  <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full border border-card bg-primary" />
                 )}
               </span>
               {item.label}

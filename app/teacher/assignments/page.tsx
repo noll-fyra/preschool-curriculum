@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { Plus } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { NurtureStore } from "@/lib/store";
 import { getActiveClassChildren } from "@/lib/selectors";
 import type { PlannedActivity } from "@/lib/types";
 import { ActivityCard } from "@/components/teacher/ActivityCard";
 import { ActivityCreator } from "@/components/teacher/ActivityCreator";
+import { Button } from "@/components/ui/button";
 
 type CalendarView = "month" | "week" | "day";
 
@@ -108,83 +110,75 @@ export default function ActivitiesPage() {
   }
 
   return (
-    <div className="px-5 py-6 md:px-8 md:py-8 flex flex-col" style={{ minHeight: 0 }}>
+    <div className="flex min-h-0 flex-col px-4 py-6 md:px-6">
       {/* Page header */}
-      <div className="flex items-center justify-between gap-3 mb-5 shrink-0">
-        <h1 className="text-2xl font-bold" style={{ color: "var(--color-text-dark)" }}>
-          Activities
-        </h1>
-        <button
+      <div className="mb-5 flex shrink-0 items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold text-foreground">Activities</h1>
+        <Button
+          type="button"
+          size="sm"
+          className="shrink-0 gap-1.5 font-semibold"
           onClick={() => setShowCreator(true)}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white shrink-0"
-          style={{ background: "var(--color-primary)" }}
         >
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-            <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
+          <Plus className="size-3.5" strokeWidth={2.5} />
           New
-        </button>
+        </Button>
       </div>
 
       {/* View switcher + navigation */}
-      <div className="flex items-center gap-3 mb-5 shrink-0 flex-wrap">
-        {/* Segmented control */}
-        <div
-          className="flex rounded-xl p-1 gap-0.5"
-          style={{ background: "var(--color-bg-deep)" }}
-        >
+      <div className="mb-5 flex shrink-0 flex-wrap items-center gap-3">
+        <div className="bg-muted flex gap-0.5 rounded-xl p-1">
           {(["month", "week", "day"] as CalendarView[]).map((v) => (
-            <button
+            <Button
               key={v}
+              type="button"
+              variant={calView === v ? "default" : "ghost"}
+              size="sm"
+              className="flex-1 capitalize shadow-none sm:flex-none"
               onClick={() => setCalView(v)}
-              className="px-3.5 py-1 rounded-lg text-sm font-medium capitalize transition-all"
-              style={{
-                background: calView === v ? "white" : "transparent",
-                color: calView === v ? "var(--color-text-dark)" : "var(--color-text-muted)",
-                boxShadow: calView === v ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-              }}
             >
               {v}
-            </button>
+            </Button>
           ))}
         </div>
 
-        {/* Prev / label / next */}
-        <div className="flex items-center gap-1">
-          <button
+        <div className="flex items-center gap-0.5">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={() => navigate(-1)}
-            className="p-1.5 rounded-lg hover:bg-bg-cream transition-colors"
             aria-label="Previous"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-          </button>
-          <span
-            className="text-sm font-semibold px-2 min-w-[180px] text-center"
-            style={{ color: "var(--color-text-dark)" }}
-          >
+          </Button>
+          <span className="min-w-[180px] px-2 text-center text-sm font-semibold text-foreground">
             {periodLabel()}
           </span>
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={() => navigate(1)}
-            className="p-1.5 rounded-lg hover:bg-bg-cream transition-colors"
             aria-label="Next"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-          </button>
+          </Button>
         </div>
 
         {selectedDate !== todayISO && (
-          <button
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
             onClick={() => setSelectedDate(todayISO)}
-            className="px-3 py-1 rounded-lg text-xs font-medium"
-            style={{ background: "var(--color-primary-wash)", color: "var(--color-primary)" }}
           >
             Today
-          </button>
+          </Button>
         )}
       </div>
 

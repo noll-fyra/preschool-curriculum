@@ -1,3 +1,6 @@
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+
 interface StatCardProps {
   value: string | number;
   label: string;
@@ -7,49 +10,43 @@ interface StatCardProps {
 
 export function StatCard({ value, label, subtext, accent }: StatCardProps) {
   return (
-    <div
-      style={{
-        background: accent ? "var(--color-primary)" : "#fff",
-        borderRadius: 12,
-        padding: "14px 16px",
-        border: accent ? "none" : "1px solid var(--color-border)",
-        display: "flex",
-        flexDirection: "column",
-        gap: 2,
-      }}
-    >
-      <span
-        style={{
-          fontSize: 26,
-          fontWeight: 700,
-          lineHeight: 1.1,
-          color: accent ? "#fff" : "var(--color-text-dark)",
-        }}
-      >
-        {value}
-      </span>
-      <span
-        style={{
-          fontSize: 12,
-          fontWeight: 600,
-          color: accent ? "rgba(255,255,255,0.85)" : "var(--color-text-mid)",
-          letterSpacing: "0.02em",
-        }}
-      >
-        {label}
-      </span>
-      {subtext && (
-        <span
-          style={{
-            fontSize: 11,
-            color: accent ? "rgba(255,255,255,0.65)" : "var(--color-text-muted)",
-            marginTop: 2,
-            lineHeight: 1.3,
-          }}
-        >
-          {subtext}
-        </span>
+    <Card
+      size="sm"
+      className={cn(
+        "py-3.5 ring-1",
+        accent
+          ? "border-transparent bg-primary text-primary-foreground ring-primary/20"
+          : "bg-card ring-border/80"
       )}
-    </div>
+    >
+      <div className="flex flex-col gap-0.5 px-3.5">
+        <span
+          className={cn(
+            "text-[1.625rem] leading-none font-bold tabular-nums tracking-tight",
+            accent ? "text-primary-foreground" : "text-foreground"
+          )}
+        >
+          {value}
+        </span>
+        <span
+          className={cn(
+            "text-xs font-semibold tracking-wide",
+            accent ? "text-primary-foreground/90" : "text-muted-foreground"
+          )}
+        >
+          {label}
+        </span>
+        {subtext ? (
+          <span
+            className={cn(
+              "mt-0.5 text-[11px] leading-snug",
+              accent ? "text-primary-foreground/75" : "text-muted-foreground"
+            )}
+          >
+            {subtext}
+          </span>
+        ) : null}
+      </div>
+    </Card>
   );
 }

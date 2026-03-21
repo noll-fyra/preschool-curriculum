@@ -16,6 +16,15 @@ import { TimeGrid } from "@/components/calendar/TimeGrid";
 import type { TimeColumn, TimedEvent, AllDayEvent } from "@/components/calendar/TimeGrid";
 import { CalendarToolbar } from "@/components/calendar/CalendarToolbar";
 import { MonthView } from "@/components/calendar/MonthView";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -201,14 +210,13 @@ export default function AdminCalendarPage() {
       .sort((a, b) => a.startDate.localeCompare(b.startDate))
       .map(h => ({
         id: h.id,
-        kind: "holiday" as const,
         title: h.title,
         startDate: h.startDate,
         endDate: h.endDate,
         badge: h.schoolId ? "School closure" : "Org-wide",
         badgeBg: h.schoolId ? HOLIDAY_SCHOOL_COLOR.bg : HOLIDAY_ORG_COLOR.bg,
         badgeText: h.schoolId ? HOLIDAY_SCHOOL_COLOR.text : HOLIDAY_ORG_COLOR.text,
-        meta: h.schoolId ? "School-specific closure" : "Applies to all schools in the organisation",
+        meta: h.startDate === h.endDate ? h.startDate : `${h.startDate} – ${h.endDate}`,
         item: h,
       })),
     [calendarHolidays]
@@ -223,47 +231,53 @@ export default function AdminCalendarPage() {
     [holidayItems, todayISO]
   );
 
+  const classItems = Object.fromEntries(classes.map((c) => [c.id, c.name]));
+
   return (
-    <div className="px-5 py-6 md:px-8 md:py-8 flex flex-col" style={{ minHeight: 0 }}>
+    <div className="flex min-h-0 flex-col px-4 py-6 md:px-6 md:py-8">
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 mb-5 shrink-0 flex-wrap">
-        <h1 className="text-2xl font-bold" style={{ color: "var(--color-text-dark)" }}>
-          Calendar
-        </h1>
+      <div className="mb-5 flex shrink-0 flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold text-foreground">Calendar</h1>
         {activeTab === "calendar" && (
-          <button
+          <Button
+            type="button"
+            size="sm"
+            className="font-semibold"
             onClick={() => setShowScheduleModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold text-white"
-            style={{ background: "var(--color-primary)" }}
           >
             + Schedule
-          </button>
+          </Button>
         )}
         {activeTab === "events" && (
-          <button
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="border-red-300 bg-red-50 font-semibold text-red-700 hover:bg-red-100"
             onClick={() => setShowHolidayModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold border"
-            style={{ borderColor: "#C0392B", color: "#C0392B", background: "#FDE8EA" }}
           >
             + Add holiday or event
-          </button>
+          </Button>
         )}
       </div>
 
-      {/* Top-level tabs */}
-      <div className="flex gap-1 mb-5 shrink-0 border-b" style={{ borderColor: "var(--color-border)" }}>
+      <div className="border-border mb-5 flex shrink-0 gap-1 border-b">
         {(["calendar", "events"] as const).map((tab) => (
-          <button
+          <Button
             key={tab}
+            type="button"
+            variant="ghost"
+            size="sm"
+            className={cn(
+              "-mb-px rounded-none border-b-2 border-transparent px-4 font-semibold shadow-none",
+              activeTab === tab
+                ? "text-primary border-primary"
+                : "text-muted-foreground"
+            )}
             onClick={() => setActiveTab(tab)}
-            className="px-4 py-2 text-sm font-semibold transition-colors -mb-px"
-            style={{
-              color: activeTab === tab ? "var(--color-primary)" : "var(--color-text-muted)",
-              borderBottom: activeTab === tab ? "2px solid var(--color-primary)" : "2px solid transparent",
-            }}
           >
             {tab === "calendar" ? "Calendar" : "Holidays & Events"}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -290,52 +304,58 @@ export default function AdminCalendarPage() {
               >
                 Org-wide (always)
               </span>
-              <button
-                onClick={() => setShowSchool1(v => !v)}
-                className="px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors"
-                style={{
-                  background: showSchool1 ? "var(--color-primary)" : "white",
-                  color: showSchool1 ? "white" : "var(--color-text-mid)",
-                  borderColor: showSchool1 ? "var(--color-primary)" : "var(--color-border)",
-                }}
+              <Button
+                type="button"
+                size="sm"
+                variant={showSchool1 ? "default" : "outline"}
+                className="rounded-full text-xs font-semibold"
+                onClick={() => setShowSchool1((v) => !v)}
               >
                 {school.name}
-              </button>
+              </Button>
             </div>
           )}
 
           {/* Week view: class selector */}
           {calView === "week" && (
-            <div className="flex items-center gap-2 mb-4 shrink-0">
-              <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>Class:</span>
-              <select
+            <div className="mb-4 flex shrink-0 items-center gap-2">
+              <span className="text-muted-foreground text-xs font-medium">Class:</span>
+              <Select
                 value={weekClassId}
-                onChange={e => setWeekClassId(e.target.value)}
-                className="rounded-lg border px-2 py-1 text-sm bg-white"
-                style={{ borderColor: "var(--color-border)", color: "var(--color-text-dark)" }}
+                onValueChange={(v) => v != null && setWeekClassId(String(v))}
+                items={classItems}
               >
-                {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
+                <SelectTrigger size="sm" className="min-w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {classes.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
 
           {/* Day view: class multi-picker */}
           {calView === "day" && (
-            <div className="flex items-center gap-2 mb-4 shrink-0 flex-wrap">
-              <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>Classes:</span>
-              {classes.map(cls => (
-                <button
+            <div className="mb-4 flex shrink-0 flex-wrap items-center gap-2">
+              <span className="text-muted-foreground text-xs font-medium">
+                Classes:
+              </span>
+              {classes.map((cls) => (
+                <Button
                   key={cls.id}
+                  type="button"
+                  size="sm"
+                  variant={dayClassIds.includes(cls.id) ? "default" : "outline"}
+                  className="rounded-full text-xs font-semibold"
                   onClick={() => toggleDayClass(cls.id)}
-                  className="px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors"
-                  style={{
-                    background: dayClassIds.includes(cls.id) ? "var(--color-primary)" : "white",
-                    color: dayClassIds.includes(cls.id) ? "white" : "var(--color-text-mid)",
-                    borderColor: dayClassIds.includes(cls.id) ? "var(--color-primary)" : "var(--color-border)",
-                  }}
                 >
                   {cls.name}
-                </button>
+                </Button>
               ))}
             </div>
           )}
@@ -376,9 +396,8 @@ export default function AdminCalendarPage() {
             title="Upcoming"
             items={upcomingHolidays}
             todayISO={todayISO}
-            classes={classes}
-            onEdit={setEditEvent}
-            onDelete={(item) => store.deleteHoliday(item.id)}
+            onEdit={(h) => setEditEvent({ kind: "holiday", item: h })}
+            onDelete={(h) => store.deleteHoliday(h.id)}
             emptyText="No upcoming holidays or events — add one above."
           />
           {pastHolidays.length > 0 && (
@@ -386,9 +405,8 @@ export default function AdminCalendarPage() {
               title="Past"
               items={pastHolidays}
               todayISO={todayISO}
-              classes={classes}
-              onEdit={setEditEvent}
-              onDelete={(item) => store.deleteHoliday(item.id)}
+              onEdit={(h) => setEditEvent({ kind: "holiday", item: h })}
+              onDelete={(h) => store.deleteHoliday(h.id)}
               dimmed
             />
           )}
@@ -451,11 +469,10 @@ export default function AdminCalendarPage() {
   );
 }
 
-// ─── List view components ─────────────────────────────────────────────────────
+// ─── Holidays & Events list components ───────────────────────────────────────
 
 type ListItem = {
   id: string;
-  kind: "holiday" | "schedule";
   title: string;
   startDate: string;
   endDate: string;
@@ -463,14 +480,13 @@ type ListItem = {
   badgeBg: string;
   badgeText: string;
   meta: string;
-  item: CalendarHoliday | ClassSchedule;
+  item: CalendarHoliday;
 };
 
 function ListSection({
   title,
   items,
   todayISO,
-  classes,
   onEdit,
   onDelete,
   dimmed = false,
@@ -479,9 +495,8 @@ function ListSection({
   title: string;
   items: ListItem[];
   todayISO: string;
-  classes: NurtureStore["classes"];
-  onEdit: (item: DetailEvent) => void;
-  onDelete: (item: ListItem) => void;
+  onEdit: (h: CalendarHoliday) => void;
+  onDelete: (h: CalendarHoliday) => void;
   dimmed?: boolean;
   emptyText?: string;
 }) {
@@ -546,18 +561,14 @@ function ListSection({
                 {/* Actions */}
                 <div className="flex items-center gap-1 shrink-0">
                   <button
-                    onClick={() => onEdit(
-                      item.kind === "holiday"
-                        ? { kind: "holiday", item: item.item as CalendarHoliday }
-                        : { kind: "schedule", item: item.item as ClassSchedule }
-                    )}
+                    onClick={() => onEdit(item.item)}
                     className="px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors"
                     style={{ borderColor: "var(--color-border)", color: "var(--color-text-mid)" }}
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => onDelete(item)}
+                    onClick={() => onDelete(item.item)}
                     className="px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors"
                     style={{ borderColor: "#C0392B", color: "#C0392B" }}
                   >

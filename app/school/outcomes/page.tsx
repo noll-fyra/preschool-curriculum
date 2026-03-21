@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { SegmentControl } from "@/components/shared/SegmentControl";
 
 type Tab = "coverage" | "progress" | "quality" | "reports";
 
@@ -665,45 +666,15 @@ export default function OutcomesPage() {
   const [tab, setTab] = useState<Tab>("coverage");
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 pb-24 md:pb-8">
+    <div className="mx-auto max-w-3xl px-4 py-6 pb-24 md:pb-8">
       <div className="mb-6">
-        <h1
-          className="text-xl font-bold"
-          style={{ color: "var(--color-text-dark)" }}
-        >
-          Learning Outcomes
-        </h1>
-        <p
-          className="text-sm mt-0.5"
-          style={{ color: "var(--color-text-mid)" }}
-        >
-          Programme-level view of whether the school's curriculum is working.
+        <h1 className="text-xl font-bold text-foreground">Learning Outcomes</h1>
+        <p className="text-muted-foreground mt-0.5 text-sm">
+          Programme-level view of whether the school&apos;s curriculum is working.
         </p>
       </div>
 
-      {/* Tabs */}
-      <div
-        className="flex gap-1 rounded-xl p-1 mb-6"
-        style={{ background: "var(--color-bg-cream)" }}
-      >
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className="flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
-            style={{
-              background: tab === t.id ? "white" : "transparent",
-              color:
-                tab === t.id
-                  ? "var(--color-text-dark)"
-                  : "var(--color-text-mid)",
-              boxShadow: tab === t.id ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
-            }}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <SegmentControl value={tab} onChange={setTab} options={TABS} />
 
       {tab === "coverage" && <CoverageView />}
       {tab === "progress" && <ProgressView />}

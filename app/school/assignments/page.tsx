@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import { useStore } from "@/lib/store";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 type AssignmentType = "lead" | "co-teacher" | "guest" | "none";
 
@@ -15,8 +20,8 @@ interface Assignment {
 const INITIAL_ASSIGNMENTS: Assignment[] = [
   { employeeId: "emp-siti", classId: "class-1", type: "lead" },
   { employeeId: "emp-siti", classId: "class-2", type: "none" },
-  { employeeId: "emp-lim",  classId: "class-1", type: "none" },
-  { employeeId: "emp-lim",  classId: "class-2", type: "lead" },
+  { employeeId: "emp-lim", classId: "class-1", type: "none" },
+  { employeeId: "emp-lim", classId: "class-2", type: "lead" },
   { employeeId: "emp-priya", classId: "class-1", type: "none" },
   { employeeId: "emp-priya", classId: "class-2", type: "none" },
   { employeeId: "emp-david", classId: "class-1", type: "none" },
@@ -30,17 +35,20 @@ const TYPE_LABELS: Record<AssignmentType, string> = {
   none: "—",
 };
 
-const TYPE_COLORS: Record<AssignmentType, { bg: string; text: string }> = {
-  lead: { bg: "var(--color-primary-wash)", text: "var(--color-primary)" },
-  "co-teacher": { bg: "#eff6ff", text: "#3b82f6" },
-  guest: { bg: "#fef9c3", text: "#a16207" },
-  none: { bg: "transparent", text: "var(--color-text-mid)" },
+const TYPE_COLORS: Record<
+  AssignmentType,
+  { className: string }
+> = {
+  lead: { className: "bg-primary/15 text-primary" },
+  "co-teacher": { className: "bg-blue-50 text-blue-700" },
+  guest: { className: "bg-amber-50 text-amber-800" },
+  none: { className: "bg-muted text-muted-foreground" },
 };
 
 const ACCESS_TABLE = [
-  { type: "Lead teacher",   see: true, log: true,  schedule: true, message: true, reports: "Full" },
-  { type: "Co-teacher",     see: true, log: true,  schedule: false, message: true, reports: "View" },
-  { type: "Guest/covering", see: true, log: true,  schedule: false, message: false, reports: "None" },
+  { type: "Lead teacher", see: true, log: true, schedule: true, message: true, reports: "Full" },
+  { type: "Co-teacher", see: true, log: true, schedule: false, message: true, reports: "View" },
+  { type: "Guest/covering", see: true, log: true, schedule: false, message: false, reports: "None" },
 ];
 
 interface EditModalProps {
@@ -56,72 +64,82 @@ function EditModal({ empName, className, current, onSave, onClose }: EditModalPr
   const [guestUntil, setGuestUntil] = useState(current.guestUntil ?? "");
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.4)" }}>
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
-        <h2 className="font-semibold text-base mb-1" style={{ color: "var(--color-text-dark)" }}>
-          Edit assignment
-        </h2>
-        <p className="text-sm mb-5" style={{ color: "var(--color-text-mid)" }}>
-          {empName} · {className}
-        </p>
-
-        <div className="space-y-2 mb-4">
-          {(["lead", "co-teacher", "guest", "none"] as AssignmentType[]).map((t) => (
-            <label
-              key={t}
-              className="flex items-center gap-3 rounded-lg border px-4 py-3 cursor-pointer transition-colors"
-              style={{
-                borderColor: type === t ? "var(--color-primary)" : "var(--color-border)",
-                background: type === t ? "var(--color-primary-wash)" : "transparent",
-              }}
-            >
-              <input
-                type="radio"
-                name="assignType"
-                value={t}
-                checked={type === t}
-                onChange={() => setType(t)}
-                className="accent-[var(--color-primary)]"
-              />
-              <span className="text-sm font-medium" style={{ color: "var(--color-text-dark)" }}>
-                {t === "none" ? "No assignment" : TYPE_LABELS[t]}
-              </span>
-            </label>
-          ))}
-        </div>
-
-        {type === "guest" && (
-          <div className="mb-4">
-            <label className="block text-xs font-medium mb-1" style={{ color: "var(--color-text-mid)" }}>
-              Access until
-            </label>
-            <input
-              type="date"
-              value={guestUntil}
-              onChange={(e) => setGuestUntil(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 text-sm"
-              style={{ borderColor: "var(--color-border)", color: "var(--color-text-dark)" }}
-            />
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      onClick={onClose}
+    >
+      <Card
+        className="max-w-sm shadow-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Edit assignment</CardTitle>
+          <p className="text-muted-foreground text-sm">
+            {empName} · {className}
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            {(["lead", "co-teacher", "guest", "none"] as AssignmentType[]).map((t) => (
+              <label
+                key={t}
+                className={cn(
+                  "flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-colors",
+                  type === t
+                    ? "border-primary bg-accent"
+                    : "border-border hover:bg-muted/50"
+                )}
+              >
+                <input
+                  type="radio"
+                  name="assignType"
+                  value={t}
+                  checked={type === t}
+                  onChange={() => setType(t)}
+                  className="text-primary accent-primary"
+                />
+                <span className="text-sm font-medium text-foreground">
+                  {t === "none" ? "No assignment" : TYPE_LABELS[t]}
+                </span>
+              </label>
+            ))}
           </div>
-        )}
 
-        <div className="flex gap-2">
-          <button
-            onClick={onClose}
-            className="flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium"
-            style={{ borderColor: "var(--color-border)", color: "var(--color-text-mid)" }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => onSave({ ...current, type, guestUntil: type === "guest" ? guestUntil : undefined })}
-            className="flex-1 rounded-lg px-4 py-2.5 text-sm font-medium text-white"
-            style={{ background: "var(--color-primary)" }}
-          >
-            Save
-          </button>
-        </div>
-      </div>
+          {type === "guest" && (
+            <div>
+              <Label htmlFor="guest-until" className="text-xs">
+                Access until
+              </Label>
+              <Input
+                id="guest-until"
+                type="date"
+                value={guestUntil}
+                onChange={(e) => setGuestUntil(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+          )}
+
+          <div className="flex gap-2 pt-1">
+            <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="flex-1 font-semibold"
+              onClick={() =>
+                onSave({
+                  ...current,
+                  type,
+                  guestUntil: type === "guest" ? guestUntil : undefined,
+                })
+              }
+            >
+              Save
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -155,30 +173,23 @@ export default function AssignmentsPage() {
   const editingClass = editing ? classes.find((c) => c.id === editing.classId) : null;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 pb-24 md:pb-8">
+    <div className="mx-auto max-w-4xl px-4 py-6 pb-24 md:pb-8">
       <div className="mb-6">
-        <h1 className="text-xl font-bold" style={{ color: "var(--color-text-dark)" }}>
-          Teacher Assignments
-        </h1>
-        <p className="text-sm mt-0.5" style={{ color: "var(--color-text-mid)" }}>
+        <h1 className="text-xl font-bold text-foreground">Teacher Assignments</h1>
+        <p className="text-muted-foreground mt-0.5 text-sm">
           Manage which teachers have access to each class and in what capacity.
         </p>
       </div>
 
-      {/* Assignment matrix */}
-      <div className="bg-white rounded-xl border border-[var(--color-border)] overflow-x-auto mb-6">
+      <Card className="mb-6 overflow-x-auto p-0 shadow-none">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[var(--color-border)]">
-              <th className="text-left px-5 py-3 font-semibold" style={{ color: "var(--color-text-dark)" }}>
+            <tr className="border-b">
+              <th className="px-5 py-3 text-left font-semibold text-foreground">
                 Staff member
               </th>
               {classes.map((cls) => (
-                <th
-                  key={cls.id}
-                  className="text-center px-5 py-3 font-semibold"
-                  style={{ color: "var(--color-text-dark)" }}
-                >
+                <th key={cls.id} className="px-5 py-3 text-center font-semibold text-foreground">
                   {cls.name}
                 </th>
               ))}
@@ -186,30 +197,33 @@ export default function AssignmentsPage() {
           </thead>
           <tbody>
             {employees.map((emp) => (
-              <tr key={emp.id} className="border-b border-[var(--color-border)] last:border-0">
+              <tr key={emp.id} className="border-b last:border-0">
                 <td className="px-5 py-3">
-                  <div className="font-medium" style={{ color: "var(--color-text-dark)" }}>
+                  <div className="font-medium text-foreground">
                     {emp.firstName} {emp.lastName}
                   </div>
-                  <div className="text-xs" style={{ color: "var(--color-text-mid)" }}>
-                    {emp.email}
-                  </div>
+                  <div className="text-muted-foreground text-xs">{emp.email}</div>
                 </td>
                 {classes.map((cls) => {
                   const a = getAssignment(emp.id, cls.id);
-                  const colors = TYPE_COLORS[a.type];
+                  const tone = TYPE_COLORS[a.type];
                   return (
                     <td key={cls.id} className="px-5 py-3 text-center">
-                      <button
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className={cn(
+                          "rounded-full px-3 text-xs font-medium shadow-none",
+                          tone.className
+                        )}
                         onClick={() => setEditing(a)}
-                        className="inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium transition-opacity hover:opacity-80"
-                        style={{ background: colors.bg, color: colors.text }}
                       >
                         {TYPE_LABELS[a.type]}
                         {a.type === "guest" && a.guestUntil && (
-                          <span className="ml-1 opacity-70">until {a.guestUntil}</span>
+                          <span className="ml-1 opacity-80">until {a.guestUntil}</span>
                         )}
-                      </button>
+                      </Button>
                     </td>
                   );
                 })}
@@ -217,47 +231,54 @@ export default function AssignmentsPage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </Card>
 
-      {/* Access permissions reference */}
-      <div className="bg-white rounded-xl border border-[var(--color-border)] overflow-x-auto">
-        <div className="px-5 py-4 border-b border-[var(--color-border)]">
-          <h2 className="font-semibold text-sm" style={{ color: "var(--color-text-dark)" }}>
-            Access permissions by role
-          </h2>
-        </div>
+      <Card className="overflow-x-auto p-0 shadow-none">
+        <CardHeader className="border-b py-4">
+          <CardTitle className="text-sm">Access permissions by role</CardTitle>
+        </CardHeader>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[var(--color-border)]" style={{ background: "var(--color-bg-cream)" }}>
-              <th className="text-left px-5 py-2.5 font-medium text-xs" style={{ color: "var(--color-text-mid)" }}>Role</th>
-              <th className="text-center px-4 py-2.5 font-medium text-xs" style={{ color: "var(--color-text-mid)" }}>View class</th>
-              <th className="text-center px-4 py-2.5 font-medium text-xs" style={{ color: "var(--color-text-mid)" }}>Log observations</th>
-              <th className="text-center px-4 py-2.5 font-medium text-xs" style={{ color: "var(--color-text-mid)" }}>Edit schedule</th>
-              <th className="text-center px-4 py-2.5 font-medium text-xs" style={{ color: "var(--color-text-mid)" }}>Message parents</th>
-              <th className="text-center px-4 py-2.5 font-medium text-xs" style={{ color: "var(--color-text-mid)" }}>Reports</th>
+            <tr className="bg-muted/50 border-b">
+              <th className="text-muted-foreground px-5 py-2.5 text-left text-xs font-medium">Role</th>
+              <th className="text-muted-foreground px-4 py-2.5 text-center text-xs font-medium">
+                View class
+              </th>
+              <th className="text-muted-foreground px-4 py-2.5 text-center text-xs font-medium">
+                Log observations
+              </th>
+              <th className="text-muted-foreground px-4 py-2.5 text-center text-xs font-medium">
+                Edit schedule
+              </th>
+              <th className="text-muted-foreground px-4 py-2.5 text-center text-xs font-medium">
+                Message parents
+              </th>
+              <th className="text-muted-foreground px-4 py-2.5 text-center text-xs font-medium">
+                Reports
+              </th>
             </tr>
           </thead>
           <tbody>
             {ACCESS_TABLE.map((row) => (
-              <tr key={row.type} className="border-b border-[var(--color-border)] last:border-0">
-                <td className="px-5 py-3 font-medium" style={{ color: "var(--color-text-dark)" }}>{row.type}</td>
+              <tr key={row.type} className="border-b last:border-0">
+                <td className="px-5 py-3 font-medium text-foreground">{row.type}</td>
                 {[row.see, row.log, row.schedule, row.message].map((v, i) => (
                   <td key={i} className="px-4 py-3 text-center">
                     {v ? (
-                      <span style={{ color: "var(--color-primary)" }}>✓</span>
+                      <span className="text-primary">✓</span>
                     ) : (
-                      <span style={{ color: "var(--color-text-mid)" }}>—</span>
+                      <span className="text-muted-foreground">—</span>
                     )}
                   </td>
                 ))}
-                <td className="px-4 py-3 text-center text-xs" style={{ color: "var(--color-text-mid)" }}>
+                <td className="text-muted-foreground px-4 py-3 text-center text-xs">
                   {row.reports}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </Card>
 
       {editing && editingEmp && editingClass && (
         <EditModal

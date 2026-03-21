@@ -2,10 +2,22 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { getChildDisplayName } from "@/lib/display-name";
 import { getChildAgeInYears } from "@/lib/child";
 import type { YearLevelId } from "@/lib/types";
+import { buttonVariants } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 const YEAR_LEVELS: { id: YearLevelId | ""; label: string }[] = [
   { id: "", label: "All grades" },
@@ -36,6 +48,13 @@ export default function AdminStudentsPage() {
   const [gradeFilter, setGradeFilter] = useState<YearLevelId | "">("");
   const [ageFilter, setAgeFilter] = useState<"" | "3" | "4" | "5" | "6+">("");
 
+  const ageItems = Object.fromEntries(AGE_OPTIONS.map((o) => [o.value || "all", o.label]));
+  const gradeItems = Object.fromEntries(YEAR_LEVELS.map((o) => [o.id || "all", o.label]));
+  const classItems = Object.fromEntries([
+    ["all", "All classes"],
+    ...classes.map((c) => [c.id, c.name] as [string, string]),
+  ]);
+
   const filtered = children.filter((c) => {
     if (classFilter && c.classId !== classFilter) return false;
     if (gradeFilter && c.yearLevel !== gradeFilter) return false;
@@ -45,65 +64,79 @@ export default function AdminStudentsPage() {
   });
 
   return (
-    <div className="px-5 py-6 md:px-8 md:py-8 max-w-4xl">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold" style={{ color: "var(--color-text-dark)" }}>
-          Students
-        </h1>
-        <Link
-          href="/school/students/new"
-          className="px-4 py-2 rounded-lg text-sm font-semibold text-white"
-          style={{ background: "var(--color-primary)" }}
-        >
+    <div className="max-w-4xl px-4 py-6 md:px-6 md:py-8">
+      <div className="mb-6 flex items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold text-foreground">Students</h1>
+        <Link href="/school/students/new" className={cn(buttonVariants(), "font-semibold")}>
           Add student
         </Link>
       </div>
 
-      <div className="flex flex-wrap gap-3 mb-4">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>Age</span>
-          <select
-            value={ageFilter}
-            onChange={(e) => setAgeFilter(e.target.value as typeof ageFilter)}
-            className="px-2.5 py-1.5 rounded-lg border text-sm"
-            style={{ borderColor: "var(--color-border)" }}
+      <div className="mb-4 flex flex-wrap items-end gap-4">
+        <div className="space-y-1">
+          <Label className="text-xs">Age</Label>
+          <Select
+            value={ageFilter || "all"}
+            onValueChange={(v) => setAgeFilter(v === "all" ? "" : (v as typeof ageFilter))}
+            items={ageItems}
           >
-            {AGE_OPTIONS.map((o) => (
-              <option key={o.value || "all"} value={o.value}>{o.label}</option>
-            ))}
-          </select>
+            <SelectTrigger size="sm" className="w-[140px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {AGE_OPTIONS.map((o) => (
+                <SelectItem key={o.value || "all"} value={o.value || "all"}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>Grade</span>
-          <select
-            value={gradeFilter}
-            onChange={(e) => setGradeFilter(e.target.value as YearLevelId | "")}
-            className="px-2.5 py-1.5 rounded-lg border text-sm"
-            style={{ borderColor: "var(--color-border)" }}
+        <div className="space-y-1">
+          <Label className="text-xs">Grade</Label>
+          <Select
+            value={gradeFilter || "all"}
+            onValueChange={(v) => setGradeFilter(v === "all" ? "" : (v as YearLevelId))}
+            items={gradeItems}
           >
-            {YEAR_LEVELS.map((o) => (
-              <option key={o.id || "all"} value={o.id}>{o.label}</option>
-            ))}
-          </select>
+            <SelectTrigger size="sm" className="w-[140px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {YEAR_LEVELS.map((o) => (
+                <SelectItem key={o.id || "all"} value={o.id || "all"}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>Class</span>
-          <select
-            value={classFilter}
-            onChange={(e) => setClassFilter(e.target.value)}
-            className="px-2.5 py-1.5 rounded-lg border text-sm"
-            style={{ borderColor: "var(--color-border)" }}
+        <div className="space-y-1">
+          <Label className="text-xs">Class</Label>
+          <Select
+            value={classFilter || "all"}
+            onValueChange={(v) =>
+              setClassFilter(v == null || v === "all" ? "" : String(v))
+            }
+            items={classItems}
           >
-            <option value="">All classes</option>
-            {classes.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
+            <SelectTrigger size="sm" className="w-[180px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All classes</SelectItem>
+              {classes.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      <div className="rounded-2xl border overflow-hidden bg-white" style={{ borderColor: "var(--color-border)" }}>
-        <ul className="divide-y divide-[var(--color-border)]">
+      <Card className="overflow-hidden p-0 shadow-none">
+        <ul className="divide-border divide-y">
           {filtered
             .sort((a, b) => getChildDisplayName(a).localeCompare(getChildDisplayName(b)))
             .map((child) => {
@@ -112,25 +145,21 @@ export default function AdminStudentsPage() {
                 <li key={child.id}>
                   <Link
                     href={`/school/students/${child.id}/edit`}
-                    className="flex items-center justify-between px-4 py-4 hover:bg-bg-cream transition-colors"
+                    className="hover:bg-accent/50 flex items-center justify-between px-4 py-4 transition-colors"
                   >
                     <div>
-                      <p className="font-medium" style={{ color: "var(--color-text-dark)" }}>
-                        {getChildDisplayName(child)}
-                      </p>
-                      <p className="text-sm mt-0.5" style={{ color: "var(--color-text-muted)" }}>
+                      <p className="font-medium text-foreground">{getChildDisplayName(child)}</p>
+                      <p className="text-muted-foreground mt-0.5 text-sm">
                         {cls?.name ?? "Unassigned"} · {child.yearLevel ?? "—"}
                       </p>
                     </div>
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0 opacity-40">
-                      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <ChevronRight className="text-muted-foreground size-4 shrink-0 opacity-50" />
                   </Link>
                 </li>
               );
             })}
         </ul>
-      </div>
+      </Card>
     </div>
   );
 }

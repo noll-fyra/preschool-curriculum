@@ -2,11 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ChevronRight, X } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { getChildDisplayName } from "@/lib/display-name";
-import { getTeacherDisplayName } from "@/lib/display-name";
 import { ChildAvatar } from "@/components/teacher/ChildAvatar";
 import type { ChatMessage, TeacherUpdateMedia } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 function formatTime(iso: string): string {
   const d = new Date(iso);
@@ -49,23 +55,22 @@ export default function TeacherMessagesPage() {
   });
 
   return (
-    <div className="px-5 py-6 md:px-8 md:py-8 max-w-2xl">
-      <div className="flex items-center justify-between mb-6">
+    <div className="mx-auto max-w-2xl px-4 py-6 md:px-6">
+      <div className="mb-6 flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "var(--color-text-dark)" }}>
-            Messages
-          </h1>
-          <p className="text-sm mt-0.5" style={{ color: "var(--color-text-muted)" }}>
+          <h1 className="text-2xl font-bold text-foreground">Messages</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">
             {activeClass.name} · per-child conversations
           </p>
         </div>
-        <button
+        <Button
+          type="button"
+          size="sm"
+          className="shrink-0 font-semibold"
           onClick={() => setBroadcastOpen(true)}
-          className="px-4 py-2 rounded-xl text-sm font-semibold text-white shrink-0"
-          style={{ background: "var(--color-primary)" }}
         >
           Broadcast to class
-        </button>
+        </Button>
       </div>
 
       {broadcastOpen && (
@@ -76,61 +81,60 @@ export default function TeacherMessagesPage() {
         />
       )}
 
-      <div className="flex flex-col divide-y" style={{ borderColor: "var(--color-border)" }}>
-        {childrenWithLatest.map(({ child, last, hasUnread }) => {
-          return (
-            <Link
-              key={child.id}
-              href={`/teacher/messages/${child.id}`}
-              className="flex items-center gap-3 py-3.5 hover:bg-bg-cream rounded-xl px-2 -mx-2 transition-colors"
-            >
-              <ChildAvatar name={getChildDisplayName(child)} size="md" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2">
-                  <p
-                    className="text-sm truncate"
-                    style={{ color: "var(--color-text-dark)", fontWeight: hasUnread ? 700 : 600 }}
-                  >
-                    {getChildDisplayName(child)}
-                  </p>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    {hasUnread && (
-                      <span
-                        className="w-2 h-2 rounded-full shrink-0"
-                        style={{ background: "var(--color-primary)" }}
-                      />
-                    )}
-                    {last && (
-                      <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                        {formatTime(last.createdAt)}
-                      </span>
-                    )}
+      <Card className="shadow-none">
+        <div className="flex flex-col py-1">
+          {childrenWithLatest.map(({ child, last, hasUnread }, i) => (
+            <div key={child.id}>
+              {i > 0 ? <Separator className="my-0" /> : null}
+              <Link
+                href={`/teacher/messages/${child.id}`}
+                className="hover:bg-accent/50 -mx-1 flex items-center gap-3 rounded-lg px-3 py-3.5 transition-colors"
+              >
+                <ChildAvatar name={getChildDisplayName(child)} size="md" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <p
+                      className={cn(
+                        "truncate text-sm",
+                        hasUnread ? "font-bold text-foreground" : "font-semibold text-foreground"
+                      )}
+                    >
+                      {getChildDisplayName(child)}
+                    </p>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      {hasUnread && (
+                        <span
+                          className="bg-primary size-2 shrink-0 rounded-full"
+                          aria-hidden
+                        />
+                      )}
+                      {last && (
+                        <span className="text-xs text-muted-foreground">
+                          {formatTime(last.createdAt)}
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  {last ? (
+                    <p
+                      className={cn(
+                        "mt-0.5 truncate text-xs",
+                        hasUnread ? "font-medium text-foreground" : "text-muted-foreground"
+                      )}
+                    >
+                      {last.senderType === "parent" ? "Parent: " : ""}
+                      {last.text.length > 60 ? `${last.text.slice(0, 60)}…` : last.text}
+                    </p>
+                  ) : (
+                    <p className="text-muted-foreground mt-0.5 text-xs">No messages yet</p>
+                  )}
                 </div>
-                {last ? (
-                  <p
-                    className="text-xs truncate mt-0.5"
-                    style={{
-                      color: hasUnread ? "var(--color-text-dark)" : "var(--color-text-muted)",
-                      fontWeight: hasUnread ? 500 : 400,
-                    }}
-                  >
-                    {last.senderType === "parent" ? "Parent: " : ""}
-                    {last.text.length > 60 ? last.text.slice(0, 60) + "…" : last.text}
-                  </p>
-                ) : (
-                  <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>
-                    No messages yet
-                  </p>
-                )}
-              </div>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ color: "var(--color-text-muted)", flexShrink: 0 }}>
-                <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </Link>
-          );
-        })}
-      </div>
+                <ChevronRight className="text-muted-foreground size-4 shrink-0" />
+              </Link>
+            </div>
+          ))}
+        </div>
+      </Card>
     </div>
   );
 }
@@ -176,104 +180,99 @@ function BroadcastComposer({
         style={{ borderColor: "var(--color-border)", maxWidth: 480 }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 flex items-center justify-between px-4 py-3 border-b bg-white z-10" style={{ borderColor: "var(--color-border)" }}>
-          <h2 className="font-semibold" style={{ color: "var(--color-text-dark)" }}>
-            Broadcast to whole class
-          </h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg" style={{ color: "var(--color-text-mid)" }} aria-label="Close">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M5 5l10 10M15 5l-10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </button>
+        <div className="border-border sticky top-0 z-10 flex items-center justify-between border-b bg-card px-4 py-3">
+          <h2 className="font-semibold text-foreground">Broadcast to whole class</h2>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <X className="size-4" />
+          </Button>
         </div>
 
-        <div className="p-4 space-y-4">
-          {/* Kind toggle */}
+        <div className="space-y-4 p-4">
           <div>
-            <label className="block text-xs font-medium mb-2" style={{ color: "var(--color-text-mid)" }}>
-              Type
-            </label>
-            <div className="flex gap-2">
+            <Label className="mb-2 block text-xs">Type</Label>
+            <div className="bg-muted flex gap-1 rounded-lg p-1">
               {(["message", "progress_update"] as const).map((k) => (
-                <button
+                <Button
                   key={k}
+                  type="button"
+                  size="sm"
+                  variant={kind === k ? "default" : "ghost"}
+                  className="flex-1 shadow-none"
                   onClick={() => setKind(k)}
-                  className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
-                  style={{
-                    background: kind === k ? "var(--color-primary-wash)" : "transparent",
-                    color: kind === k ? "var(--color-primary)" : "var(--color-text-mid)",
-                    borderColor: kind === k ? "var(--color-primary)" : "var(--color-border)",
-                  }}
                 >
                   {k === "message" ? "Message" : "Progress update"}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--color-text-mid)" }}>
+            <Label htmlFor="broadcast-text" className="mb-1.5 block text-xs">
               Message
-            </label>
+            </Label>
             <textarea
+              id="broadcast-text"
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Write a message for all parents…"
               rows={4}
-              className="w-full rounded-xl border px-3 py-2.5 text-sm resize-none"
-              style={{ borderColor: "var(--color-border)", color: "var(--color-text-dark)" }}
+              className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[100px] w-full rounded-lg border px-3 py-2.5 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
             />
           </div>
 
-          {/* Media */}
           <div>
-            <label className="block text-xs font-medium mb-2" style={{ color: "var(--color-text-mid)" }}>
-              Add media (optional)
-            </label>
-            <div className="flex gap-2 mb-2">
+            <Label className="mb-2 block text-xs">Add media (optional)</Label>
+            <div className="mb-2 flex flex-wrap gap-2">
               <select
                 value={newMediaType}
-                onChange={(e) => setNewMediaType(e.target.value as "photo" | "video")}
-                className="rounded-lg border px-2 py-1.5 text-sm"
-                style={{ borderColor: "var(--color-border)", color: "var(--color-text-dark)" }}
+                onChange={(e) =>
+                  setNewMediaType(e.target.value as "photo" | "video")
+                }
+                className="border-input bg-background h-8 rounded-lg border px-2 text-sm"
               >
                 <option value="photo">Photo</option>
                 <option value="video">Video</option>
               </select>
-              <input
+              <Input
                 type="url"
                 value={newMediaUrl}
                 onChange={(e) => setNewMediaUrl(e.target.value)}
                 placeholder="URL"
-                className="flex-1 rounded-lg border px-3 py-1.5 text-sm"
-                style={{ borderColor: "var(--color-border)", color: "var(--color-text-dark)" }}
+                className="min-w-[8rem] flex-1"
               />
-              <button
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
                 onClick={addMedia}
                 disabled={!newMediaUrl.trim()}
-                className="px-3 py-1.5 rounded-lg text-sm font-medium border disabled:opacity-50"
-                style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
               >
                 Add
-              </button>
+              </Button>
             </div>
             {media.length > 0 && (
-              <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+              <p className="text-muted-foreground text-xs">
                 {media.length} media item{media.length > 1 ? "s" : ""} attached
               </p>
             )}
           </div>
         </div>
 
-        <div className="p-4 border-t" style={{ borderColor: "var(--color-border)" }}>
-          <button
+        <div className="border-border border-t p-4">
+          <Button
+            type="button"
+            className="w-full font-semibold"
             onClick={handleSubmit}
             disabled={!text.trim()}
-            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
-            style={{ background: "var(--color-primary)" }}
           >
             Send to all parents
-          </button>
+          </Button>
         </div>
       </div>
     </div>

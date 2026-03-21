@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useStore } from "@/lib/store";
-import type { ClassSchedule } from "@/lib/types";
+import type { ClassSchedule, LearningAreaId } from "@/lib/types";
 import {
   holidaysOnDate, schedulesOnDate, schedulesForClass,
   holidayColor, scheduleColor,
@@ -15,10 +15,29 @@ import type { TimeColumn, TimedEvent, AllDayEvent } from "@/components/calendar/
 import { CalendarToolbar } from "@/components/calendar/CalendarToolbar";
 import { MonthView } from "@/components/calendar/MonthView";
 import { ReadOnlyEventDetailModal } from "@/components/calendar/ReadOnlyEventDetailModal";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const AREA_LABELS: Record<LearningAreaId, string> = {
+  LL: "Language & Literacy",
+  NUM: "Numeracy",
+  SED: "Social & Emotional",
+  ACE: "Aesthetics",
+  DOW: "Discovery",
+  HMS: "Health & Motor",
+};
+
+type CalTab = "schedule" | "activity_library";
 
 export default function TeacherCalendarPage() {
   const store = useStore();
-  const { calendarHolidays, classSchedules, classes, classTeacherAssignments, demoPersona } = store;
+  const { calendarHolidays, classSchedules, classes, classTeacherAssignments, demoPersona, plannedActivities, milestones, activeClassId } = store;
 
   // Derive teacher's classes
   const teacherClassIds = useMemo(
@@ -34,6 +53,10 @@ export default function TeacherCalendarPage() {
 
   const todayISO = toISO(new Date());
   const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
+
+  const [calTab, setCalTab] = useState<CalTab>("schedule");
+  const [libAreaFilter, setLibAreaFilter] = useState<LearningAreaId | null>(null);
+  const [libSearch, setLibSearch] = useState("");
 
   const [calView, setCalView] = useState<CalendarView>("week");
   const [selectedDate, setSelectedDate] = useState(clampToYear(todayISO));
@@ -182,13 +205,68 @@ export default function TeacherCalendarPage() {
     );
   }
 
+  const classItems = Object.fromEntries(
+    teacherClasses.map((c) => [c.id, c.name])
+  );
+
+  // ── Activity Library ─────────────────────────────────────────────────────────
+
+  const milestoneMap = useMemo(() => new Map(milestones.map((m) => [m.id, m])), [milestones]);
+
+  const libraryActivities = useMemo(() => {
+    return plannedActivities
+      .filter((a) => a.classId === activeClassId)
+      .filter((a) => !libAreaFilter || a.areaId === libAreaFilter)
+      .filter((a) => {
+        if (!libSearch.trim()) return true;
+        const q = libSearch.toLowerCase();
+        return a.title.toLowerCase().includes(q) || a.description.toLowerCase().includes(q);
+      })
+      .sort((a, b) => b.date.localeCompare(a.date));
+  }, [plannedActivities, activeClassId, libAreaFilter, libSearch]);
+
   return (
-    <div className="px-5 py-6 md:px-8 md:py-8 flex flex-col" style={{ minHeight: 0 }}>
+    <div className="flex min-h-0 flex-col px-4 py-6 md:px-6">
       {/* Header */}
-      <div className="mb-5 shrink-0">
-        <h1 className="text-2xl font-bold" style={{ color: "var(--color-text-dark)" }}>Schedule</h1>
+      <div className="mb-4 shrink-0">
+        <h1 className="text-2xl font-bold text-foreground">Schedule</h1>
       </div>
 
+      {/* Top-level tab row */}
+      <div
+        className="mb-5 flex shrink-0 gap-1 border-b"
+        style={{ borderColor: "var(--color-border)" }}
+      >
+        {(["schedule", "activity_library"] as CalTab[]).map((t) => (
+          <button
+            key={t}
+            onClick={() => setCalTab(t)}
+            className="px-4 py-2 text-sm font-medium"
+            style={{
+              color: calTab === t ? "var(--color-primary)" : "var(--color-text-muted)",
+              borderBottom: calTab === t ? "2px solid var(--color-primary)" : "2px solid transparent",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              marginBottom: -1,
+            }}
+          >
+            {t === "schedule" ? "Schedule" : "Activity Library"}
+          </button>
+        ))}
+      </div>
+
+      {calTab === "activity_library" ? (
+        <ActivityLibrary
+          activities={libraryActivities}
+          milestoneMap={milestoneMap}
+          areaFilter={libAreaFilter}
+          onAreaFilter={setLibAreaFilter}
+          search={libSearch}
+          onSearch={setLibSearch}
+        />
+      ) : (
+        <>
       <CalendarToolbar
         calView={calView}
         setCalView={setCalView}
@@ -201,36 +279,42 @@ export default function TeacherCalendarPage() {
 
       {/* Week view: class selector */}
       {calView === "week" && teacherClasses.length > 0 && (
-        <div className="flex items-center gap-2 mb-4 shrink-0">
-          <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>Class:</span>
-          <select
+        <div className="mb-4 flex shrink-0 items-center gap-2">
+          <span className="text-muted-foreground text-xs font-medium">Class:</span>
+          <Select
             value={weekClassId}
-            onChange={e => setWeekClassId(e.target.value)}
-            className="rounded-lg border px-2 py-1 text-sm bg-white"
-            style={{ borderColor: "var(--color-border)", color: "var(--color-text-dark)" }}
+            onValueChange={(v) => v != null && setWeekClassId(String(v))}
+            items={classItems}
           >
-            {teacherClasses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
+            <SelectTrigger size="sm" className="min-w-[180px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {teacherClasses.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       )}
 
       {/* Day view: class multi-picker (teacher's classes) */}
       {calView === "day" && teacherClasses.length > 1 && (
-        <div className="flex items-center gap-2 mb-4 shrink-0 flex-wrap">
-          <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>Classes:</span>
-          {teacherClasses.map(cls => (
-            <button
+        <div className="mb-4 flex shrink-0 flex-wrap items-center gap-2">
+          <span className="text-muted-foreground text-xs font-medium">Classes:</span>
+          {teacherClasses.map((cls) => (
+            <Button
               key={cls.id}
+              type="button"
+              size="sm"
+              variant={dayClassIds.includes(cls.id) ? "default" : "outline"}
+              className="rounded-full text-xs font-semibold"
               onClick={() => toggleDayClass(cls.id)}
-              className="px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors"
-              style={{
-                background: dayClassIds.includes(cls.id) ? "var(--color-primary)" : "white",
-                color: dayClassIds.includes(cls.id) ? "white" : "var(--color-text-mid)",
-                borderColor: dayClassIds.includes(cls.id) ? "var(--color-primary)" : "var(--color-border)",
-              }}
             >
               {cls.name}
-            </button>
+            </Button>
           ))}
         </div>
       )}
@@ -264,6 +348,140 @@ export default function TeacherCalendarPage() {
           variant="teacher"
           onClose={() => setDetailEvent(null)}
         />
+      )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── Activity Library ──────────────────────────────────────────────────────────
+
+import type { PlannedActivity, Milestone } from "@/lib/types";
+
+function ActivityLibrary({
+  activities,
+  milestoneMap,
+  areaFilter,
+  onAreaFilter,
+  search,
+  onSearch,
+}: {
+  activities: PlannedActivity[];
+  milestoneMap: Map<string, Milestone>;
+  areaFilter: LearningAreaId | null;
+  onAreaFilter: (area: LearningAreaId | null) => void;
+  search: string;
+  onSearch: (s: string) => void;
+}) {
+  const areaColors: Record<LearningAreaId, string> = {
+    LL: "#7BA3D4",
+    NUM: "#F5A623",
+    SED: "#E8745A",
+    ACE: "#9B7DD4",
+    DOW: "#4A9B6F",
+    HMS: "#D47B7B",
+  };
+
+  return (
+    <div className="flex flex-1 min-h-0 flex-col gap-4 overflow-y-auto">
+      {/* Search */}
+      <input
+        type="search"
+        placeholder="Search activities…"
+        value={search}
+        onChange={(e) => onSearch(e.target.value)}
+        className="w-full rounded-xl border px-4 py-2.5 text-sm outline-none"
+        style={{ borderColor: "var(--color-border)", background: "#fff" }}
+      />
+
+      {/* Domain filter pills */}
+      <div className="flex flex-wrap gap-2 shrink-0">
+        <button
+          onClick={() => onAreaFilter(null)}
+          className="rounded-full px-3 py-1 text-xs font-semibold"
+          style={{
+            background: !areaFilter ? "var(--color-primary)" : "var(--color-bg-warm)",
+            color: !areaFilter ? "#fff" : "var(--color-text-mid)",
+            border: "1px solid var(--color-border)",
+          }}
+        >
+          All
+        </button>
+        {(Object.keys(AREA_LABELS) as LearningAreaId[]).map((area) => (
+          <button
+            key={area}
+            onClick={() => onAreaFilter(areaFilter === area ? null : area)}
+            className="rounded-full px-3 py-1 text-xs font-semibold"
+            style={{
+              background: areaFilter === area ? areaColors[area] : "var(--color-bg-warm)",
+              color: areaFilter === area ? "#fff" : "var(--color-text-mid)",
+              border: "1px solid var(--color-border)",
+            }}
+          >
+            {area}
+          </button>
+        ))}
+      </div>
+
+      {/* Activity cards */}
+      {activities.length === 0 ? (
+        <p className="py-10 text-center text-sm" style={{ color: "var(--color-text-muted)" }}>
+          No activities found
+        </p>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {activities.map((activity) => {
+            const milestone = activity.milestoneId ? milestoneMap.get(activity.milestoneId) : undefined;
+            return (
+              <div
+                key={activity.id}
+                className="rounded-2xl border bg-white p-4"
+                style={{ borderColor: "var(--color-border)" }}
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className="mt-0.5 h-3 w-3 shrink-0 rounded-full"
+                    style={{ background: areaColors[activity.areaId] }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm" style={{ color: "var(--color-text-dark)" }}>
+                      {activity.title}
+                    </p>
+                    {activity.description && (
+                      <p className="mt-0.5 text-xs" style={{ color: "var(--color-text-muted)" }}>
+                        {activity.description}
+                      </p>
+                    )}
+                    <div className="mt-2 flex flex-wrap gap-2 items-center">
+                      <span
+                        className="rounded-full px-2 py-0.5 text-xs font-medium"
+                        style={{ background: `${areaColors[activity.areaId]}22`, color: areaColors[activity.areaId] }}
+                      >
+                        {AREA_LABELS[activity.areaId]}
+                      </span>
+                      {milestone && (
+                        <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                          {milestone.id} · {milestone.statement.slice(0, 60)}{milestone.statement.length > 60 ? "…" : ""}
+                        </span>
+                      )}
+                      <span className="ml-auto text-xs" style={{ color: "var(--color-text-muted)" }}>
+                        {activity.date}
+                        {activity.startTime ? ` · ${activity.startTime}` : ""}
+                        {activity.durationMins ? ` (${activity.durationMins}m)` : ""}
+                      </span>
+                    </div>
+                    {activity.childIds.length > 0 && (
+                      <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
+                        {activity.childIds.length} child{activity.childIds.length !== 1 ? "ren" : ""}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );

@@ -1,6 +1,18 @@
 "use client";
 
+import { Bell, Plus } from "lucide-react";
+
 import type { Class } from "@/lib/types";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 interface DashboardTopBarProps {
   teacherName: string;
@@ -31,128 +43,82 @@ export function DashboardTopBar({
   onNotificationsOpen,
   notificationCount = 0,
 }: DashboardTopBarProps) {
+  const classItems = Object.fromEntries(
+    classes.map((c) => [c.id, `${c.name} (${c.preschoolYear})`])
+  );
+
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        padding: "12px 20px",
-        borderBottom: "1px solid var(--color-border)",
-        background: "#fff",
-        flexShrink: 0,
-      }}
-    >
-      {/* Left: teacher name + date */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontWeight: 700, fontSize: 14, color: "var(--color-text-dark)" }}>
-          {teacherName}
-        </div>
-        <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
-          {formatDate(today)}
-        </div>
+    <header className="flex shrink-0 items-center gap-3 border-b bg-card px-4 py-3 sm:px-5 md:gap-4">
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-bold text-foreground">{teacherName}</p>
+        <p className="text-xs text-muted-foreground">{formatDate(today)}</p>
       </div>
 
-      {/* Centre: class selector */}
-      <div style={{ flex: "0 0 auto" }}>
-        <select
+      <div className="shrink-0">
+        <Select
           value={activeClassId}
-          onChange={(e) => onClassChange(e.target.value)}
-          style={{
-            fontSize: 15,
-            fontWeight: 700,
-            color: "var(--color-text-dark)",
-            background: "var(--color-bg-warm)",
-            border: "1.5px solid var(--color-border)",
-            borderRadius: 10,
-            padding: "8px 14px",
-            cursor: "pointer",
+          onValueChange={(v) => {
+            if (v != null) onClassChange(String(v));
           }}
+          items={classItems}
         >
-          {classes.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name} ({c.preschoolYear})
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="h-9 min-w-[min(100vw-12rem,220px)] font-semibold sm:min-w-[240px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {classes.map((c) => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.name} ({c.preschoolYear})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* Right: notifications + quick-log */}
-      <div style={{ flex: 1, display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 10 }}>
-        {/* Notifications bell */}
+      <div className="flex flex-1 items-center justify-end gap-2">
         {onNotificationsOpen && (
-          <button
+          <Button
+            type="button"
+            variant="outline"
+            size="icon-sm"
+            className="relative shrink-0"
             onClick={onNotificationsOpen}
-            style={{
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 34,
-              height: 34,
-              borderRadius: 8,
-              background: "var(--color-bg-warm)",
-              border: "1px solid var(--color-border)",
-              cursor: "pointer",
-              color: "var(--color-text-mid)",
-              flexShrink: 0,
-            }}
             aria-label="Open notifications"
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M8 1.5A4.5 4.5 0 003.5 6v2.5L2 10h12l-1.5-1.5V6A4.5 4.5 0 008 1.5z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-              <path d="M6.5 12a1.5 1.5 0 003 0" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-            </svg>
+            <Bell className="size-4" />
             {notificationCount > 0 && (
-              <span
-                style={{
-                  position: "absolute",
-                  top: -3,
-                  right: -3,
-                  minWidth: 16,
-                  height: 16,
-                  borderRadius: 8,
-                  background: "#E8745A",
-                  color: "#fff",
-                  fontSize: 10,
-                  fontWeight: 700,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "0 3px",
-                  lineHeight: 1,
-                }}
+              <Badge
+                variant="destructive"
+                className={cn(
+                  "absolute -top-1.5 -right-1.5 h-4 min-w-4 justify-center rounded-full px-1 py-0 text-[10px] font-bold tabular-nums",
+                  notificationCount > 9 && "px-1.5"
+                )}
               >
                 {notificationCount > 9 ? "9+" : notificationCount}
-              </span>
+              </Badge>
             )}
-          </button>
+          </Button>
         )}
 
-        {/* Quick-log CTA */}
-        <button
+        <Button
+          type="button"
+          size="sm"
+          className="hidden gap-1.5 font-semibold sm:inline-flex"
           onClick={onQuickLogOpen}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            padding: "7px 14px",
-            borderRadius: 8,
-            background: "var(--color-primary)",
-            color: "#fff",
-            fontSize: 13,
-            fontWeight: 600,
-            border: "none",
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-          }}
         >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-            <path d="M7 1v12M1 7h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
+          <Plus className="size-3.5" strokeWidth={2.5} />
           Log observation
-        </button>
+        </Button>
+        <Button
+          type="button"
+          size="icon-sm"
+          className="sm:hidden"
+          onClick={onQuickLogOpen}
+          aria-label="Log observation"
+        >
+          <Plus className="size-4" strokeWidth={2.5} />
+        </Button>
       </div>
-    </div>
+    </header>
   );
 }

@@ -2,11 +2,15 @@
 
 import { use, useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { ChevronLeft, ImagePlus, Send } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { getChildDisplayName } from "@/lib/display-name";
 import { getTeacherDisplayName } from "@/lib/display-name";
 import { ChildAvatar } from "@/components/teacher/ChildAvatar";
 import type { TeacherUpdateMedia } from "@/lib/types";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 function formatTime(iso: string): string {
   const d = new Date(iso);
@@ -109,33 +113,32 @@ export default function TeacherChatPage({ params }: { params: Promise<{ childId:
   };
 
   if (!child) {
-    return <div className="p-8 text-center" style={{ color: "var(--color-text-muted)" }}>Child not found.</div>;
+    return (
+      <div className="p-8 text-center text-muted-foreground">Child not found.</div>
+    );
   }
 
   return (
-    <div className="flex flex-col h-screen md:h-[calc(100vh-0px)] max-w-2xl">
-      {/* Header */}
-      <div
-        className="flex items-center gap-3 px-4 py-3 border-b bg-white shrink-0"
-        style={{ borderColor: "var(--color-border)" }}
-      >
+    <div className="flex h-screen max-w-2xl flex-col bg-background md:h-[calc(100vh-0px)]">
+      <div className="flex shrink-0 items-center gap-3 border-b border-border bg-background px-4 py-3">
         <Link
           href="/teacher/messages"
-          className="p-1.5 rounded-lg -ml-1"
-          style={{ color: "var(--color-text-mid)" }}
+          className={cn(
+            buttonVariants({ variant: "ghost", size: "icon-sm" }),
+            "-ml-1 shrink-0",
+          )}
           aria-label="Back"
         >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M12 4l-6 6 6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <ChevronLeft className="size-5" />
         </Link>
         <ChildAvatar name={getChildDisplayName(child)} size="sm" />
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm" style={{ color: "var(--color-text-dark)" }}>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-foreground">
             {getChildDisplayName(child)}
           </p>
-          <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-            {activeClass?.name ?? "Class"} · {activeTeacher ? getTeacherDisplayName(activeTeacher) : "Teacher"}
+          <p className="text-xs text-muted-foreground">
+            {activeClass?.name ?? "Class"} ·{" "}
+            {activeTeacher ? getTeacherDisplayName(activeTeacher) : "Teacher"}
           </p>
         </div>
       </div>
@@ -207,125 +210,122 @@ export default function TeacherChatPage({ params }: { params: Promise<{ childId:
         )}
       </div>
 
-      {/* Compose bar */}
-      <div
-        className="border-t bg-white px-4 py-3 shrink-0"
-        style={{ borderColor: "var(--color-border)" }}
-      >
-        {/* Kind + scope toggles */}
-        <div className="flex items-center gap-2 mb-2 flex-wrap">
+      <div className="shrink-0 border-t border-border bg-background px-4 py-3">
+        <div className="mb-2 flex flex-wrap items-center gap-2">
           {(["message", "progress_update"] as const).map((k) => (
-            <button
+            <Button
               key={k}
+              type="button"
+              variant={kind === k ? "secondary" : "outline"}
+              size="xs"
+              className={cn(
+                "rounded-full font-semibold",
+                kind === k && "border-primary/30 bg-primary/10 text-primary",
+              )}
               onClick={() => setKind(k)}
-              className="px-2.5 py-1 rounded-full text-xs font-medium border transition-colors"
-              style={{
-                background: kind === k ? "var(--color-primary-wash)" : "transparent",
-                color: kind === k ? "var(--color-primary)" : "var(--color-text-muted)",
-                borderColor: kind === k ? "var(--color-primary)" : "var(--color-border)",
-              }}
             >
               {k === "message" ? "Message" : "Progress update"}
-            </button>
+            </Button>
           ))}
-          <div className="h-3.5 w-px" style={{ background: "var(--color-border)" }} />
+          <div className="h-3.5 w-px shrink-0 bg-border" />
           {(["child", "class"] as const).map((s) => (
-            <button
+            <Button
               key={s}
+              type="button"
+              variant={scope === s ? "secondary" : "outline"}
+              size="xs"
+              className={cn(
+                "rounded-full font-semibold",
+                scope === s &&
+                  "border-amber-400/50 bg-amber-50 text-amber-950 dark:bg-amber-950/30 dark:text-amber-100",
+              )}
               onClick={() => setScope(s)}
-              className="px-2.5 py-1 rounded-full text-xs font-medium border transition-colors"
-              style={{
-                background: scope === s ? "#FFF3E0" : "transparent",
-                color: scope === s ? "#A06010" : "var(--color-text-muted)",
-                borderColor: scope === s ? "#F5A623" : "var(--color-border)",
-              }}
             >
               {s === "child" ? `${getChildDisplayName(child)} only` : "Whole class"}
-            </button>
+            </Button>
           ))}
         </div>
 
-        {/* Media inline input */}
         {showMedia && (
-          <div className="flex gap-2 mb-2">
+          <div className="mb-2 flex flex-wrap gap-2">
             <select
               value={newMediaType}
-              onChange={(e) => setNewMediaType(e.target.value as "photo" | "video")}
-              className="rounded-lg border px-2 py-1.5 text-xs"
-              style={{ borderColor: "var(--color-border)", color: "var(--color-text-dark)" }}
+              onChange={(e) =>
+                setNewMediaType(e.target.value as "photo" | "video")
+              }
+              className="h-8 rounded-lg border border-input bg-background px-2 text-xs text-foreground"
             >
               <option value="photo">Photo</option>
               <option value="video">Video</option>
             </select>
-            <input
+            <Input
               type="url"
               value={newMediaUrl}
               onChange={(e) => setNewMediaUrl(e.target.value)}
               placeholder="Paste URL…"
-              className="flex-1 rounded-lg border px-3 py-1.5 text-xs"
-              style={{ borderColor: "var(--color-border)", color: "var(--color-text-dark)" }}
+              className="min-w-0 flex-1 text-xs"
             />
-            <button
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0 font-semibold"
               onClick={addMedia}
               disabled={!newMediaUrl.trim()}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium border disabled:opacity-50"
-              style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
             >
               Add
-            </button>
+            </Button>
           </div>
         )}
         {media.length > 0 && (
-          <p className="text-xs mb-1.5" style={{ color: "var(--color-text-muted)" }}>
-            {media.length} media attached · <button className="underline" onClick={() => setMedia([])}>remove all</button>
+          <p className="mb-1.5 text-xs text-muted-foreground">
+            {media.length} media attached ·{" "}
+            <button
+              type="button"
+              className="font-medium text-primary underline-offset-2 hover:underline"
+              onClick={() => setMedia([])}
+            >
+              remove all
+            </button>
           </p>
         )}
 
         <div className="flex items-end gap-2">
-          <button
+          <Button
+            type="button"
+            variant={showMedia ? "secondary" : "outline"}
+            size="icon-sm"
+            className="shrink-0 rounded-xl"
             onClick={() => setShowMedia((v) => !v)}
-            className="p-2 rounded-xl border transition-colors shrink-0"
-            style={{
-              borderColor: showMedia ? "var(--color-primary)" : "var(--color-border)",
-              color: showMedia ? "var(--color-primary)" : "var(--color-text-muted)",
-            }}
             aria-label="Attach media"
           >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <rect x="2" y="4" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.4" />
-              <circle cx="6.5" cy="7.5" r="1.5" fill="currentColor" opacity="0.6" />
-              <path d="M2 12l4-3 3 3 2-2 5 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
+            <ImagePlus className="size-4" />
+          </Button>
 
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
             }}
             placeholder={`Message ${getChildDisplayName(child)}'s parents…`}
             rows={1}
-            className="flex-1 rounded-xl border px-3 py-2 text-sm resize-none"
-            style={{
-              borderColor: "var(--color-border)",
-              color: "var(--color-text-dark)",
-              minHeight: 40,
-              maxHeight: 120,
-            }}
+            className="min-h-10 max-h-[120px] flex-1 resize-none rounded-xl border border-input bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
 
-          <button
+          <Button
+            type="button"
+            size="icon-sm"
+            className="shrink-0 rounded-xl"
             onClick={handleSend}
             disabled={!text.trim()}
-            className="p-2 rounded-xl text-white shrink-0 disabled:opacity-50 transition-opacity"
-            style={{ background: "var(--color-primary)" }}
             aria-label="Send"
           >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M15.5 2.5L8 10M15.5 2.5L10.5 15.5 8 10M15.5 2.5L2.5 7l5.5 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
+            <Send className="size-4" />
+          </Button>
         </div>
       </div>
     </div>

@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { SegmentControl } from "@/components/shared/SegmentControl";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 type Tab = "today" | "trends" | "absences";
 
@@ -142,23 +145,21 @@ function TodayView() {
           },
           { label: "Late", value: TODAY_SUMMARY.late, color: "#94a3b8" },
         ].map((s) => (
-          <div
-            key={s.label}
-            className="bg-white rounded-xl border border-[var(--color-border)] p-4"
-          >
-            <div
-              className="text-2xl font-bold tabular-nums"
-              style={{ color: s.color }}
-            >
-              {s.value}
-            </div>
-            <div
-              className="text-xs mt-0.5"
-              style={{ color: "var(--color-text-mid)" }}
-            >
-              {s.label}
-            </div>
-          </div>
+          <Card key={s.label} className="shadow-none">
+            <CardContent className="p-4">
+              <div
+                className="text-2xl font-bold tabular-nums"
+                style={{ color: s.color }}
+              >
+                {s.value}
+              </div>
+              <div
+                className="text-muted-foreground mt-0.5 text-xs"
+              >
+                {s.label}
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
@@ -393,7 +394,7 @@ function TrendsView() {
       >
         <p className="text-xs" style={{ color: "var(--color-text-mid)" }}>
           Attendance patterns can be an early signal of family stress or health
-          issues. The admin's role is to ensure the teacher is aware and can
+          issues. The admin&apos;s role is to ensure the teacher is aware and can
           have a supportive conversation with the family.
         </p>
       </div>
@@ -413,20 +414,18 @@ function AbsencesView() {
   return (
     <div className="space-y-4">
       {/* Filter */}
-      <div className="flex gap-2 flex-wrap">
+      <div className="bg-muted flex w-fit flex-wrap gap-1 rounded-full p-1">
         {(["all", "unexplained", "ongoing", "resolved"] as const).map((f) => (
-          <button
+          <Button
             key={f}
+            type="button"
+            size="sm"
+            variant={filter === f ? "default" : "ghost"}
+            className="h-7 rounded-full px-3 text-xs font-medium capitalize shadow-none"
             onClick={() => setFilter(f)}
-            className="px-3 py-1.5 rounded-full text-xs font-medium capitalize"
-            style={{
-              background:
-                filter === f ? "var(--color-primary)" : "var(--color-bg-cream)",
-              color: filter === f ? "white" : "var(--color-text-mid)",
-            }}
           >
             {f}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -523,12 +522,9 @@ function AbsencesView() {
                   </td>
                   <td className="px-5 py-3 text-right">
                     {a.status === "unexplained" && (
-                      <button
-                        className="text-xs font-medium"
-                        style={{ color: "var(--color-primary)" }}
-                      >
+                      <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs">
                         Flag teacher
-                      </button>
+                      </Button>
                     )}
                   </td>
                 </tr>
@@ -553,45 +549,15 @@ export default function AttendancePage() {
   const [tab, setTab] = useState<Tab>("today");
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 pb-24 md:pb-8">
+    <div className="mx-auto max-w-3xl px-4 py-6 pb-24 md:pb-8">
       <div className="mb-6">
-        <h1
-          className="text-xl font-bold"
-          style={{ color: "var(--color-text-dark)" }}
-        >
-          Attendance Overview
-        </h1>
-        <p
-          className="text-sm mt-0.5"
-          style={{ color: "var(--color-text-mid)" }}
-        >
+        <h1 className="text-xl font-bold text-foreground">Attendance Overview</h1>
+        <p className="text-muted-foreground mt-0.5 text-sm">
           School-wide attendance tracking and absence management.
         </p>
       </div>
 
-      {/* Tabs */}
-      <div
-        className="flex gap-1 rounded-xl p-1 mb-6"
-        style={{ background: "var(--color-bg-cream)" }}
-      >
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className="flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
-            style={{
-              background: tab === t.id ? "white" : "transparent",
-              color:
-                tab === t.id
-                  ? "var(--color-text-dark)"
-                  : "var(--color-text-mid)",
-              boxShadow: tab === t.id ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
-            }}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <SegmentControl value={tab} onChange={setTab} options={TABS} />
 
       {tab === "today" && <TodayView />}
       {tab === "trends" && <TrendsView />}

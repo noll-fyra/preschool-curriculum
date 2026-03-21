@@ -4,6 +4,11 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 export default function EditTeacherPage() {
   const params = useParams();
@@ -20,8 +25,8 @@ export default function EditTeacherPage() {
   if (!teacher) {
     return (
       <div className="px-5 py-8">
-        <p style={{ color: "var(--color-text-muted)" }}>Teacher not found.</p>
-        <Link href="/school/teachers" className="text-sm font-medium mt-2 inline-block" style={{ color: "var(--color-primary)" }}>
+        <p className="text-muted-foreground">Teacher not found.</p>
+        <Link href="/school/teachers" className="mt-2 inline-block text-sm font-medium text-primary">
           ← Back to teachers
         </Link>
       </div>
@@ -31,102 +36,93 @@ export default function EditTeacherPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!firstName.trim()) return;
-    updateTeacher(teacherId, { firstName: firstName.trim(), lastName: lastName.trim(), email: email.trim() || undefined });
+    updateTeacher(teacherId, {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.trim() || undefined,
+    });
     setTeacherClasses(teacherId, classIds);
     router.push("/school/teachers");
   };
 
   const toggleClass = (id: string) => {
     setClassIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   };
 
   return (
-    <div className="px-5 py-6 md:px-8 md:py-8 max-w-lg">
+    <div className="mx-auto max-w-lg px-5 py-6 md:px-8 md:py-8">
       <Link
         href="/school/teachers"
-        className="inline-flex items-center gap-1 text-sm font-medium mb-6"
-        style={{ color: "var(--color-text-mid)" }}
+        className="mb-6 inline-flex text-sm font-medium text-muted-foreground hover:text-foreground"
       >
         ← Back to teachers
       </Link>
-      <h1 className="text-2xl font-bold mb-6" style={{ color: "var(--color-text-dark)" }}>
-        Edit teacher
-      </h1>
-
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <label className="block">
-          <span className="block text-sm font-medium mb-1" style={{ color: "var(--color-text-dark)" }}>
-            First name
-          </span>
-          <input
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg border text-sm"
-            style={{ borderColor: "var(--color-border)" }}
-          />
-        </label>
-        <label className="block">
-          <span className="block text-sm font-medium mb-1" style={{ color: "var(--color-text-dark)" }}>
-            Last name
-          </span>
-          <input
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg border text-sm"
-            style={{ borderColor: "var(--color-border)" }}
-          />
-        </label>
-        <label className="block">
-          <span className="block text-sm font-medium mb-1" style={{ color: "var(--color-text-dark)" }}>
-            Email
-          </span>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg border text-sm"
-            style={{ borderColor: "var(--color-border)" }}
-          />
-        </label>
-        <div>
-          <span className="block text-sm font-medium mb-2" style={{ color: "var(--color-text-dark)" }}>
-            Assign to classes
-          </span>
-          <div className="flex flex-col gap-2">
-            {classes.map((c) => (
-              <label key={c.id} className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={classIds.includes(c.id)}
-                  onChange={() => toggleClass(c.id)}
-                  className="rounded border-gray-300"
-                />
-                <span className="text-sm" style={{ color: "var(--color-text-dark)" }}>{c.name}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-        <div className="flex gap-3 pt-2">
-          <button
-            type="submit"
-            className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white"
-            style={{ background: "var(--color-primary)" }}
-          >
-            Save changes
-          </button>
-          <Link
-            href="/school/teachers"
-            className="px-4 py-2.5 rounded-lg text-sm font-medium border"
-            style={{ borderColor: "var(--color-border)", color: "var(--color-text-mid)" }}
-          >
-            Cancel
-          </Link>
-        </div>
-      </form>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Edit teacher</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="et-fn">First name</Label>
+              <Input
+                id="et-fn"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="h-10"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="et-ln">Last name</Label>
+              <Input
+                id="et-ln"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="h-10"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="et-email">Email</Label>
+              <Input
+                id="et-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-10"
+              />
+            </div>
+            <div>
+              <span className="mb-2 block text-sm font-medium text-foreground">Assign to classes</span>
+              <div className="flex flex-col gap-2">
+                {classes.map((c) => (
+                  <label key={c.id} className="flex cursor-pointer items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={classIds.includes(c.id)}
+                      onChange={() => toggleClass(c.id)}
+                      className="size-4 rounded border-input accent-primary"
+                    />
+                    <span className="text-sm text-foreground">{c.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-3 pt-2">
+              <Button type="submit" className="font-semibold">
+                Save changes
+              </Button>
+              <Link
+                href="/school/teachers"
+                className={cn(buttonVariants({ variant: "outline" }), "font-medium")}
+              >
+                Cancel
+              </Link>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

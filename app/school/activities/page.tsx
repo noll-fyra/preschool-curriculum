@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { Card } from "@/components/ui/card";
 import { ACTIVITY_CONFIGS } from "@/lib/activity-data";
 import { LEARNING_AREAS } from "@/lib/types";
 import type { LearningAreaId, LevelId } from "@/lib/types";
@@ -50,48 +52,42 @@ export default function AdminActivitiesPage() {
   }, [activityConfigOverrides, milestones]);
 
   return (
-    <div className="px-5 py-6 md:px-8 md:py-8 max-w-4xl">
-      <h1 className="text-2xl font-bold mb-6" style={{ color: "var(--color-text-dark)" }}>
-        Activities
-      </h1>
-      <p className="text-sm mb-6" style={{ color: "var(--color-text-muted)" }}>
+    <div className="max-w-4xl px-4 py-6 md:px-6 md:py-8">
+      <h1 className="mb-2 text-2xl font-bold text-foreground">Activities</h1>
+      <p className="text-muted-foreground mb-6 text-sm">
         NEL-aligned tap-to-select activities, grouped by subject and sorted by proficiency. Edit name, emoji, skills trained, and question content.
       </p>
 
       <div className="flex flex-col gap-8">
         {bySubject.map(({ areaId, label, activities }) => (
           <div key={areaId}>
-            <h2 className="text-sm font-semibold uppercase tracking-wide mb-3" style={{ color: "var(--color-text-muted)" }}>
+            <h2 className="text-muted-foreground mb-3 text-sm font-semibold tracking-wide uppercase">
               {label}
             </h2>
-            <div className="rounded-2xl border overflow-hidden bg-white" style={{ borderColor: "var(--color-border)" }}>
-              <ul className="divide-y divide-border">
+            <Card className="overflow-hidden p-0 shadow-none">
+              <ul className="divide-border divide-y">
                 {activities.map((a) => (
                   <li key={a.milestoneId}>
                     <Link
                       href={`/school/activities/${a.milestoneId}/edit`}
-                      className="flex items-center gap-4 px-4 py-4 hover:bg-bg-cream transition-colors"
+                      className="hover:bg-accent/50 flex items-center gap-4 px-4 py-4 transition-colors"
                     >
-                      <span className="text-2xl shrink-0">{a.emoji}</span>
+                      <span className="shrink-0 text-2xl">{a.emoji}</span>
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium" style={{ color: "var(--color-text-dark)" }}>
-                          {a.name}
-                        </p>
-                        <p className="text-sm mt-0.5" style={{ color: "var(--color-text-muted)" }}>
+                        <p className="font-medium text-foreground">{a.name}</p>
+                        <p className="text-muted-foreground mt-0.5 text-sm">
                           {a.milestoneId}
                           {a.isDynamic ? " · Dynamic (name-based)" : ` · ${a.questionCount} questions`}
                           {a.skills.length > 1 && ` · Trains: ${a.skills.join(", ")}`}
                           {a.hasOverride && " · Edited"}
                         </p>
                       </div>
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0 opacity-40">
-                        <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                      <ChevronRight className="text-muted-foreground size-4 shrink-0 opacity-50" />
                     </Link>
                   </li>
                 ))}
               </ul>
-            </div>
+            </Card>
           </div>
         ))}
       </div>

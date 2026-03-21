@@ -9,7 +9,7 @@ import { ChildAvatar } from "@/components/teacher/ChildAvatar";
 import { DomainDot } from "@/components/teacher/DomainDot";
 
 interface ChildrenGridProps {
-  children: Child[];
+  students: Child[];
   attendance: ChildAttendance[];
   weeklyDomainCoverage: Record<string, Record<LearningAreaId, boolean>>;
   flaggedChildIds: Set<string>;
@@ -33,7 +33,7 @@ const STATUS_LABEL: Record<AttendanceStatus, string> = {
 const ALL_STATUSES: AttendanceStatus[] = ["present", "late", "absent", "pending"];
 
 export function ChildrenGrid({
-  children: classChildren,
+  students: classChildren,
   attendance,
   weeklyDomainCoverage,
   flaggedChildIds,

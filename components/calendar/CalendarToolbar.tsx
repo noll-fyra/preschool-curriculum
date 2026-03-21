@@ -1,6 +1,10 @@
 "use client";
 
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
 import type { CalendarView } from "@/lib/calendar-utils";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export function CalendarToolbar({
   calView,
@@ -22,61 +26,73 @@ export function CalendarToolbar({
   compact?: boolean;
 }) {
   return (
-    <div className={`flex items-center ${compact ? "gap-2" : "gap-3"} mb-4 shrink-0 flex-wrap`}>
-      {/* View switcher */}
+    <div
+      className={cn(
+        "mb-4 flex shrink-0 flex-wrap items-center",
+        compact ? "gap-2" : "gap-3"
+      )}
+    >
       <div
-        className="flex rounded-xl gap-0.5"
-        style={{ background: "var(--color-bg-deep)", padding: compact ? "2px" : "4px" }}
+        className={cn(
+          "bg-muted flex gap-0.5 rounded-xl p-1",
+          compact ? "p-0.5" : "p-1"
+        )}
       >
         {(["month", "week", "day"] as CalendarView[]).map((v) => (
-          <button
+          <Button
             key={v}
+            type="button"
+            variant={calView === v ? "default" : "ghost"}
+            size={compact ? "xs" : "sm"}
+            className="flex-1 capitalize shadow-none"
             onClick={() => setCalView(v)}
-            className={`rounded-lg font-medium capitalize transition-all ${compact ? "px-3 py-1 text-xs" : "px-3.5 py-1 text-sm"}`}
-            style={{
-              background: calView === v ? "white" : "transparent",
-              color: calView === v ? "var(--color-text-dark)" : "var(--color-text-muted)",
-              boxShadow: calView === v ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-            }}
           >
             {v}
-          </button>
+          </Button>
         ))}
       </div>
 
-      {/* Prev / label / Next */}
-      <div className={`flex items-center gap-1 ${compact ? "flex-1 justify-center" : ""}`}>
-        <button onClick={onPrev} className="p-1.5 rounded-lg" aria-label="Previous">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+      <div
+        className={cn(
+          "flex items-center gap-0.5",
+          compact && "flex-1 justify-center"
+        )}
+      >
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          onClick={onPrev}
+          aria-label="Previous"
+        >
+          <ChevronLeft className="size-4" />
+        </Button>
         <span
-          className="text-sm font-semibold text-center"
-          style={{
-            color: "var(--color-text-dark)",
-            minWidth: compact ? 160 : 200,
-            paddingInline: compact ? 4 : 8,
-          }}
+          className="px-2 text-center text-sm font-semibold text-foreground"
+          style={{ minWidth: compact ? 160 : 200 }}
         >
           {periodLabel}
         </span>
-        <button onClick={onNext} className="p-1.5 rounded-lg" aria-label="Next">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          onClick={onNext}
+          aria-label="Next"
+        >
+          <ChevronRight className="size-4" />
+        </Button>
       </div>
 
-      {/* Today shortcut */}
       {showToday && (
-        <button
+        <Button
+          type="button"
+          variant="secondary"
+          size={compact ? "xs" : "sm"}
           onClick={onToday}
-          className={`rounded-lg text-xs font-medium ${compact ? "px-2.5 py-1" : "px-3 py-1"}`}
-          style={{ background: "var(--color-primary-wash)", color: "var(--color-primary)" }}
         >
           Today
-        </button>
+        </Button>
       )}
     </div>
   );

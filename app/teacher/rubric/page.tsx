@@ -1,20 +1,22 @@
 import { RubricView } from "@/components/shared/RubricView";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function TeacherRubricPage() {
   return (
-    <div className="px-5 py-6 max-w-3xl mx-auto">
+    <div className="mx-auto max-w-3xl px-4 py-6 md:px-6">
       <div className="mb-6">
-        <h1
-          className="text-xl font-semibold mb-1"
-          style={{ color: "var(--color-text-dark)" }}
-        >
+        <h1 className="mb-1 text-xl font-semibold text-foreground">
           Rubric Reference
         </h1>
-        <p className="text-sm" style={{ color: "var(--color-text-mid)" }}>
+        <p className="text-muted-foreground text-sm">
           Observable criteria for all 6 NEL learning areas across Beginning, Developing, and Secure levels. Use this as a guide when observing children and recording progress.
         </p>
       </div>
-      <RubricView />
+      <Card className="shadow-none">
+        <CardContent className="pt-4">
+          <RubricView />
+        </CardContent>
+      </Card>
     </div>
   );
 }

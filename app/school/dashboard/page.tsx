@@ -2,22 +2,24 @@
 
 import Link from "next/link";
 import { useStore } from "@/lib/store";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 type StatusLevel = "green" | "amber" | "red";
 
-function StatusBadge({ level }: { level: StatusLevel }) {
-  const colors: Record<StatusLevel, string> = {
-    green: "#22c55e",
-    amber: "#f59e0b",
-    red: "#ef4444",
-  };
-  return (
-    <span
-      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-      style={{ background: colors[level] }}
-    />
-  );
-}
+const levelRing: Record<StatusLevel, string> = {
+  green: "ring-emerald-500/35",
+  amber: "ring-amber-500/40",
+  red: "ring-destructive/40",
+};
+
+const levelDot: Record<StatusLevel, string> = {
+  green: "bg-emerald-500",
+  amber: "bg-amber-500",
+  red: "bg-red-500",
+};
 
 function StatusPanel({
   title,
@@ -30,27 +32,25 @@ function StatusPanel({
   href: string;
   children: React.ReactNode;
 }) {
-  const borderColors: Record<StatusLevel, string> = {
-    green: "rgba(34,197,94,0.3)",
-    amber: "rgba(245,158,11,0.3)",
-    red: "rgba(239,68,68,0.3)",
-  };
   return (
-    <Link
-      href={href}
-      className="block rounded-xl border bg-white p-5 hover:shadow-sm transition-shadow"
-      style={{ borderColor: borderColors[level] }}
-    >
-      <div className="flex items-center gap-2 mb-3">
-        <StatusBadge level={level} />
-        <h2
-          className="font-semibold text-sm"
-          style={{ color: "var(--color-text-dark)" }}
-        >
-          {title}
-        </h2>
-      </div>
-      <div className="space-y-2">{children}</div>
+    <Link href={href} className="group block h-full">
+      <Card
+        className={cn(
+          "h-full transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-md",
+          "ring-2",
+          levelRing[level]
+        )}
+      >
+        <CardHeader className="pb-2">
+          <div className="flex items-center gap-2">
+            <span
+              className={cn("size-2.5 shrink-0 rounded-full", levelDot[level])}
+            />
+            <CardTitle className="text-sm font-semibold">{title}</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-2 pt-0">{children}</CardContent>
+      </Card>
     </Link>
   );
 }
@@ -66,12 +66,12 @@ function Metric({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-2">
-      <span className="text-xs" style={{ color: "var(--color-text-mid)" }}>
-        {label}
-      </span>
+      <span className="text-xs text-muted-foreground">{label}</span>
       <span
-        className="text-sm font-semibold tabular-nums"
-        style={{ color: flag ? "#ef4444" : "var(--color-text-dark)" }}
+        className={cn(
+          "text-sm font-semibold tabular-nums text-foreground",
+          flag && "text-destructive"
+        )}
       >
         {value}
       </span>
@@ -82,13 +82,10 @@ function Metric({
 function FeedItem({ time, text }: { time: string; text: string }) {
   return (
     <div className="flex gap-3 text-sm">
-      <span
-        className="text-xs tabular-nums flex-shrink-0 pt-px"
-        style={{ color: "var(--color-text-mid)" }}
-      >
+      <span className="w-14 shrink-0 pt-px text-xs tabular-nums text-muted-foreground">
         {time}
       </span>
-      <span style={{ color: "var(--color-text-dark)" }}>{text}</span>
+      <span className="text-foreground">{text}</span>
     </div>
   );
 }
@@ -105,19 +102,15 @@ export default function AdminDashboardPage() {
   ).length;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 pb-24 md:pb-8">
-      {/* Header */}
-      <div className="mb-6">
-        <h1
-          className="text-xl font-bold"
-          style={{ color: "var(--color-text-dark)" }}
-        >
-          School Overview
-        </h1>
-        <p
-          className="text-sm mt-0.5"
-          style={{ color: "var(--color-text-mid)" }}
-        >
+    <div className="mx-auto max-w-4xl px-4 py-6 pb-24 md:pb-8">
+      <div className="mb-6 space-y-1">
+        <div className="flex flex-wrap items-end gap-2">
+          <h1 className="text-xl font-bold text-foreground">School Overview</h1>
+          <Badge variant="secondary" className="font-normal">
+            Live demo
+          </Badge>
+        </div>
+        <p className="text-sm text-muted-foreground">
           Yew Tee Campus · Term 2, 2026 ·{" "}
           {new Date().toLocaleDateString("en-SG", {
             weekday: "long",
@@ -127,9 +120,7 @@ export default function AdminDashboardPage() {
         </p>
       </div>
 
-      {/* Status grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-        {/* Classes & Students */}
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <StatusPanel
           title="Classes & Students"
           level="amber"
@@ -146,7 +137,6 @@ export default function AdminDashboardPage() {
           <Metric label="New this week" value={2} />
         </StatusPanel>
 
-        {/* Teacher Coverage */}
         <StatusPanel
           title="Teacher Coverage"
           level="green"
@@ -161,7 +151,6 @@ export default function AdminDashboardPage() {
           <Metric label="Pending assignments" value={0} />
         </StatusPanel>
 
-        {/* Curriculum & Schedule */}
         <StatusPanel
           title="Curriculum & Schedule"
           level="amber"
@@ -173,7 +162,6 @@ export default function AdminDashboardPage() {
           <Metric label="Activities in library" value={24} />
         </StatusPanel>
 
-        {/* Parent Engagement */}
         <StatusPanel
           title="Parent Engagement"
           level="amber"
@@ -185,7 +173,6 @@ export default function AdminDashboardPage() {
           <Metric label="Unread broadcasts (3d+)" value={1} flag />
         </StatusPanel>
 
-        {/* Attendance */}
         <StatusPanel title="Attendance" level="red" href="/school/attendance">
           <Metric label="Present today" value="22 / 25" />
           <Metric label="Absent – notified" value={2} />
@@ -193,7 +180,6 @@ export default function AdminDashboardPage() {
           <Metric label="Check-in via parent app" value="88%" />
         </StatusPanel>
 
-        {/* Learning Outcomes */}
         <StatusPanel
           title="Learning Outcomes"
           level="green"
@@ -206,41 +192,40 @@ export default function AdminDashboardPage() {
         </StatusPanel>
       </div>
 
-      {/* Daily activity feed */}
-      <div className="bg-white rounded-xl border border-[var(--color-border)] p-5">
-        <h2
-          className="font-semibold text-sm mb-4"
-          style={{ color: "var(--color-text-dark)" }}
-        >
-          Today's Activity
-        </h2>
-        <div className="space-y-3">
-          <FeedItem
-            time="9:42am"
-            text="Siti logged 4 observations for Kingfisher N1"
-          />
-          <FeedItem
-            time="9:15am"
-            text="22 of 25 check-ins completed via parent app"
-          />
-          <FeedItem
-            time="9:01am"
-            text="Rayan's parent reported absence — illness"
-          />
-          <FeedItem
-            time="8:55am"
-            text="Daily updates sent to all Sparrow K2 families"
-          />
-          <FeedItem
-            time="8:30am"
-            text="School calendar updated — PD Day added for 28 March"
-          />
-          <FeedItem
-            time="8:12am"
-            text="Lim Wei Ling logged in · Sparrow K2 schedule published"
-          />
-        </div>
-      </div>
+      <Card>
+        <CardHeader className="pb-0">
+          <CardTitle className="text-sm font-semibold">Today&apos;s Activity</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 pt-4">
+          <Separator />
+          <div className="space-y-3">
+            <FeedItem
+              time="9:42am"
+              text="Siti logged 4 observations for Kingfisher N1"
+            />
+            <FeedItem
+              time="9:15am"
+              text="22 of 25 check-ins completed via parent app"
+            />
+            <FeedItem
+              time="9:01am"
+              text="Rayan's parent reported absence — illness"
+            />
+            <FeedItem
+              time="8:55am"
+              text="Daily updates sent to all Sparrow K2 families"
+            />
+            <FeedItem
+              time="8:30am"
+              text="School calendar updated — PD Day added for 28 March"
+            />
+            <FeedItem
+              time="8:12am"
+              text="Lim Wei Ling logged in · Sparrow K2 schedule published"
+            />
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

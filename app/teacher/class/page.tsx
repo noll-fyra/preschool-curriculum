@@ -22,6 +22,7 @@ import { AIInsightCard } from "@/components/teacher/dashboard/AIInsightCard";
 import { QuickActionsGrid } from "@/components/teacher/dashboard/QuickActionsGrid";
 import { DomainSnapshot } from "@/components/teacher/dashboard/DomainSnapshot";
 import { ObservationsFeed } from "@/components/teacher/dashboard/ObservationsFeed";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function TeacherDashboard() {
   const {
@@ -151,10 +152,10 @@ export default function TeacherDashboard() {
   // Right column sections — shared between desktop and mobile renders
   const rightColumnContent = (
     <>
-      <SectionCard>
+      <DashboardSectionCard>
         <AIInsightCard phase={phase} stats={insightStats} teacherName={teacherName} />
-      </SectionCard>
-      <SectionCard>
+      </DashboardSectionCard>
+      <DashboardSectionCard>
         <DomainSnapshot
           classChildren={classChildren}
           observations={observations}
@@ -162,15 +163,15 @@ export default function TeacherDashboard() {
           milestones={milestones}
           weekStart={weekStart}
         />
-      </SectionCard>
-      <SectionCard>
+      </DashboardSectionCard>
+      <DashboardSectionCard>
         <ObservationsFeed items={recentObservationItems} />
-      </SectionCard>
+      </DashboardSectionCard>
     </>
   );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <div className="flex h-full flex-col">
       {/* Dashboard-local top bar */}
       <DashboardTopBar
         teacherName={teacherName}
@@ -184,32 +185,16 @@ export default function TeacherDashboard() {
       />
 
       {/* Scrollable content area */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "20px" }}>
+      <div className="flex-1 overflow-y-auto p-4 md:p-5">
         {/* Quick actions — full-width single row */}
-        <div style={{ maxWidth: 1280, margin: "0 auto 16px" }}>
+        <div className="mx-auto mb-4 max-w-[1280px]">
           <QuickActionsGrid onLogObservation={openQuickLog} />
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            gap: 20,
-            alignItems: "flex-start",
-            maxWidth: 1280,
-            margin: "0 auto",
-          }}
-        >
+        <div className="mx-auto flex max-w-[1280px] flex-col gap-4 lg:flex-row lg:items-start lg:gap-5">
           {/* Left column (~65%) — always visible */}
-          <div
-            style={{
-              flex: "65 1 0%",
-              minWidth: 0,
-              display: "flex",
-              flexDirection: "column",
-              gap: 16,
-            }}
-          >
-            <SectionCard>
+          <div className="flex min-w-0 flex-[65_1_0%] flex-col gap-4">
+            <DashboardSectionCard>
               <StatStrip
                 present={attendanceSummary.present}
                 total={attendanceSummary.total}
@@ -220,38 +205,28 @@ export default function TeacherDashboard() {
                 needsAttentionCount={flaggedChildIds.size}
                 absentNames={attendanceSummary.absentNames}
               />
-            </SectionCard>
+            </DashboardSectionCard>
 
-            <SectionCard>
+            <DashboardSectionCard>
               <ChildrenGrid
-                children={classChildren}
+                students={classChildren}
                 attendance={attendance}
                 weeklyDomainCoverage={weeklyDomainCoverage}
                 flaggedChildIds={flaggedChildIds}
                 today={today}
               />
-            </SectionCard>
+            </DashboardSectionCard>
 
-            <SectionCard>
+            <DashboardSectionCard>
               <ScheduleTimeline activities={scheduleActivities} />
-            </SectionCard>
+            </DashboardSectionCard>
 
             {/* Mobile: right column stacked below left column */}
-            <div className="lg:hidden flex flex-col gap-4">
-              {rightColumnContent}
-            </div>
+            <div className="flex flex-col gap-4 lg:hidden">{rightColumnContent}</div>
           </div>
 
           {/* Right column (~35%) — desktop only */}
-          <div
-            className="hidden lg:flex"
-            style={{
-              flex: "35 1 0%",
-              minWidth: 0,
-              flexDirection: "column",
-              gap: 16,
-            }}
-          >
+          <div className="hidden min-w-0 flex-[35_1_0%] flex-col gap-4 lg:flex">
             {rightColumnContent}
           </div>
         </div>
@@ -260,17 +235,10 @@ export default function TeacherDashboard() {
   );
 }
 
-function SectionCard({ children }: { children: React.ReactNode }) {
+function DashboardSectionCard({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      style={{
-        background: "#fff",
-        borderRadius: 14,
-        padding: "16px",
-        border: "1px solid var(--color-border)",
-      }}
-    >
-      {children}
-    </div>
+    <Card className="shadow-none">
+      <CardContent className="pt-0">{children}</CardContent>
+    </Card>
   );
 }

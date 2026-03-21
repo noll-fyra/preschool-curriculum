@@ -13,90 +13,70 @@ import { getWeekStart } from "@/lib/assignments";
 import { ChildAvatar } from "@/components/teacher/ChildAvatar";
 import { AttendanceDot } from "@/components/teacher/AttendanceDot";
 import { getChildDisplayName } from "@/lib/display-name";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 type PresenceFilter = "all" | "present" | "absent";
 type SortBy = "alpha" | "last_observed";
 type ViewMode = "grid" | "list";
 
-// ─── Contact sheet modal ──────────────────────────────────────────────────────
-
-function ContactSheet({ child, onClose }: { child: Child; onClose: () => void }) {
+function ChildContactDetails({ child }: { child: Child }) {
   return (
     <>
-      <div
-        onClick={onClose}
-        style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 50 }}
-      />
-      <div
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 51,
-          background: "#fff",
-          borderRadius: "20px 20px 0 0",
-          padding: "24px 20px 40px",
-          maxWidth: 480,
-          margin: "0 auto",
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
-          <div>
-            <div style={{ fontSize: 17, fontWeight: 700, color: "var(--color-text-dark)" }}>
-              {getChildDisplayName(child)}
-            </div>
-            <div style={{ fontSize: 13, color: "var(--color-text-muted)", marginTop: 2 }}>Contact & emergency details</div>
-          </div>
-          <button
-            onClick={onClose}
-            style={{ width: 30, height: 30, borderRadius: "50%", background: "var(--color-bg-warm)", border: "none", cursor: "pointer", fontSize: 18, color: "var(--color-text-mid)" }}
-          >
-            ×
-          </button>
+      <SheetHeader className="text-left">
+        <SheetTitle className="text-lg">{getChildDisplayName(child)}</SheetTitle>
+        <SheetDescription>Contact & emergency details</SheetDescription>
+      </SheetHeader>
+
+      {child.primaryGuardian ? (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Primary guardian
+          </p>
+          <div className="font-semibold text-foreground">{child.primaryGuardian.name}</div>
+          {child.primaryGuardian.phone && (
+            <p className="text-sm text-muted-foreground">{child.primaryGuardian.phone}</p>
+          )}
+          {child.primaryGuardian.email && (
+            <p className="text-sm text-muted-foreground">{child.primaryGuardian.email}</p>
+          )}
         </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">No guardian details on record.</p>
+      )}
 
-        {child.primaryGuardian ? (
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: "var(--color-text-muted)", marginBottom: 8 }}>PRIMARY GUARDIAN</div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--color-text-dark)" }}>{child.primaryGuardian.name}</div>
-            {child.primaryGuardian.phone && (
-              <div style={{ fontSize: 13, color: "var(--color-text-mid)", marginTop: 3 }}>{child.primaryGuardian.phone}</div>
-            )}
-            {child.primaryGuardian.email && (
-              <div style={{ fontSize: 13, color: "var(--color-text-mid)", marginTop: 2 }}>{child.primaryGuardian.email}</div>
-            )}
-          </div>
-        ) : (
-          <p style={{ fontSize: 13, color: "var(--color-text-muted)", marginBottom: 16 }}>No guardian details on record.</p>
-        )}
-
-        {child.flags && (Object.values(child.flags).some(Boolean)) && (
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: "var(--color-text-muted)", marginBottom: 8 }}>NOTES & ALERTS</div>
-            {child.flags.allergy && (
-              <div style={{ padding: "8px 12px", borderRadius: 8, background: "#FDECEA", color: "#B91C1C", fontSize: 13, marginBottom: 6, fontWeight: 600 }}>
-                Allergy: {child.flags.allergy}
-              </div>
-            )}
-            {child.flags.medicalNote && (
-              <div style={{ padding: "8px 12px", borderRadius: 8, background: "#FEF3D7", color: "#A06010", fontSize: 13, marginBottom: 6 }}>
-                Medical: {child.flags.medicalNote}
-              </div>
-            )}
-            {child.flags.specialNeed && (
-              <div style={{ padding: "8px 12px", borderRadius: 8, background: "#EFF6FF", color: "#1D4ED8", fontSize: 13, marginBottom: 6 }}>
-                Special need: {child.flags.specialNeed}
-              </div>
-            )}
-            {child.flags.welfareConcern && (
-              <div style={{ padding: "8px 12px", borderRadius: 8, background: "#FDECEA", color: "#B91C1C", fontSize: 13 }}>
-                Welfare: {child.flags.welfareConcern}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      {child.flags && Object.values(child.flags).some(Boolean) && (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Notes & alerts
+          </p>
+          {child.flags.allergy && (
+            <div className="rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-800">
+              Allergy: {child.flags.allergy}
+            </div>
+          )}
+          {child.flags.medicalNote && (
+            <div className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
+              Medical: {child.flags.medicalNote}
+            </div>
+          )}
+          {child.flags.specialNeed && (
+            <div className="rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-900">
+              Special need: {child.flags.specialNeed}
+            </div>
+          )}
+          {child.flags.welfareConcern && (
+            <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">
+              Welfare: {child.flags.welfareConcern}
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 }
@@ -364,7 +344,6 @@ export default function ChildrenPage() {
   const [sortBy, setSortBy] = useState<SortBy>("alpha");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [contactChild, setContactChild] = useState<Child | null>(null);
-  const [archiveConfirm, setArchiveConfirm] = useState<string | null>(null);
 
   const classChildren = useMemo(
     () => children.filter((c) => c.classId === activeClassId),
@@ -684,10 +663,19 @@ export default function ChildrenPage() {
         </div>
       )}
 
-      {/* Contact sheet */}
-      {contactChild && (
-        <ContactSheet child={contactChild} onClose={() => setContactChild(null)} />
-      )}
+      <Sheet
+        open={contactChild !== null}
+        onOpenChange={(open) => {
+          if (!open) setContactChild(null);
+        }}
+      >
+        <SheetContent
+          side="bottom"
+          className="max-h-[min(85vh,36rem)] overflow-y-auto rounded-t-2xl"
+        >
+          {contactChild ? <ChildContactDetails child={contactChild} /> : null}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

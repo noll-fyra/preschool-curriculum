@@ -5,6 +5,11 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { getTeacherDisplayName } from "@/lib/display-name";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 export default function EditClassPage() {
   const params = useParams();
@@ -16,14 +21,14 @@ export default function EditClassPage() {
   const [name, setName] = useState(() => (cls ? cls.name : ""));
   const [termLabel, setTermLabel] = useState(() => (cls ? cls.termLabel : ""));
   const [assignedTeacherIds, setAssignedTeacherIds] = useState<string[]>(() =>
-    cls ? teachers.filter((t) => t.classIds.includes(classId)).map((t) => t.id) : []
+    cls ? teachers.filter((t) => t.classIds.includes(classId)).map((t) => t.id) : [],
   );
 
   if (!cls) {
     return (
       <div className="px-5 py-8">
-        <p style={{ color: "var(--color-text-muted)" }}>Class not found.</p>
-        <Link href="/school/classes" className="text-sm font-medium mt-2 inline-block" style={{ color: "var(--color-primary)" }}>
+        <p className="text-muted-foreground">Class not found.</p>
+        <Link href="/school/classes" className="mt-2 inline-block text-sm font-medium text-primary">
           ← Back to classes
         </Link>
       </div>
@@ -48,101 +53,97 @@ export default function EditClassPage() {
 
   const toggleTeacher = (teacherId: string) => {
     setAssignedTeacherIds((prev) =>
-      prev.includes(teacherId) ? prev.filter((id) => id !== teacherId) : [...prev, teacherId]
+      prev.includes(teacherId) ? prev.filter((id) => id !== teacherId) : [...prev, teacherId],
     );
   };
 
   return (
-    <div className="px-5 py-6 md:px-8 md:py-8 max-w-lg">
+    <div className="mx-auto max-w-lg px-5 py-6 md:px-8 md:py-8">
       <Link
         href="/school/classes"
-        className="inline-flex items-center gap-1 text-sm font-medium mb-6"
-        style={{ color: "var(--color-text-mid)" }}
+        className="mb-6 inline-flex text-sm font-medium text-muted-foreground hover:text-foreground"
       >
         ← Back to classes
       </Link>
-      <h1 className="text-2xl font-bold mb-6" style={{ color: "var(--color-text-dark)" }}>
-        Edit class
-      </h1>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Edit class</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-class-name">Class name</Label>
+              <Input
+                id="edit-class-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="h-10"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-term">Term</Label>
+              <Input
+                id="edit-term"
+                value={termLabel}
+                onChange={(e) => setTermLabel(e.target.value)}
+                className="h-10"
+              />
+            </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <label className="block">
-          <span className="block text-sm font-medium mb-1" style={{ color: "var(--color-text-dark)" }}>
-            Class name
-          </span>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg border text-sm"
-            style={{ borderColor: "var(--color-border)" }}
-          />
-        </label>
-        <label className="block">
-          <span className="block text-sm font-medium mb-1" style={{ color: "var(--color-text-dark)" }}>
-            Term
-          </span>
-          <input
-            type="text"
-            value={termLabel}
-            onChange={(e) => setTermLabel(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg border text-sm"
-            style={{ borderColor: "var(--color-border)" }}
-          />
-        </label>
+            <div>
+              <span className="mb-2 block text-sm font-medium text-foreground">Assign teachers</span>
+              <div className="flex flex-col gap-2">
+                {teachers.map((t) => (
+                  <label key={t.id} className="flex cursor-pointer items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={assignedTeacherIds.includes(t.id)}
+                      onChange={() => toggleTeacher(t.id)}
+                      className="size-4 rounded border-input accent-primary"
+                    />
+                    <span className="text-sm text-foreground">
+                      {getTeacherDisplayName(t)}
+                      {t.email && (
+                        <span className="text-muted-foreground"> · {t.email}</span>
+                      )}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
 
-        <div>
-          <span className="block text-sm font-medium mb-2" style={{ color: "var(--color-text-dark)" }}>
-            Assign teachers
-          </span>
-          <div className="flex flex-col gap-2">
-            {teachers.map((t) => (
-              <label key={t.id} className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={assignedTeacherIds.includes(t.id)}
-                  onChange={() => toggleTeacher(t.id)}
-                  className="rounded border-gray-300"
-                />
-                <span className="text-sm" style={{ color: "var(--color-text-dark)" }}>
-                  {getTeacherDisplayName(t)}
-                  {t.email && <span className="text-muted"> · {t.email}</span>}
-                </span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-3 pt-2">
-          <button
-            type="submit"
-            className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white"
-            style={{ background: "var(--color-primary)" }}
-          >
-            Save changes
-          </button>
-          <Link
-            href="/school/classes"
-            className="px-4 py-2.5 rounded-lg text-sm font-medium border"
-            style={{ borderColor: "var(--color-border)", color: "var(--color-text-mid)" }}
-          >
-            Cancel
-          </Link>
-          <button
-            type="button"
-            onClick={() => {
-              if (typeof window !== "undefined" && window.confirm("Delete this class? Teachers and students will be unassigned from it.")) {
-                deleteClass(classId);
-                router.push("/school/classes");
-              }
-            }}
-            className="px-4 py-2.5 rounded-lg text-sm font-medium border"
-            style={{ borderColor: "var(--color-coral, #E8745A)", color: "var(--color-coral, #E8745A)" }}
-          >
-            Delete class
-          </button>
-        </div>
-      </form>
+            <div className="flex flex-wrap gap-3 pt-2">
+              <Button type="submit" className="font-semibold">
+                Save changes
+              </Button>
+              <Link
+                href="/school/classes"
+                className={cn(buttonVariants({ variant: "outline" }), "font-medium")}
+              >
+                Cancel
+              </Link>
+              <Button
+                type="button"
+                variant="outline"
+                className="border-destructive/40 font-medium text-destructive hover:bg-destructive/10"
+                onClick={() => {
+                  if (
+                    typeof window !== "undefined" &&
+                    window.confirm(
+                      "Delete this class? Teachers and students will be unassigned from it.",
+                    )
+                  ) {
+                    deleteClass(classId);
+                    router.push("/school/classes");
+                  }
+                }}
+              >
+                Delete class
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

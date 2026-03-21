@@ -2,9 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { getChildDisplayName } from "@/lib/display-name";
 import { ChildAvatar } from "@/components/teacher/ChildAvatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export default function EvaluationPage() {
   const store = useStore();
@@ -58,111 +62,120 @@ export default function EvaluationPage() {
   }
 
   return (
-    <div className="px-5 py-6 md:px-8 md:py-8 max-w-2xl">
+    <div className="mx-auto max-w-2xl px-5 py-6 md:px-8 md:py-8">
       <Link
         href="/teacher/documents"
-        className="inline-flex items-center gap-1.5 text-sm mb-5"
-        style={{ color: "var(--color-text-muted)" }}
+        className="mb-5 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M9 11L5 7l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <ChevronLeft className="size-4" />
         Documents
       </Link>
 
-      <h1 className="text-2xl font-bold mb-1" style={{ color: "var(--color-text-dark)" }}>
-        Student Evaluation
-      </h1>
-      <p className="text-sm mb-6" style={{ color: "var(--color-text-muted)" }}>
+      <h1 className="mb-1 text-2xl font-bold text-foreground">Student Evaluation</h1>
+      <p className="mb-6 text-sm text-muted-foreground">
         Generate a formal developmental evaluation for a student
       </p>
 
-      {/* Student selector */}
-      <div
-        className="rounded-2xl border p-5 mb-5 flex flex-col gap-4"
-        style={{ borderColor: "var(--color-border)", background: "white" }}
-      >
-        <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--color-text-muted)" }}>
-            Select student
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {classChildren.map((child) => {
-              const selected = selectedChildId === child.id;
-              return (
-                <button
-                  key={child.id}
-                  onClick={() => { setSelectedChildId(child.id); setContent(null); setSaved(false); }}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs font-medium transition-all"
-                  style={{
-                    background: selected ? "var(--color-primary-wash)" : "white",
-                    borderColor: selected ? "var(--color-primary)" : "var(--color-border)",
-                    color: selected ? "var(--color-primary)" : "var(--color-text-mid)",
-                  }}
-                >
-                  <ChildAvatar name={getChildDisplayName(child)} size="xs" />
-                  {child.firstName}
-                </button>
-              );
-            })}
+      <Card className="mb-5">
+        <CardContent className="flex flex-col gap-4 pt-6">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Select student
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {classChildren.map((child) => {
+                const selected = selectedChildId === child.id;
+                return (
+                  <Button
+                    key={child.id}
+                    type="button"
+                    size="xs"
+                    variant={selected ? "secondary" : "outline"}
+                    className={cn(
+                      "gap-1.5 rounded-full font-medium",
+                      selected && "border-primary/30 bg-primary/10 text-primary",
+                    )}
+                    onClick={() => {
+                      setSelectedChildId(child.id);
+                      setContent(null);
+                      setSaved(false);
+                    }}
+                  >
+                    <ChildAvatar name={getChildDisplayName(child)} size="xs" />
+                    {child.firstName}
+                  </Button>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
-        <button
-          onClick={handleGenerate}
-          disabled={generating || !selectedChildId}
-          className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-50"
-          style={{ background: "var(--color-primary)" }}
-        >
-          {generating ? "Generating…" : content ? "Regenerate" : "Generate evaluation"}
-        </button>
-      </div>
-
-      {/* Output */}
-      {(generating || content) && (
-        <div
-          className="rounded-2xl border overflow-hidden"
-          style={{ borderColor: "var(--color-border)" }}
-        >
-          <div
-            className="px-5 py-3 border-b flex items-center justify-between"
-            style={{ background: "var(--color-bg-cream)", borderColor: "var(--color-border)" }}
+          <Button
+            type="button"
+            className="w-full font-semibold"
+            onClick={handleGenerate}
+            disabled={generating || !selectedChildId}
           >
-            <h2 className="text-sm font-semibold" style={{ color: "var(--color-text-dark)" }}>
+            {generating ? "Generating…" : content ? "Regenerate" : "Generate evaluation"}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {(generating || content) && (
+        <Card className="overflow-hidden">
+          <div className="flex items-center justify-between border-b border-border bg-muted/50 px-5 py-3">
+            <h2 className="text-sm font-semibold text-foreground">
               {selectedChild ? getChildDisplayName(selectedChild) : ""} — Evaluation
             </h2>
             {content && !generating && (
-              <button
+              <Button
+                type="button"
+                size="xs"
+                variant={saved ? "secondary" : "outline"}
+                className="font-semibold"
                 onClick={handleSave}
-                className="text-xs px-3 py-1 rounded-lg border font-medium transition-colors"
-                style={{
-                  borderColor: saved ? "var(--color-primary)" : "var(--color-border)",
-                  color: saved ? "var(--color-primary)" : "var(--color-text-mid)",
-                  background: "white",
-                }}
               >
                 {saved ? "Saved ✓" : "Save"}
-              </button>
+              </Button>
             )}
           </div>
 
-          <div className="px-5 py-4">
+          <CardContent className="px-5 py-4">
             {generating ? (
               <div className="flex flex-col gap-2">
                 {[85, 65, 80, 55, 75, 70].map((w, i) => (
-                  <div key={i} className="h-3.5 rounded animate-pulse" style={{ background: "var(--color-bg-deep)", width: `${w}%` }} />
+                  <div
+                    key={i}
+                    className="h-3.5 animate-pulse rounded bg-muted"
+                    style={{ width: `${w}%` }}
+                  />
                 ))}
               </div>
             ) : (
               content?.split("\n").map((line, i) => {
-                if (line.startsWith("## ")) return <h3 key={i} className="text-sm font-bold mt-5 mb-2 first:mt-0" style={{ color: "var(--color-text-dark)" }}>{line.replace("## ", "")}</h3>;
-                if (line.startsWith("- ")) return <p key={i} className="text-sm leading-relaxed pl-3" style={{ color: "var(--color-text-dark)" }}>• {line.slice(2)}</p>;
+                if (line.startsWith("## ")) {
+                  return (
+                    <h3 key={i} className="mt-5 mb-2 text-sm font-bold text-foreground first:mt-0">
+                      {line.replace("## ", "")}
+                    </h3>
+                  );
+                }
+                if (line.startsWith("- ")) {
+                  return (
+                    <p key={i} className="pl-3 text-sm leading-relaxed text-foreground">
+                      • {line.slice(2)}
+                    </p>
+                  );
+                }
                 if (line.trim() === "") return <div key={i} className="h-2" />;
-                return <p key={i} className="text-sm leading-relaxed" style={{ color: "var(--color-text-dark)" }}>{line}</p>;
+                return (
+                  <p key={i} className="text-sm leading-relaxed text-foreground">
+                    {line}
+                  </p>
+                );
               })
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

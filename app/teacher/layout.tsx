@@ -6,6 +6,8 @@ import { DemoRoleBar } from "@/components/shared/DemoRoleBar";
 import { DemoPersonaBar } from "@/components/shared/DemoPersonaBar";
 import { StudentSearch } from "@/components/teacher/StudentSearch";
 import { QuickLogSheet } from "@/components/teacher/QuickLogSheet";
+import { NotificationsPanel } from "@/components/teacher/NotificationsPanel";
+import { useStore } from "@/lib/store";
 
 export default function TeacherLayout({
   children,
@@ -13,6 +15,7 @@ export default function TeacherLayout({
   children: React.ReactNode;
 }) {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const { notificationsOpen, closeNotifications } = useStore();
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
@@ -49,16 +52,16 @@ export default function TeacherLayout({
         </div>
       )}
 
-      <div
-        className="flex flex-1 min-h-0"
-        style={{ background: "var(--color-bg-warm)" }}
-      >
+      <div className="flex min-h-0 flex-1 bg-background">
         <TeacherNav />
         <main className="flex-1 min-w-0 overflow-y-auto pb-20 md:pb-0">{children}</main>
       </div>
 
       {/* Global quick-log sheet — accessible from any teacher route */}
       <QuickLogSheet />
+
+      {/* Global notifications panel */}
+      <NotificationsPanel open={notificationsOpen} onClose={closeNotifications} />
     </div>
   );
 }

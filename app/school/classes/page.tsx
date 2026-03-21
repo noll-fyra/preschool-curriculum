@@ -3,6 +3,11 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
+import { SegmentControl } from "@/components/shared/SegmentControl";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { getChildDisplayName } from "@/lib/display-name";
 import { getChildAgeInYears } from "@/lib/child";
 import type { Class, Child } from "@/lib/types";
@@ -93,7 +98,9 @@ function ClassDetail({ cls, onClose }: { cls: Class; onClose: () => void }) {
         <span className="font-semibold text-sm" style={{ color: "var(--color-text-dark)" }}>
           {cls.name} — detail
         </span>
-        <button onClick={onClose} className="text-xs" style={{ color: "var(--color-text-mid)" }}>Close</button>
+        <Button type="button" variant="ghost" size="sm" onClick={onClose}>
+          Close
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x" style={{ borderColor: "var(--color-border)" }}>
@@ -213,8 +220,7 @@ function ClassesTab() {
       <div className="flex justify-end">
         <Link
           href="/school/classes/new"
-          className="px-4 py-2 rounded-lg text-sm font-semibold text-white"
-          style={{ background: "var(--color-primary)" }}
+          className={cn(buttonVariants(), "font-semibold")}
         >
           Add class
         </Link>
@@ -359,19 +365,17 @@ function StudentsTab() {
             <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" strokeWidth="1.5" />
             <path d="M10 10l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
-          <input
+          <Input
             type="text"
             placeholder="Search students…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-lg border text-sm"
-            style={{ borderColor: "var(--color-border)" }}
+            className="pl-9"
           />
         </div>
         <Link
           href="/school/students/new"
-          className="px-4 py-2 rounded-lg text-sm font-semibold text-white flex-shrink-0"
-          style={{ background: "var(--color-primary)" }}
+          className={cn(buttonVariants(), "shrink-0 font-semibold")}
         >
           Add student
         </Link>
@@ -483,7 +487,12 @@ function StudentsTab() {
                           <span className="text-xs" style={{ color: "var(--color-text-mid)" }}>{ageYears}y</span>
                         )}
                         {isAbsent && (
-                          <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "#fee2e2", color: "#b91c1c" }}>Absent</span>
+                          <Badge
+                            variant="outline"
+                            className="border-red-200 bg-red-50 text-xs text-red-800"
+                          >
+                            Absent
+                          </Badge>
                         )}
                       </div>
                       <div className="text-xs truncate" style={{ color: "var(--color-text-mid)" }}>
@@ -522,37 +531,25 @@ function StudentsTab() {
 
 type Tab = "classes" | "students";
 
+const CLASS_STUDENT_TABS: { id: Tab; label: string }[] = [
+  { id: "classes", label: "Classes" },
+  { id: "students", label: "Students" },
+];
+
 export default function AdminClassesPage() {
   const [tab, setTab] = useState<Tab>("classes");
 
   return (
-    <div className="px-5 py-6 md:px-8 md:py-8 max-w-4xl">
+    <div className="max-w-4xl px-4 py-6 md:px-6 md:py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold" style={{ color: "var(--color-text-dark)" }}>
-          Classes & Students
-        </h1>
+        <h1 className="text-2xl font-bold text-foreground">Classes & Students</h1>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 rounded-xl p-1 mb-6 w-fit" style={{ background: "var(--color-bg-cream)" }}>
-        {([
-          { id: "classes",  label: "Classes" },
-          { id: "students", label: "Students" },
-        ] as { id: Tab; label: string }[]).map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className="rounded-lg px-5 py-2 text-sm font-medium transition-colors"
-            style={{
-              background: tab === t.id ? "white" : "transparent",
-              color: tab === t.id ? "var(--color-text-dark)" : "var(--color-text-mid)",
-              boxShadow: tab === t.id ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
-            }}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <SegmentControl
+        value={tab}
+        onChange={setTab}
+        options={CLASS_STUDENT_TABS}
+      />
 
       {tab === "classes"  && <ClassesTab />}
       {tab === "students" && <StudentsTab />}

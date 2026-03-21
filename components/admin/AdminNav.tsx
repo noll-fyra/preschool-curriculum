@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { cn } from "@/lib/utils";
+
 const NAV_ITEMS = [
   {
     href: "/school/dashboard",
@@ -115,35 +117,30 @@ export function AdminNav() {
 
   return (
     <>
-      <aside className="hidden md:flex flex-col w-[220px] min-h-screen border-r border-[var(--color-border)] bg-white flex-shrink-0">
-        <div className="px-6 py-5 border-b border-[var(--color-border)]">
+      <aside className="hidden min-h-screen w-[220px] shrink-0 flex-col border-r bg-card md:flex">
+        <div className="border-b px-6 py-5">
           <Link href="/school/dashboard" className="flex items-center gap-2">
-            <span
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-sm font-bold"
-              style={{ background: "var(--color-primary)" }}
-            >
+            <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
               N
             </span>
-            <span
-              className="font-bold text-base"
-              style={{ color: "var(--color-text-dark)" }}
-            >
+            <span className="text-base font-bold text-foreground">
               Nurture School
             </span>
           </Link>
         </div>
-        <nav className="flex flex-col gap-1 px-3 py-4 flex-1">
+        <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
           {NAV_ITEMS.map((item) => {
             const active = isActive(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
-                style={{
-                  color: active ? "var(--color-primary)" : "var(--color-text-mid)",
-                  background: active ? "var(--color-primary-wash)" : "transparent",
-                }}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  active
+                    ? "bg-accent text-primary"
+                    : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                )}
               >
                 {item.icon}
                 {item.label}
@@ -153,17 +150,17 @@ export function AdminNav() {
         </nav>
       </aside>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[var(--color-border)] flex z-50">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex border-t bg-card md:hidden">
         {MOBILE_NAV_ITEMS.map((item) => {
           const active = isActive(item.href);
           return (
             <Link
               key={item.href}
               href={item.href}
-              className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-[10px] font-medium"
-              style={{
-                color: active ? "var(--color-primary)" : "var(--color-text-muted)",
-              }}
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium",
+                active ? "text-primary" : "text-muted-foreground"
+              )}
             >
               {item.icon}
               {item.label}

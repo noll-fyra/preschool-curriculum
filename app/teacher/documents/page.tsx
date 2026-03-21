@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { Card, CardContent } from "@/components/ui/card";
 
 const DOC_TYPES = [
   {
@@ -54,73 +56,64 @@ export default function DocumentsPage() {
   const { generatedDocuments } = useStore();
 
   return (
-    <div className="px-5 py-6 md:px-8 md:py-8 max-w-2xl">
+    <div className="mx-auto max-w-2xl px-4 py-6 md:px-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-1" style={{ color: "var(--color-text-dark)" }}>
-          Documents
-        </h1>
-        <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+        <h1 className="mb-1 text-2xl font-bold text-foreground">Documents</h1>
+        <p className="text-muted-foreground text-sm">
           Generate professional teaching documents with AI. Reports and portfolios are available from individual student profiles.
         </p>
       </div>
 
-      {/* Document type cards */}
-      <div className="flex flex-col gap-3 mb-8">
+      <div className="mb-8 flex flex-col gap-3">
         {DOC_TYPES.map((doc) => (
-          <Link
-            key={doc.href}
-            href={doc.href}
-            className="flex items-start gap-4 rounded-2xl border p-4 transition-colors hover:bg-[var(--color-bg-cream)]"
-            style={{ borderColor: "var(--color-border)", background: "white" }}
-          >
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: doc.color, color: doc.textColor }}
-            >
-              {doc.icon}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold mb-0.5" style={{ color: "var(--color-text-dark)" }}>
-                {doc.title}
-              </p>
-              <p className="text-xs leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
-                {doc.description}
-              </p>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0 mt-0.5" style={{ color: "var(--color-text-muted)" }}>
-              <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+          <Link key={doc.href} href={doc.href} className="block">
+            <Card className="shadow-none transition-colors hover:bg-accent/40">
+              <CardContent className="flex items-start gap-4 py-4">
+                <div
+                  className="flex size-10 shrink-0 items-center justify-center rounded-xl"
+                  style={{ background: doc.color, color: doc.textColor }}
+                >
+                  {doc.icon}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="mb-0.5 text-sm font-semibold text-foreground">
+                    {doc.title}
+                  </p>
+                  <p className="text-muted-foreground text-xs leading-relaxed">
+                    {doc.description}
+                  </p>
+                </div>
+                <ChevronRight className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+              </CardContent>
+            </Card>
           </Link>
         ))}
       </div>
 
-      {/* Saved documents */}
       {generatedDocuments.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold mb-3" style={{ color: "var(--color-text-dark)" }}>
+          <h2 className="mb-3 text-sm font-semibold text-foreground">
             Saved documents
           </h2>
           <div className="flex flex-col gap-2">
             {generatedDocuments.map((doc) => (
-              <div
-                key={doc.id}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl border"
-                style={{ borderColor: "var(--color-border)", background: "white" }}
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate" style={{ color: "var(--color-text-dark)" }}>
-                    {doc.title}
-                  </p>
-                  <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                    {doc.type.replace("_", " ")} ·{" "}
-                    {new Date(doc.createdAt).toLocaleDateString("en-SG", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </p>
-                </div>
-              </div>
+              <Card key={doc.id} className="shadow-none">
+                <CardContent className="flex items-center gap-3 py-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {doc.title}
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      {doc.type.replace("_", " ")} ·{" "}
+                      {new Date(doc.createdAt).toLocaleDateString("en-SG", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>

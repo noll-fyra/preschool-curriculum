@@ -10,10 +10,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div
-      className="flex flex-col h-screen overflow-hidden"
-      style={{ background: "var(--color-bg-warm)" }}
-    >
+    <div className="flex h-screen flex-col overflow-hidden bg-background">
       <DemoRoleBar activeRole="school" />
       <DemoPersonaBar role="school" />
       <div className="flex flex-1 min-h-0">

@@ -5,6 +5,11 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
 import type { Gender, YearLevelId } from "@/lib/types";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 const GENDERS: { id: Gender; label: string }[] = [
   { id: "male", label: "Male" },
@@ -19,20 +24,22 @@ const YEAR_LEVELS: { id: YearLevelId; label: string }[] = [
   { id: "K2", label: "K2" },
 ];
 
-// ── Section wrapper ────────────────────────────────────────────────────────
+const selectClass =
+  "h-10 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
+
+const textAreaClass =
+  "min-h-[5.5rem] w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="space-y-4">
-      <h2 className="text-sm font-semibold uppercase tracking-wide" style={{ color: "var(--color-text-muted)" }}>
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
         {title}
       </h2>
       {children}
     </div>
   );
 }
-
-// ── Main page ──────────────────────────────────────────────────────────────
 
 export default function EditStudentPage() {
   const params = useParams();
@@ -41,7 +48,6 @@ export default function EditStudentPage() {
   const { children, classes, updateChild, setChildClass } = useStore();
   const child = children.find((c) => c.id === childId);
 
-  // Basic
   const [firstName, setFirstName] = useState(() => child?.firstName ?? "");
   const [lastName, setLastName] = useState(() => child?.lastName ?? "");
   const [gender, setGender] = useState<Gender>(() => child?.gender ?? "non-binary");
@@ -49,41 +55,37 @@ export default function EditStudentPage() {
   const [yearLevel, setYearLevel] = useState<YearLevelId>(() => child?.yearLevel ?? "K1");
   const [dateOfBirth, setDateOfBirth] = useState(() => child?.dateOfBirth ?? "");
 
-  // Primary guardian
   const [guardianName, setGuardianName] = useState(() => child?.primaryGuardian?.name ?? "");
   const [guardianPhone, setGuardianPhone] = useState(() => child?.primaryGuardian?.phone ?? "");
   const [guardianEmail, setGuardianEmail] = useState(() => child?.primaryGuardian?.email ?? "");
 
-  // Emergency contacts (demo — local state only)
   const [emergencyName, setEmergencyName] = useState("");
   const [emergencyPhone, setEmergencyPhone] = useState("");
   const [emergencyRelation, setEmergencyRelation] = useState("");
 
-  // Authorised pick-up (demo — local state only)
   const [pickupNames, setPickupNames] = useState("Primary guardian");
 
-  // Flags
   const [flagAllergy, setFlagAllergy] = useState(() => child?.flags?.allergy ?? "");
   const [flagMedical, setFlagMedical] = useState(() => child?.flags?.medicalNote ?? "");
   const [flagSpecialNeed, setFlagSpecialNeed] = useState(() => child?.flags?.specialNeed ?? "");
   const [flagWelfare, setFlagWelfare] = useState(() => child?.flags?.welfareConcern ?? "");
 
-  // Consent (demo — local state only)
   const [consentPhoto, setConsentPhoto] = useState(true);
   const [consentExcursion, setConsentExcursion] = useState(true);
   const [consentAppData, setConsentAppData] = useState(true);
 
-  // Admin note (demo — local state only)
   const [adminNote, setAdminNote] = useState("");
 
-  // Archive confirmation
   const [showArchive, setShowArchive] = useState(false);
 
   if (!child) {
     return (
       <div className="px-5 py-8">
-        <p style={{ color: "var(--color-text-muted)" }}>Student not found.</p>
-        <Link href="/school/classes" className="text-sm font-medium mt-2 inline-block" style={{ color: "var(--color-primary)" }}>
+        <p className="text-muted-foreground">Student not found.</p>
+        <Link
+          href="/school/classes"
+          className="mt-2 inline-block text-sm font-medium text-primary"
+        >
           ← Back to classes
         </Link>
       </div>
@@ -122,12 +124,6 @@ export default function EditStudentPage() {
     router.push("/school/classes?tab=students");
   };
 
-  const inputClass = "w-full px-4 py-2.5 rounded-lg border text-sm";
-  const inputStyle = { borderColor: "var(--color-border)" as const };
-  const labelClass = "block text-sm font-medium mb-1";
-  const labelStyle = { color: "var(--color-text-dark)" as const };
-
-  // Class history (demo — derived from current class)
   const currentClass = classes.find((c) => c.id === child.classId);
   const classHistory = [
     ...(currentClass ? [{ className: currentClass.name, from: "6 Jan 2026", to: "present" }] : []),
@@ -135,251 +131,368 @@ export default function EditStudentPage() {
   ];
 
   return (
-    <div className="px-5 py-6 md:px-8 md:py-8 max-w-lg pb-24 md:pb-8">
+    <div className="mx-auto max-w-lg px-5 py-6 pb-24 md:px-8 md:py-8 md:pb-8">
       <Link
         href="/school/classes"
-        className="inline-flex items-center gap-1 text-sm font-medium mb-6"
-        style={{ color: "var(--color-text-mid)" }}
+        className="mb-6 inline-flex text-sm font-medium text-muted-foreground hover:text-foreground"
       >
         ← Back to classes
       </Link>
-      <h1 className="text-2xl font-bold mb-6" style={{ color: "var(--color-text-dark)" }}>
-        {child.firstName} {child.lastName}
-      </h1>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">
+            {child.firstName} {child.lastName}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <Section title="Name & identity">
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-fn">First name</Label>
+                <Input
+                  id="edit-fn"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-ln">Last name</Label>
+                <Input
+                  id="edit-ln"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-dob">Date of birth</Label>
+                <Input
+                  id="edit-dob"
+                  type="date"
+                  value={dateOfBirth}
+                  onChange={(e) => setDateOfBirth(e.target.value)}
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-gender">Gender</Label>
+                <select
+                  id="edit-gender"
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value as Gender)}
+                  className={selectClass}
+                >
+                  {GENDERS.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </Section>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-        {/* Name & identity */}
-        <Section title="Name & identity">
-          <label className="block">
-            <span className={labelClass} style={labelStyle}>First name</span>
-            <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} className={inputClass} style={inputStyle} />
-          </label>
-          <label className="block">
-            <span className={labelClass} style={labelStyle}>Last name</span>
-            <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className={inputClass} style={inputStyle} />
-          </label>
-          <label className="block">
-            <span className={labelClass} style={labelStyle}>Date of birth</span>
-            <input type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} className={inputClass} style={inputStyle} />
-          </label>
-          <label className="block">
-            <span className={labelClass} style={labelStyle}>Gender</span>
-            <select value={gender} onChange={(e) => setGender(e.target.value as Gender)} className={inputClass} style={inputStyle}>
-              {GENDERS.map((g) => <option key={g.id} value={g.id}>{g.label}</option>)}
-            </select>
-          </label>
-        </Section>
+            <Section title="Class & grade">
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-class">Class</Label>
+                <select
+                  id="edit-class"
+                  value={classId}
+                  onChange={(e) => setClassId(e.target.value)}
+                  className={selectClass}
+                >
+                  <option value="">Unassigned</option>
+                  {classes.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-yl">Year level</Label>
+                <select
+                  id="edit-yl"
+                  value={yearLevel}
+                  onChange={(e) => setYearLevel(e.target.value as YearLevelId)}
+                  className={selectClass}
+                >
+                  {YEAR_LEVELS.map((y) => (
+                    <option key={y.id} value={y.id}>
+                      {y.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </Section>
 
-        {/* Class & grade */}
-        <Section title="Class & grade">
-          <label className="block">
-            <span className={labelClass} style={labelStyle}>Class</span>
-            <select value={classId} onChange={(e) => setClassId(e.target.value)} className={inputClass} style={inputStyle}>
-              <option value="">Unassigned</option>
-              {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </label>
-          <label className="block">
-            <span className={labelClass} style={labelStyle}>Year level</span>
-            <select value={yearLevel} onChange={(e) => setYearLevel(e.target.value as YearLevelId)} className={inputClass} style={inputStyle}>
-              {YEAR_LEVELS.map((y) => <option key={y.id} value={y.id}>{y.label}</option>)}
-            </select>
-          </label>
-        </Section>
+            <Section title="Primary guardian">
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-g-name">Name</Label>
+                <Input
+                  id="edit-g-name"
+                  value={guardianName}
+                  onChange={(e) => setGuardianName(e.target.value)}
+                  placeholder="e.g. Mr Ahmed"
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-g-phone">Phone</Label>
+                <Input
+                  id="edit-g-phone"
+                  type="tel"
+                  value={guardianPhone}
+                  onChange={(e) => setGuardianPhone(e.target.value)}
+                  placeholder="e.g. +65 8123 4567"
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-g-email">Email</Label>
+                <Input
+                  id="edit-g-email"
+                  type="email"
+                  value={guardianEmail}
+                  onChange={(e) => setGuardianEmail(e.target.value)}
+                  placeholder="e.g. parent@example.com"
+                  className="h-10"
+                />
+              </div>
+            </Section>
 
-        {/* Primary guardian */}
-        <Section title="Primary guardian">
-          <label className="block">
-            <span className={labelClass} style={labelStyle}>Name</span>
-            <input type="text" value={guardianName} onChange={(e) => setGuardianName(e.target.value)} placeholder="e.g. Mr Ahmed" className={inputClass} style={inputStyle} />
-          </label>
-          <label className="block">
-            <span className={labelClass} style={labelStyle}>Phone</span>
-            <input type="tel" value={guardianPhone} onChange={(e) => setGuardianPhone(e.target.value)} placeholder="e.g. +65 8123 4567" className={inputClass} style={inputStyle} />
-          </label>
-          <label className="block">
-            <span className={labelClass} style={labelStyle}>Email</span>
-            <input type="email" value={guardianEmail} onChange={(e) => setGuardianEmail(e.target.value)} placeholder="e.g. parent@example.com" className={inputClass} style={inputStyle} />
-          </label>
-        </Section>
+            <Section title="Emergency contact">
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-e-name">Name</Label>
+                <Input
+                  id="edit-e-name"
+                  value={emergencyName}
+                  onChange={(e) => setEmergencyName(e.target.value)}
+                  placeholder="e.g. Mdm Fatimah (Aunt)"
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-e-rel">Relationship</Label>
+                <Input
+                  id="edit-e-rel"
+                  value={emergencyRelation}
+                  onChange={(e) => setEmergencyRelation(e.target.value)}
+                  placeholder="e.g. Aunt"
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-e-phone">Phone</Label>
+                <Input
+                  id="edit-e-phone"
+                  type="tel"
+                  value={emergencyPhone}
+                  onChange={(e) => setEmergencyPhone(e.target.value)}
+                  placeholder="e.g. +65 9123 4567"
+                  className="h-10"
+                />
+              </div>
+            </Section>
 
-        {/* Emergency contact */}
-        <Section title="Emergency contact">
-          <label className="block">
-            <span className={labelClass} style={labelStyle}>Name</span>
-            <input type="text" value={emergencyName} onChange={(e) => setEmergencyName(e.target.value)} placeholder="e.g. Mdm Fatimah (Aunt)" className={inputClass} style={inputStyle} />
-          </label>
-          <label className="block">
-            <span className={labelClass} style={labelStyle}>Relationship</span>
-            <input type="text" value={emergencyRelation} onChange={(e) => setEmergencyRelation(e.target.value)} placeholder="e.g. Aunt" className={inputClass} style={inputStyle} />
-          </label>
-          <label className="block">
-            <span className={labelClass} style={labelStyle}>Phone</span>
-            <input type="tel" value={emergencyPhone} onChange={(e) => setEmergencyPhone(e.target.value)} placeholder="e.g. +65 9123 4567" className={inputClass} style={inputStyle} />
-          </label>
-        </Section>
-
-        {/* Authorised pick-up */}
-        <Section title="Authorised pick-up">
-          <label className="block">
-            <span className={labelClass} style={labelStyle}>Authorised persons (one per line)</span>
-            <textarea
-              value={pickupNames}
-              onChange={(e) => setPickupNames(e.target.value)}
-              rows={3}
-              className="w-full px-4 py-2.5 rounded-lg border text-sm resize-none"
-              style={inputStyle}
-              placeholder="e.g. Primary guardian"
-            />
-          </label>
-          <p className="text-xs" style={{ color: "var(--color-text-mid)" }}>
-            Only people on this list may collect the child. The teacher will be shown this list at pick-up.
-          </p>
-        </Section>
-
-        {/* Medical flags */}
-        <Section title="Medical & support flags">
-          <label className="block">
-            <span className={labelClass} style={labelStyle}>Allergy</span>
-            <input type="text" value={flagAllergy} onChange={(e) => setFlagAllergy(e.target.value)} placeholder="e.g. Peanut allergy – EpiPen in classroom" className={inputClass} style={inputStyle} />
-          </label>
-          <label className="block">
-            <span className={labelClass} style={labelStyle}>Medical note</span>
-            <input type="text" value={flagMedical} onChange={(e) => setFlagMedical(e.target.value)} placeholder="e.g. Mild asthma – inhaler in office" className={inputClass} style={inputStyle} />
-          </label>
-          <label className="block">
-            <span className={labelClass} style={labelStyle}>Special need</span>
-            <input type="text" value={flagSpecialNeed} onChange={(e) => setFlagSpecialNeed(e.target.value)} placeholder="e.g. Speech therapy support" className={inputClass} style={inputStyle} />
-          </label>
-          <label className="block">
-            <span className={labelClass} style={labelStyle}>Welfare concern</span>
-            <input type="text" value={flagWelfare} onChange={(e) => setFlagWelfare(e.target.value)} className={inputClass} style={inputStyle} />
-          </label>
-        </Section>
-
-        {/* Consent records */}
-        <Section title="Consent records">
-          {[
-            { label: "Photography & social media consent", value: consentPhoto, set: setConsentPhoto },
-            { label: "Excursion participation consent", value: consentExcursion, set: setConsentExcursion },
-            { label: "App data sharing consent (parent portal)", value: consentAppData, set: setConsentAppData },
-          ].map(({ label, value, set }) => (
-            <label key={label} className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={value}
-                onChange={(e) => set(e.target.checked)}
-                className="w-4 h-4 rounded accent-[var(--color-primary)]"
-              />
-              <span className="text-sm" style={{ color: "var(--color-text-dark)" }}>{label}</span>
-            </label>
-          ))}
-        </Section>
-
-        {/* Admin note */}
-        <Section title="Admin note">
-          <label className="block">
-            <span className={labelClass} style={labelStyle}>Note (visible to admin and teachers only — not parents)</span>
-            <textarea
-              value={adminNote}
-              onChange={(e) => setAdminNote(e.target.value)}
-              rows={3}
-              className="w-full px-4 py-2.5 rounded-lg border text-sm resize-none"
-              style={inputStyle}
-              placeholder="Internal notes about this student…"
-            />
-          </label>
-        </Section>
-
-        {/* Class history */}
-        <Section title="Class history">
-          <div className="rounded-lg border overflow-hidden" style={{ borderColor: "var(--color-border)" }}>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b" style={{ borderColor: "var(--color-border)", background: "var(--color-bg-cream)" }}>
-                  <th className="text-left px-4 py-2 font-medium text-xs" style={{ color: "var(--color-text-mid)" }}>Class</th>
-                  <th className="text-left px-4 py-2 font-medium text-xs" style={{ color: "var(--color-text-mid)" }}>From</th>
-                  <th className="text-left px-4 py-2 font-medium text-xs" style={{ color: "var(--color-text-mid)" }}>To</th>
-                </tr>
-              </thead>
-              <tbody>
-                {classHistory.map((row, i) => (
-                  <tr key={i} className="border-b last:border-0" style={{ borderColor: "var(--color-border)" }}>
-                    <td className="px-4 py-2.5" style={{ color: "var(--color-text-dark)" }}>{row.className}</td>
-                    <td className="px-4 py-2.5 text-xs" style={{ color: "var(--color-text-mid)" }}>{row.from}</td>
-                    <td className="px-4 py-2.5 text-xs" style={{ color: row.to === "present" ? "var(--color-primary)" : "var(--color-text-mid)" }}>
-                      {row.to}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Section>
-
-        {/* Save / cancel */}
-        <div className="flex gap-3 pt-2">
-          <button type="submit" className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white" style={{ background: "var(--color-primary)" }}>
-            Save changes
-          </button>
-          <Link href="/school/classes" className="px-4 py-2.5 rounded-lg text-sm font-medium border" style={{ borderColor: "var(--color-border)", color: "var(--color-text-mid)" }}>
-            Cancel
-          </Link>
-        </div>
-
-        {/* Archive */}
-        <div className="border-t pt-6" style={{ borderColor: "var(--color-border)" }}>
-          {!showArchive ? (
-            <button
-              type="button"
-              onClick={() => setShowArchive(true)}
-              className="text-sm font-medium"
-              style={{ color: "#ef4444" }}
-            >
-              Archive student…
-            </button>
-          ) : (
-            <div className="rounded-xl border border-[#fca5a5] p-4 space-y-3" style={{ background: "#fff1f2" }}>
-              <p className="text-sm font-semibold" style={{ color: "#b91c1c" }}>Archive {child.firstName}?</p>
-              <p className="text-xs" style={{ color: "#7f1d1d" }}>
-                This marks the student as having left the school. All historical data — observations, reports, and milestones — is retained. The student will no longer appear in active class lists.
+            <Section title="Authorised pick-up">
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-pickup">Authorised persons (one per line)</Label>
+                <textarea
+                  id="edit-pickup"
+                  value={pickupNames}
+                  onChange={(e) => setPickupNames(e.target.value)}
+                  rows={3}
+                  className={cn(textAreaClass, "resize-none")}
+                  placeholder="e.g. Primary guardian"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Only people on this list may collect the child. The teacher will be shown this list at pick-up.
               </p>
-              <div className="flex gap-2 flex-wrap">
-                <label className="block flex-1 min-w-[140px]">
-                  <span className="block text-xs font-medium mb-1" style={{ color: "#b91c1c" }}>Departure date</span>
-                  <input type="date" className="w-full px-3 py-2 rounded-lg border text-sm" style={{ borderColor: "#fca5a5" }} />
-                </label>
-                <label className="block flex-1 min-w-[140px]">
-                  <span className="block text-xs font-medium mb-1" style={{ color: "#b91c1c" }}>Reason</span>
-                  <select className="w-full px-3 py-2 rounded-lg border text-sm" style={{ borderColor: "#fca5a5" }}>
-                    <option>Graduated / moved up</option>
-                    <option>Family relocated</option>
-                    <option>Transferred to another school</option>
-                    <option>Other</option>
-                  </select>
-                </label>
+            </Section>
+
+            <Section title="Medical & support flags">
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-allergy">Allergy</Label>
+                <Input
+                  id="edit-allergy"
+                  value={flagAllergy}
+                  onChange={(e) => setFlagAllergy(e.target.value)}
+                  placeholder="e.g. Peanut allergy – EpiPen in classroom"
+                  className="h-10"
+                />
               </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  className="px-4 py-2 rounded-lg text-sm font-semibold text-white"
-                  style={{ background: "#ef4444" }}
-                >
-                  Confirm archive
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowArchive(false)}
-                  className="px-4 py-2 rounded-lg text-sm font-medium border"
-                  style={{ borderColor: "#fca5a5", color: "#b91c1c" }}
-                >
-                  Cancel
-                </button>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-medical">Medical note</Label>
+                <Input
+                  id="edit-medical"
+                  value={flagMedical}
+                  onChange={(e) => setFlagMedical(e.target.value)}
+                  placeholder="e.g. Mild asthma – inhaler in office"
+                  className="h-10"
+                />
               </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-sn">Special need</Label>
+                <Input
+                  id="edit-sn"
+                  value={flagSpecialNeed}
+                  onChange={(e) => setFlagSpecialNeed(e.target.value)}
+                  placeholder="e.g. Speech therapy support"
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-welfare">Welfare concern</Label>
+                <Input
+                  id="edit-welfare"
+                  value={flagWelfare}
+                  onChange={(e) => setFlagWelfare(e.target.value)}
+                  className="h-10"
+                />
+              </div>
+            </Section>
+
+            <Section title="Consent records">
+              {[
+                { label: "Photography & social media consent", value: consentPhoto, set: setConsentPhoto },
+                { label: "Excursion participation consent", value: consentExcursion, set: setConsentExcursion },
+                {
+                  label: "App data sharing consent (parent portal)",
+                  value: consentAppData,
+                  set: setConsentAppData,
+                },
+              ].map(({ label, value, set }) => (
+                <label key={label} className="flex cursor-pointer items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={value}
+                    onChange={(e) => set(e.target.checked)}
+                    className="size-4 rounded accent-primary"
+                  />
+                  <span className="text-sm text-foreground">{label}</span>
+                </label>
+              ))}
+            </Section>
+
+            <Section title="Admin note">
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-admin-note">
+                  Note (visible to admin and teachers only — not parents)
+                </Label>
+                <textarea
+                  id="edit-admin-note"
+                  value={adminNote}
+                  onChange={(e) => setAdminNote(e.target.value)}
+                  rows={3}
+                  className={cn(textAreaClass, "resize-none")}
+                  placeholder="Internal notes about this student…"
+                />
+              </div>
+            </Section>
+
+            <Section title="Class history">
+              <div className="overflow-hidden rounded-lg border border-border">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/50">
+                      <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
+                        Class
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
+                        From
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
+                        To
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {classHistory.map((row, i) => (
+                      <tr key={i} className="border-b border-border last:border-0">
+                        <td className="px-4 py-2.5 text-foreground">{row.className}</td>
+                        <td className="px-4 py-2.5 text-xs text-muted-foreground">{row.from}</td>
+                        <td
+                          className={cn(
+                            "px-4 py-2.5 text-xs",
+                            row.to === "present" ? "text-primary" : "text-muted-foreground",
+                          )}
+                        >
+                          {row.to}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Section>
+
+            <div className="flex flex-wrap gap-3 pt-2">
+              <Button type="submit" className="font-semibold">
+                Save changes
+              </Button>
+              <Link
+                href="/school/classes"
+                className={cn(buttonVariants({ variant: "outline" }), "font-medium")}
+              >
+                Cancel
+              </Link>
             </div>
-          )}
-        </div>
-      </form>
+
+            <div className="border-t border-border pt-6">
+              {!showArchive ? (
+                <Button
+                  type="button"
+                  variant="link"
+                  className="h-auto p-0 text-destructive"
+                  onClick={() => setShowArchive(true)}
+                >
+                  Archive student…
+                </Button>
+              ) : (
+                <div className="space-y-3 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/40">
+                  <p className="text-sm font-semibold text-red-800 dark:text-red-200">
+                    Archive {child.firstName}?
+                  </p>
+                  <p className="text-xs text-red-900/90 dark:text-red-200/80">
+                    This marks the student as having left the school. All historical data — observations,
+                    reports, and milestones — is retained. The student will no longer appear in active class
+                    lists.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <label className="block min-w-[140px] flex-1">
+                      <span className="mb-1 block text-xs font-medium text-red-800 dark:text-red-200">
+                        Departure date
+                      </span>
+                      <Input type="date" className="h-9 border-red-200 dark:border-red-800" />
+                    </label>
+                    <label className="block min-w-[140px] flex-1">
+                      <span className="mb-1 block text-xs font-medium text-red-800 dark:text-red-200">
+                        Reason
+                      </span>
+                      <select className="h-9 w-full rounded-lg border border-red-200 bg-background px-3 text-sm dark:border-red-800">
+                        <option>Graduated / moved up</option>
+                        <option>Family relocated</option>
+                        <option>Transferred to another school</option>
+                        <option>Other</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button type="button" size="sm" variant="destructive" className="font-semibold">
+                      Confirm archive
+                    </Button>
+                    <Button type="button" size="sm" variant="outline" onClick={() => setShowArchive(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
