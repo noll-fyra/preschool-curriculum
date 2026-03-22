@@ -28,11 +28,6 @@ export interface ChartDataPoint {
   total: number;
 }
 
-export interface ReferencePoint {
-  date: string; // YYYY-MM-DD
-  reference: number;
-}
-
 const AREA_IDS: LearningAreaId[] = ["LL", "NUM", "SED", "ACE", "DOW", "HMS"];
 
 // ─── Build sorted list of milestone achievements with dates ─────────────────
@@ -63,69 +58,75 @@ export function getAchievementTimeline(
   return results.sort((a, b) => a.date.localeCompare(b.date));
 }
 
-// ─── Build cumulative step-chart series ─────────────────────────────────────
-// Returns one data point per unique date where at least one milestone was achieved.
-// Each point carries cumulative counts per area up to and including that date.
-// A leading zero-point at startDate and a trailing point at today are always included.
+// ─── Month-based x-axis (Jan → this month + 1, capped at December) ───────────
 
-export function buildChartSeries(
-  achievements: MilestoneAchievement[],
-  startDate: string
-): ChartDataPoint[] {
-  const today = new Date().toISOString().slice(0, 10);
+/** First day of each month YYYY-MM-DD from January of `academicYear` through the end month. */
+export function getChartMonthStarts(
+  academicYear: number,
+  now: Date = new Date()
+): string[] {
+  const cy = now.getFullYear();
+  const cm = now.getMonth();
 
-  // Group achievements by date
-  const byDate = new Map<string, MilestoneAchievement[]>();
-  for (const a of achievements) {
-    if (a.date < startDate || a.date > today) continue;
-    const list = byDate.get(a.date) ?? [];
-    list.push(a);
-    byDate.set(a.date, list);
+  let endIdx: number;
+  if (cy > academicYear) {
+    endIdx = 11;
+  } else if (cy < academicYear) {
+    endIdx = 0;
+  } else {
+    endIdx = Math.min(cm + 1, 11);
   }
 
-  const sortedDates = [...byDate.keys()].sort();
+  const out: string[] = [];
+  for (let m = 0; m <= endIdx; m++) {
+    out.push(
+      `${academicYear}-${String(m + 1).padStart(2, "0")}-01`
+    );
+  }
+  return out;
+}
 
-  // Running totals
-  const counts: Record<LearningAreaId, number> = {
-    LL: 0, NUM: 0, SED: 0, ACE: 0, DOW: 0, HMS: 0,
-  };
+function isoEndOfMonth(monthStartYYYYMM01: string): string {
+  const y = Number(monthStartYYYYMM01.slice(0, 4));
+  const mo = Number(monthStartYYYYMM01.slice(5, 7));
+  const d = new Date(y, mo, 0);
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${y}-${String(mo).padStart(2, "0")}-${dd}`;
+}
+
+/** One row per month start: cumulative milestone counts from 1 Jan of academic year through end of that month. */
+export function buildMonthlyChartSeries(
+  achievements: MilestoneAchievement[],
+  academicYear: number,
+  monthStarts: string[]
+): ChartDataPoint[] {
+  const yearStart = `${academicYear}-01-01`;
+  const yearEnd = `${academicYear}-12-31`;
+  const filtered = achievements.filter(
+    (a) => a.date >= yearStart && a.date <= yearEnd
+  );
 
   const points: ChartDataPoint[] = [];
-
-  // Leading zero point
-  points.push({ date: startDate, ...counts, total: 0 });
-
-  for (const date of sortedDates) {
-    const achieved = byDate.get(date)!;
-    for (const a of achieved) {
-      counts[a.areaId]++;
+  for (const monthStart of monthStarts) {
+    const periodEnd = isoEndOfMonth(monthStart);
+    const counts: Record<LearningAreaId, number> = {
+      LL: 0,
+      NUM: 0,
+      SED: 0,
+      ACE: 0,
+      DOW: 0,
+      HMS: 0,
+    };
+    for (const a of filtered) {
+      if (a.date <= periodEnd) {
+        counts[a.areaId]++;
+      }
     }
     points.push({
-      date,
+      date: monthStart,
       ...counts,
       total: AREA_IDS.reduce((s, id) => s + counts[id], 0),
     });
   }
-
-  // Trailing "today" point (only if today isn't already in the series)
-  const last = points[points.length - 1];
-  if (last.date !== today) {
-    points.push({ date: today, ...counts, total: last.total });
-  }
-
   return points;
-}
-
-// ─── Build linear reference series ──────────────────────────────────────────
-// milestonesPerArea defaults to 9 (3 levels × 3 milestones).
-// Returns just start + end points; Recharts draws the straight line between them.
-
-export function buildReferenceSeries(
-  academicYear: number,
-  milestonesPerArea = 9
-): ReferencePoint[] {
-  return [
-    { date: `${academicYear}-01-01`, reference: 0 },
-    { date: `${academicYear}-12-31`, reference: milestonesPerArea },
-  ];
 }

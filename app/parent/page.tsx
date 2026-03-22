@@ -15,7 +15,7 @@ export default function ParentHomePage() {
   const visibleChildren = children.filter((c) => linkedChildIds.includes(c.id));
 
   return (
-    <div className="px-5 py-8 max-w-lg mx-auto">
+    <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-8 max-w-lg mx-auto w-full">
       <div className="text-center mb-8">
         <div className="text-4xl mb-3">👨‍👩‍👧</div>
         <h1 className="text-2xl font-bold" style={{ color: "var(--color-text-dark)" }}>

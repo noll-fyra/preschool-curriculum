@@ -6,12 +6,12 @@ import { useStore } from "@/lib/store";
 import type { NurtureStore } from "@/lib/store";
 import type { CalendarHoliday, ClassSchedule, YearLevelId } from "@/lib/types";
 import {
-  holidaysOnDate, schedulesOnDate, schedulesForClass,
+  holidaysOnDate, schedulesOnDate, schedulesForClass, schoolEventSchedulesOnDate,
   holidayColor, scheduleColor,
   toISO, fromISO, addDays, getMondayOf, buildMonthGrid, parseTime,
   MONTH_NAMES, DAY_SHORT,
   YEAR_LEVEL_COLORS, CLASS_SCHED_COLOR, HOLIDAY_ORG_COLOR,
-  WEEKDAYS, CalendarView, DetailEvent, clampToYear,
+  CalendarView, DetailEvent, clampToYear,
 } from "@/lib/calendar-utils";
 import { TimeGrid } from "@/components/calendar/TimeGrid";
 import type { TimeColumn, TimedEvent, AllDayEvent } from "@/components/calendar/TimeGrid";
@@ -37,7 +37,7 @@ export default function ParentCalendarPage() {
   const todayISO = toISO(new Date());
   const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
 
-  const [calView, setCalView] = useState<CalendarView>("month");
+  const [calView, setCalView] = useState<CalendarView>("week");
   const [selectedDate, setSelectedDate] = useState(clampToYear(todayISO));
   const [detailEvent, setDetailEvent] = useState<DetailEvent | null>(null);
 
@@ -49,10 +49,11 @@ export default function ParentCalendarPage() {
 
   // ── Month view data ──────────────────────────────────────────────────────────
 
-  function eventsForDate(date: string) {
+  /** Holidays + monthly school events only (for parent month grid dots). */
+  function monthDotEventsForDate(date: string) {
     return {
       holidays: holidaysOnDate(date, calendarHolidays),
-      scheds: schedulesOnDate(date, childScheds),
+      eventScheds: schoolEventSchedulesOnDate(date, childScheds),
     };
   }
 
@@ -192,10 +193,12 @@ export default function ParentCalendarPage() {
             month={month}
             today={todayISO}
             selectedDate={selectedDate}
-            eventsForDate={eventsForDate}
+            monthDotEventsForDate={monthDotEventsForDate}
             classes={classes}
-            onSelectDay={(d) => { setSelectedDate(clampToYear(d)); setCalView("day"); }}
-            onEventClick={setDetailEvent}
+            onSelectDay={(d) => {
+              setSelectedDate(clampToYear(d));
+              setCalView("day");
+            }}
           />
         )}
         {calView === "week" && (
@@ -221,21 +224,26 @@ export default function ParentCalendarPage() {
 // ─── Month view ───────────────────────────────────────────────────────────────
 
 function MonthView({
-  year, month, today, selectedDate, eventsForDate, classes, onSelectDay, onEventClick,
+  year,
+  month,
+  today,
+  selectedDate,
+  monthDotEventsForDate,
+  classes,
+  onSelectDay,
 }: {
   year: number;
   month: number;
   today: string;
   selectedDate: string;
-  eventsForDate: (date: string) => { holidays: CalendarHoliday[]; scheds: ClassSchedule[] };
+  monthDotEventsForDate: (date: string) => {
+    holidays: CalendarHoliday[];
+    eventScheds: ClassSchedule[];
+  };
   classes: NurtureStore["classes"];
   onSelectDay: (d: string) => void;
-  onEventClick: (e: DetailEvent) => void;
 }) {
   const grid = buildMonthGrid(year, month);
-
-  const { holidays: dayHolidays, scheds: dayScheds } = eventsForDate(selectedDate);
-  const hasDayEvents = dayHolidays.length > 0 || dayScheds.length > 0;
 
   return (
     <div>
@@ -258,8 +266,8 @@ function MonthView({
           const inMonth = day.getMonth() === month;
           const isToday = iso === today;
           const isSelected = iso === selectedDate;
-          const { holidays, scheds } = eventsForDate(iso);
-          const dotCount = holidays.length + scheds.length;
+          const { holidays, eventScheds } = monthDotEventsForDate(iso);
+          const dotCount = holidays.length + eventScheds.length;
 
           return (
             <button
@@ -282,8 +290,8 @@ function MonthView({
                   {holidays.length > 0 && (
                     <span className="w-1.5 h-1.5 rounded-full" style={{ background: HOLIDAY_ORG_COLOR.text }} />
                   )}
-                  {scheds.length > 0 && (() => {
-                    const s = scheds[0];
+                  {eventScheds.length > 0 && (() => {
+                    const s = eventScheds[0];
                     const c = s.scope === "year_level" && s.yearLevel
                       ? YEAR_LEVEL_COLORS[s.yearLevel as YearLevelId]
                       : CLASS_SCHED_COLOR;
@@ -294,61 +302,6 @@ function MonthView({
             </button>
           );
         })}
-      </div>
-
-      {/* Selected day detail */}
-      <div>
-        <p className="text-sm font-semibold mb-2" style={{ color: "var(--color-text-dark)" }}>
-          {fromISO(selectedDate).toLocaleDateString("en-SG", {
-            weekday: "long", day: "numeric", month: "long",
-          })}
-        </p>
-        {!hasDayEvents ? (
-          <div
-            className="rounded-2xl border border-dashed px-4 py-8 text-center"
-            style={{ borderColor: "var(--color-border)" }}
-          >
-            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>No events</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {dayHolidays.map((h) => {
-              const c = holidayColor(h);
-              return (
-                <button
-                  key={h.id}
-                  onClick={() => onEventClick({ kind: "holiday", item: h })}
-                  className="w-full text-left rounded-xl px-3 py-3 hover:opacity-90 transition-opacity"
-                  style={{ background: c.bg }}
-                >
-                  <p className="text-sm font-semibold" style={{ color: c.text }}>{h.title}</p>
-                  <p className="text-xs mt-0.5" style={{ color: c.text, opacity: 0.7 }}>
-                    {h.schoolId ? "School closure" : "Public holiday"}
-                  </p>
-                </button>
-              );
-            })}
-            {dayScheds.map((s) => {
-              const c = scheduleColor(s, classes);
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => onEventClick({ kind: "schedule", item: s })}
-                  className="w-full text-left rounded-xl px-3 py-3 hover:opacity-90 transition-opacity"
-                  style={{ background: c.bg }}
-                >
-                  <p className="text-sm font-semibold" style={{ color: c.text }}>{s.title}</p>
-                  <p className="text-xs mt-0.5" style={{ color: c.text, opacity: 0.7 }}>
-                    {s.startTime ? `${s.startTime}${s.endTime ? `–${s.endTime}` : ""}` : "All day"}
-                  </p>
-                  {s.description && (
-                    <p className="text-xs mt-0.5" style={{ color: c.text, opacity: 0.55 }}>{s.description}</p>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
       </div>
     </div>
   );

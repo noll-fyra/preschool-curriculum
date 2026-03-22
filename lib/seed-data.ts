@@ -1401,11 +1401,20 @@ function session(
   milestoneId: string,
   passed: boolean,
   score: number,
-  daysAgo: number
+  daysAgo: number,
+  location?: "home" | "school"
 ): ActivitySession {
   const d = new Date();
   d.setDate(d.getDate() - daysAgo);
-  return { id, childId, milestoneId, passed, score, attemptedAt: d.toISOString() };
+  return {
+    id,
+    childId,
+    milestoneId,
+    passed,
+    score,
+    attemptedAt: d.toISOString(),
+    ...(location ? { location } : {}),
+  };
 }
 
 export const DEMO_SESSIONS: ActivitySession[] = [
@@ -1464,8 +1473,8 @@ export const DEMO_SESSIONS: ActivitySession[] = [
   session("s034", "child-aisha", "LL-B-03", true, 2, 10),
 
   // Aisha — LL-D-01: in_progress (1 passing session)
-  session("s035", "child-aisha", "LL-D-01", false, 1, 6),
-  session("s036", "child-aisha", "LL-D-01", true,  2, 4),
+  session("s035", "child-aisha", "LL-D-01", false, 1, 6, "home"),
+  session("s036", "child-aisha", "LL-D-01", true,  2, 4, "home"),
 
   // Aisha — LL-D-02: in_progress (0 passes yet)
   session("s037", "child-aisha", "LL-D-02", false, 1, 5),
@@ -1942,11 +1951,21 @@ function obs(
   id: string,
   childId: string,
   milestoneId: string,
-  daysAgo: number
+  daysAgo: number,
+  note?: string,
+  teacherId?: string
 ): TeacherObservation {
   const d = new Date();
   d.setDate(d.getDate() - daysAgo);
-  return { id, childId, milestoneId, observedAt: d.toISOString().slice(0, 10) };
+  const row: TeacherObservation = {
+    id,
+    childId,
+    milestoneId,
+    observedAt: d.toISOString().slice(0, 10),
+  };
+  if (note) row.note = note;
+  if (teacherId) row.teacherId = teacherId;
+  return row;
 }
 
 export const DEMO_OBSERVATIONS: TeacherObservation[] = [
@@ -2010,6 +2029,16 @@ export const DEMO_OBSERVATIONS: TeacherObservation[] = [
   obs("o039", "child-zoe", "SED-B-01",  9),
   obs("o040", "child-zoe", "SED-B-01",  5),
   obs("o041", "child-zoe", "SED-B-01",  1),
+
+  // Aisha — sample SED observation (parent home feed)
+  obs(
+    "o-aisha-sed1",
+    "child-aisha",
+    "SED-B-02",
+    3,
+    "Offered to help a friend tidy up after craft.",
+    "teacher-1"
+  ),
 
   // ── Kingfisher N1: children with no prior observations ───────────────────
 

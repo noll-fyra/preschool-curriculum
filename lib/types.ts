@@ -183,6 +183,8 @@ export interface ActivitySession {
   passed: boolean;
   score: number; // 0–3
   attemptedAt: string; // ISO datetime string
+  /** Parent vs teacher initiation — for parent feed location line. */
+  location?: "home" | "school";
 }
 
 export interface TeacherObservation {

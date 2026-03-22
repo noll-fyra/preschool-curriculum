@@ -78,6 +78,23 @@ export function getMilestoneProgressForChild(
   });
 }
 
+/** P1 readiness counts from computed mastery (sessions / observations), not raw progress rows alone. */
+export function getP1ReadinessSnapshot(childId: string, store: NurtureStore) {
+  const all = getMilestoneProgressForChild(childId, store);
+  const achieved = all.filter((m) => m.status === "achieved").length;
+  const total = all.length;
+  const byArea = LEARNING_AREAS.map((area) => {
+    const am = all.filter((m) => m.areaId === area.id);
+    return {
+      area,
+      total: am.length,
+      achieved: am.filter((m) => m.status === "achieved").length,
+      inProgress: am.filter((m) => m.status === "in_progress").length,
+    };
+  });
+  return { achieved, total, byArea };
+}
+
 // ─── Today's observations (milestoneIds already logged today for a child) ──
 
 export function getTodayObservationMilestoneIds(

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { getChildDisplayName, getPronounFromGender } from "@/lib/display-name";
-import { getMilestoneProgressForChild } from "@/lib/selectors";
+import { getMilestoneProgressForChild, getChildLevelPerArea } from "@/lib/selectors";
 import { getMilestoneContent } from "@/lib/milestone-content";
 import { getTimeAgoLabel } from "@/lib/parent-summary";
 import { LEARNING_AREAS, LEVEL_LABELS, type LearningAreaId, type LevelId } from "@/lib/types";
@@ -46,6 +46,11 @@ export default function MilestoneDetailPage() {
   const isSED = areaId === "SED";
   const isAchieved = milestone.status === "achieved";
   const isInProgress = milestone.status === "in_progress";
+  const isNotStarted = milestone.status === "not_started";
+  const levels = getChildLevelPerArea(childId, store);
+  const currentLevel = levels[areaId];
+  const lockedFutureLevel =
+    isNotStarted && milestone.levelId !== currentLevel;
   const badge = LEVEL_BADGE[milestone.levelId];
 
   // Recent sessions for skill milestones (last 4, most recent first)
@@ -86,7 +91,7 @@ export default function MilestoneDetailPage() {
   }
 
   return (
-    <div className="px-4 py-5 max-w-lg mx-auto">
+    <div className="px-4 py-5">
       {/* Back */}
       <Link
         href={`/parent/${childId}/area/${areaId}`}
@@ -131,6 +136,15 @@ export default function MilestoneDetailPage() {
               ✓ Achieved · {getTimeAgoLabel(milestone.achievedAt)}
             </span>
           </div>
+        )}
+
+        {/* Not started — parents can still read “why this matters” */}
+        {isNotStarted && (
+          <p className="mt-2" style={{ fontSize: 12, color: "var(--color-text-muted)", lineHeight: 1.5 }}>
+            {lockedFutureLevel
+              ? "Your child isn’t on this level yet — earlier milestones in this area come first."
+              : "Not started yet — your child will work on this when it unlocks in sequence."}
+          </p>
         )}
 
         {/* Mastery progress for in-progress */}
@@ -197,8 +211,8 @@ export default function MilestoneDetailPage() {
         </div>
       )}
 
-      {/* "Try at home" card — in-progress only */}
-      {content && !isAchieved && (
+      {/* "Try at home" card — in-progress only (not for not-yet-unlocked) */}
+      {content && isInProgress && (
         <div
           className="rounded-2xl border p-4 mb-4"
           style={{ background: "#FAEEDA", borderColor: "#EF9F27" }}

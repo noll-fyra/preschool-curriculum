@@ -10,9 +10,8 @@ import {
   getWorkingOnText,
   getRecencyLabel,
 } from "@/lib/parent-summary";
-import { getChildLevelPerArea } from "@/lib/selectors";
+import { getChildLevelPerArea, getP1ReadinessSnapshot } from "@/lib/selectors";
 import { LEARNING_AREAS, LEVEL_LABELS, type LevelId } from "@/lib/types";
-import { ProgressChart } from "@/components/shared/ProgressChart";
 
 const LEVEL_BADGE: Record<LevelId, { bg: string; text: string }> = {
   B: { bg: "#FAECE7", text: "#712B13" },
@@ -43,16 +42,12 @@ export default function AreaIndexPage() {
 
   const childName = getChildDisplayName(child);
   const levels = getChildLevelPerArea(childId, store);
-  const childClass = store.classes.find((c) => c.id === child.classId);
-  const academicYear = childClass?.academicYear ?? new Date().getFullYear();
 
-  const achievedCount = store.progress.filter(
-    (p) => p.childId === childId && p.status === "achieved",
-  ).length;
-  const totalMilestones = store.milestones.length;
+  const { achieved: achievedCount, total: totalMilestones } =
+    getP1ReadinessSnapshot(childId, store);
 
   return (
-    <div className="px-4 py-5 max-w-lg mx-auto">
+    <div className="px-4 py-5">
       {/* Header */}
       <div className="flex items-center gap-3 mb-5">
         <Link
@@ -66,7 +61,7 @@ export default function AreaIndexPage() {
           className="font-medium"
           style={{ fontSize: 18, color: "var(--color-text-dark)" }}
         >
-          {childName}'s progress
+          {`${childName}'s progress`}
         </h1>
       </div>
 
@@ -182,26 +177,6 @@ export default function AreaIndexPage() {
             </Link>
           );
         })}
-      </div>
-
-      {/* Progress chart */}
-      <div
-        className="rounded-2xl p-5"
-        style={{ background: "white", border: "1px solid var(--color-border)" }}
-      >
-        <p
-          className="font-semibold mb-0.5"
-          style={{ color: "var(--color-text-dark)" }}
-        >
-          Progress over time
-        </p>
-        <p
-          className="text-sm mb-4"
-          style={{ color: "var(--color-text-muted)" }}
-        >
-          Milestones achieved vs. expected this year.
-        </p>
-        <ProgressChart childId={childId} academicYear={academicYear} />
       </div>
     </div>
   );

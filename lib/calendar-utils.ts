@@ -163,6 +163,17 @@ export function schedulesOnDate(
 }
 
 /**
+ * Schedules shown as dots on the parent month calendar: monthly / one-off style
+ * entries only. Weekly programme blocks are excluded (they still appear in week/day views).
+ */
+export function schoolEventSchedulesOnDate(
+  date: string,
+  schedules: ClassSchedule[]
+): ClassSchedule[] {
+  return schedulesOnDate(date, schedules).filter((s) => s.recurrence === "monthly");
+}
+
+/**
  * Filter classSchedules that are relevant for a given class:
  * year-level schedules matching the class's preschoolYear, plus class-specific schedules.
  */

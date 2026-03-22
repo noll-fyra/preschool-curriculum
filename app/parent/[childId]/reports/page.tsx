@@ -127,7 +127,7 @@ export default function ParentReportsPage() {
     });
 
   return (
-    <div className="px-4 py-5 max-w-lg mx-auto">
+    <div className="px-4 py-5">
       <div className="mb-5">
         <h1
           className="font-medium"

@@ -144,6 +144,8 @@ export interface NurtureStore {
   setChildTeacherNote: (childId: string, note: string) => void;
   recordSession: (childId: string, milestoneId: string, score: number) => void;
   logObservation: (childId: string, milestoneId: string, note?: string, teacherId?: string) => void;
+  /** Parent logs a home group activity; visible to teachers; allows multiple same day (unlike teacher quick-log guard). */
+  logParentHomeActivity: (childId: string, milestoneId: string, activityTitle: string) => void;
   undoObservation: (childId: string, milestoneId: string) => void;
   createActivity: (activity: Omit<PlannedActivity, "id" | "createdAt" | "classId">) => void;
   deleteActivity: (activityId: string) => void;
@@ -359,6 +361,38 @@ export const useStore = create<NurtureStore>((set, get) => ({
       observedAt: today,
       ...(note ? { note } : {}),
       ...(teacherId ? { teacherId } : {}),
+    };
+
+    set((state) => {
+      const newObservations = [...state.observations, newObs];
+      const milestone = state.milestones.find((m) => m.id === milestoneId);
+      if (!milestone) return { observations: newObservations };
+
+      const newStatus = computeStatus(milestone, childId, state.sessions, newObservations);
+      const newProgress = state.progress.map((p) =>
+        p.childId === childId && p.milestoneId === milestoneId
+          ? {
+              ...p,
+              status: newStatus,
+              achievedAt:
+                newStatus === "achieved" && p.status !== "achieved"
+                  ? new Date().toISOString()
+                  : p.achievedAt,
+            }
+          : p
+      );
+      return { observations: newObservations, progress: newProgress };
+    });
+  },
+
+  logParentHomeActivity: (childId, milestoneId, activityTitle) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const newObs: TeacherObservation = {
+      id: `obs-home-${Date.now()}`,
+      childId,
+      milestoneId,
+      observedAt: today,
+      note: `Home activity: ${activityTitle}`,
     };
 
     set((state) => {

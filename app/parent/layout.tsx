@@ -10,12 +10,18 @@ export default function ParentLayout({
 }) {
   return (
     <div
-      className="flex flex-col min-h-screen"
+      className="flex h-screen min-h-0 flex-col overflow-hidden"
       style={{ background: "var(--color-bg-warm)" }}
     >
       <DemoRoleBar activeRole="parent" />
       <DemoPersonaBar role="parent" />
-      <main className="flex-1">{children}</main>
+      {/*
+        Match teacher demo: lock viewport height so only the app column scrolls.
+        Prevents document scroll that shifts the demo top bars.
+      */}
+      <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        {children}
+      </main>
     </div>
   );
 }

@@ -34,12 +34,11 @@ function MessagesIcon({ active }: { active: boolean }) {
   );
 }
 
-function ReportsIcon({ active }: { active: boolean }) {
+function FeedTabIcon({ active }: { active: boolean }) {
   const c = active ? "var(--color-primary)" : "var(--color-text-muted)";
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="4" y="2" width="16" height="20" rx="2" />
-      <path d="M9 7h6M9 11h6M9 15h4" />
+      <path d="M4 6h16M4 12h16M4 18h12" />
     </svg>
   );
 }
@@ -68,71 +67,83 @@ export default function ChildParentLayout({
   const params = useParams();
   const childId = params.childId as string;
 
-  const isActivities = pathname.includes("/activities");
-  const isMessages = pathname.includes("/messages");
-  const isReports = pathname.includes("/reports");
-  const isCalendar = pathname.includes("/calendar");
-  const isHome = !isActivities && !isMessages && !isReports && !isCalendar;
+  const base = `/parent/${childId}`;
+  const isHome = pathname === base;
+  const isFeed = pathname.startsWith(`${base}/feed`);
+  const isActivities = pathname.startsWith(`${base}/activities`);
+  const isMessages = pathname.startsWith(`${base}/messages`);
+  const isCalendar = pathname.startsWith(`${base}/calendar`);
 
   const tabs = [
     {
       label: "Home",
-      href: `/parent/${childId}`,
+      href: base,
       active: isHome,
       Icon: HomeIcon,
     },
     {
+      label: "Feed",
+      href: `${base}/feed`,
+      active: isFeed,
+      Icon: FeedTabIcon,
+    },
+    {
       label: "Activities",
-      href: `/parent/${childId}/activities`,
+      href: `${base}/activities`,
       active: isActivities,
       Icon: ActivitiesIcon,
     },
     {
       label: "Messages",
-      href: `/parent/${childId}/messages`,
+      href: `${base}/messages`,
       active: isMessages,
       Icon: MessagesIcon,
     },
     {
-      label: "Reports",
-      href: `/parent/${childId}/reports`,
-      active: isReports,
-      Icon: ReportsIcon,
-    },
-    {
       label: "Calendar",
-      href: `/parent/${childId}/calendar`,
+      href: `${base}/calendar`,
       active: isCalendar,
       Icon: CalendarIcon,
     },
   ];
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ background: "var(--color-bg-warm)" }}>
+    <div
+      className="flex min-h-0 flex-1 flex-col"
+      style={{ background: "var(--color-bg-warm)" }}
+    >
       {/* Scrollable content with bottom padding to clear tab bar */}
-      <div className="flex-1 overflow-y-auto pb-20">
-        {children}
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-20">
+        <div className="mx-auto w-full max-w-lg min-h-min">{children}</div>
       </div>
 
-      {/* Fixed bottom tab bar */}
+      {/* Fixed bottom tab bar — full-width surface, tabs aligned to content column */}
       <div
-        className="fixed bottom-0 left-0 right-0 flex border-t z-50"
+        className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white"
         style={{
-          background: "white",
           borderColor: "var(--color-border)",
+          /* Safe area; tab row height (~3.875rem) must match messages compose `bottom` calc. */
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
       >
-        {tabs.map(({ label, href, active, Icon }) => (
-          <Link
-            key={label}
-            href={href}
-            className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1"
-            style={{ color: active ? "var(--color-primary)" : "var(--color-text-muted)" }}
-          >
-            <Icon active={active} />
-            <span className="text-xs font-medium">{label}</span>
-          </Link>
-        ))}
+        <nav
+          className="mx-auto flex w-full max-w-lg"
+          aria-label="Parent app sections"
+        >
+          {tabs.map(({ label, href, active, Icon }) => (
+            <Link
+              key={label}
+              href={href}
+              className="flex flex-1 flex-col items-center justify-center gap-1 py-2.5"
+              style={{
+                color: active ? "var(--color-primary)" : "var(--color-text-muted)",
+              }}
+            >
+              <Icon active={active} />
+              <span className="text-xs font-medium">{label}</span>
+            </Link>
+          ))}
+        </nav>
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import { getMilestoneProgressForChild, getChildLevelPerArea } from "@/lib/select
 import { getChildDisplayName, getPronounFromGender } from "@/lib/display-name";
 import { getProgressBarFill, getProgressBarColor, getAreaSummaryText } from "@/lib/parent-summary";
 import { LEARNING_AREAS, LEVEL_LABELS, type LearningAreaId, type LevelId, type MilestoneStatus } from "@/lib/types";
+import { ProgressChart } from "@/components/shared/ProgressChart";
 
 // ─── Spec colours ──────────────────────────────────────────────────────────────
 
@@ -76,6 +77,9 @@ export default function AreaDetailPage() {
   const area = LEARNING_AREAS.find((a) => a.id === areaId);
   if (!area) return null;
 
+  const childClass = store.classes.find((c) => c.id === child.classId);
+  const academicYear = childClass?.academicYear ?? new Date().getFullYear();
+
   const allProgress = getMilestoneProgressForChild(childId, store);
   const areaMilestones = allProgress.filter((m) => m.areaId === areaId);
   const levels = getChildLevelPerArea(childId, store);
@@ -131,7 +135,6 @@ export default function AreaDetailPage() {
             const isAchieved = m.status === "achieved";
             const isLocked = m.status === "not_started" && levelId !== currentLevel && !isAchieved;
 
-            const canTap = isActive || isAchieved;
             const milestoneHref = `/parent/${childId}/area/${areaId}/milestone/${m.id}`;
 
             const rowContent = (
@@ -196,20 +199,16 @@ export default function AreaDetailPage() {
                     </div>
                   )}
                 </div>
-                {canTap && (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
-                    <path d="M9 18l6-6-6-6" />
-                  </svg>
-                )}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
               </div>
             );
 
-            return canTap ? (
-              <Link key={m.id} href={milestoneHref} className="block">
+            return (
+              <Link key={m.id} href={milestoneHref} className="block transition-opacity active:opacity-80">
                 {rowContent}
               </Link>
-            ) : (
-              <div key={m.id}>{rowContent}</div>
             );
           })}
         </div>
@@ -218,7 +217,7 @@ export default function AreaDetailPage() {
   }
 
   return (
-    <div className="px-4 py-5 max-w-lg mx-auto">
+    <div className="px-4 py-5">
       {/* Back */}
       <Link
         href={`/parent/${childId}`}
@@ -244,7 +243,7 @@ export default function AreaDetailPage() {
         {areaSummary}
       </p>
 
-      {/* Full-width progress bar with level labels */}
+      {/* Full-width progress bar */}
       <div className="mb-5">
         <div
           className="w-full rounded-full overflow-hidden"
@@ -255,48 +254,30 @@ export default function AreaDetailPage() {
             style={{ width: `${fill}%`, background: barColor }}
           />
         </div>
-        <div className="flex justify-between mt-1.5">
-          {(["Beginning", "Developing", "Secure"] as const).map((label) => (
-            <span
-              key={label}
-              style={{ fontSize: 10, color: "var(--color-text-muted)" }}
-            >
-              {label}
-            </span>
-          ))}
-        </div>
+      </div>
+
+      {/* Domain-specific progress over time */}
+      <div
+        className="rounded-2xl p-5 mb-5"
+        style={{ background: "white", border: "1px solid var(--color-border)" }}
+      >
+        <p className="font-medium mb-0.5" style={{ color: "var(--color-text-dark)" }}>
+          Progress over time
+        </p>
+        <p className="text-sm mb-4" style={{ color: "var(--color-text-muted)" }}>
+          Cumulative milestones achieved in {area.name} this school year.
+        </p>
+        <ProgressChart
+          childId={childId}
+          academicYear={academicYear}
+          focusAreaId={areaId}
+        />
       </div>
 
       {/* Milestone list grouped by level */}
       {renderLevel(bMilestones, "B")}
       {renderLevel(dMilestones, "D")}
       {renderLevel(sMilestones, "S")}
-
-      {/* Rubric link */}
-      <div
-        className="mt-4 pt-4 border-t"
-        style={{ borderColor: "var(--color-border)" }}
-      >
-        <Link
-          href={`/parent/${childId}/area/${areaId}/rubric`}
-          className="flex items-center justify-between px-4 py-3 rounded-xl border transition-colors"
-          style={{
-            borderColor: "var(--color-border)",
-            background: "var(--color-bg-cream)",
-            color: "var(--color-text-dark)",
-          }}
-        >
-          <div>
-            <p className="text-sm font-medium">View full rubric</p>
-            <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>
-              See all milestones across every level with plain-language descriptions
-            </p>
-          </div>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 ml-2">
-            <path d="M9 18l6-6-6-6" />
-          </svg>
-        </Link>
-      </div>
     </div>
   );
 }

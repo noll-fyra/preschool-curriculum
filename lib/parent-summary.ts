@@ -11,8 +11,9 @@ import type {
   LevelId,
   Pronoun,
   DailyUpdate,
-  MoodType,
+  Report,
 } from "./types";
+import { LEARNING_AREAS } from "./types";
 import { getCurrentLevel, evaluateSkillMastery, evaluateSEDMastery, isBehaviourBased } from "./mastery";
 import { getActivityConfig } from "./activity-data";
 
@@ -150,103 +151,439 @@ export function getRecencyLabel(
   return `${diffDays} days ago`;
 }
 
-// ─── Feed items ───────────────────────────────────────────────────────────
+// ─── Home activity feed (parent dashboard spec) ───────────────────────────
 
-export interface FeedItem {
-  id: string;
-  type: "daily_update" | "milestone_achieved" | "teacher_update";
-  timestamp: string; // ISO string
-  // daily_update fields
-  mood?: MoodType;
-  text?: string;
-  photos?: string[];
-  // milestone_achieved fields
-  headline?: string;       // parentDescription
-  whatThisMeans?: string;  // brief context line
-  // teacher_update fields
-  teacherName?: string;
-  updateText?: string;
-  media?: { type: "photo" | "video"; url: string }[];
+export type HomeFeedItem =
+  | {
+      id: string;
+      type: "activity_completed";
+      timestamp: string;
+      href: string;
+      title: string;
+      subtitle: string;
+      icon: "activity";
+      location: "home" | "school";
+    }
+  | {
+      id: string;
+      type: "milestone_achieved";
+      timestamp: string;
+      href: string;
+      title: string;
+      subtitle: string;
+      icon: "milestone";
+      location: "school";
+    }
+  | {
+      id: string;
+      type: "teacher_note";
+      timestamp: string;
+      href: string;
+      title: string;
+      subtitle: string;
+      icon: "note";
+      location: "school";
+    }
+  | {
+      id: string;
+      type: "class_update";
+      timestamp: string;
+      href: string;
+      title: string;
+      subtitle: string;
+      icon: "note";
+      location: "school";
+    }
+  | {
+      id: string;
+      type: "behaviour_observation";
+      timestamp: string;
+      href: string;
+      title: string;
+      subtitle: string;
+      icon: "observation";
+      location: "school";
+    }
+  | {
+      id: string;
+      type: "report_published";
+      timestamp: string;
+      href: string;
+      title: string;
+      subtitle: string;
+      icon: "note";
+      location: "school";
+    };
+
+const FEED_CANDIDATE_MS = 120 * 24 * 60 * 60 * 1000;
+const OLD_MILESTONE_DAYS = 7;
+const NOTE_TRUNCATE = 80;
+
+function areaName(id: LearningAreaId): string {
+  return LEARNING_AREAS.find((a) => a.id === id)?.name ?? id;
 }
 
-const AREA_CONTEXT: Record<string, string> = {
-  LL:  "Language and early literacy skills are the foundation for reading and writing at primary school.",
-  NUM: "Early number sense built now gives children a head-start in maths at primary school.",
-  SED: "Understanding and managing feelings is one of the most important skills for school and life.",
-  ACE: "Creativity and self-expression build confidence and communication skills.",
-  DOW: "Curiosity about the world develops scientific thinking and a love of learning.",
-  HMS: "Strong physical skills and healthy habits support confidence and focus in the classroom.",
+function truncateNote(text: string, max = NOTE_TRUNCATE): string {
+  const t = text.trim().replace(/\s+/g, " ");
+  if (t.length <= max) return t;
+  return `${t.slice(0, max - 1).trimEnd()}…`;
+}
+
+function qualitativeGloss(score: number): string {
+  if (score >= 3) return "Strong work — keep it up!";
+  if (score === 2) return "Good effort — a little more practice will help.";
+  return "Keep practising — every try counts.";
+}
+
+function nowChildStatement(firstName: string, parentDescription: string): string {
+  const p = parentDescription.trim();
+  if (!p) return `${firstName} has reached this milestone.`;
+  const rest = p.charAt(0).toLowerCase() + p.slice(1);
+  return `${firstName} now ${rest.replace(/\.$/, "")}.`;
+}
+
+/** Timestamp line: "Today, 3:45 pm · at home" */
+export function formatParentFeedTimestamp(
+  iso: string,
+  location: "home" | "school"
+): string {
+  const d = new Date(iso);
+  const today = new Date();
+  const yDay = new Date(today);
+  yDay.setDate(yDay.getDate() - 1);
+  const d0 = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const y0 = new Date(yDay.getFullYear(), yDay.getMonth(), yDay.getDate());
+
+  let dayPart: string;
+  if (d0.getTime() === t0.getTime()) dayPart = "Today";
+  else if (d0.getTime() === y0.getTime()) dayPart = "Yesterday";
+  else {
+    dayPart = d.toLocaleDateString("en-SG", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    });
+  }
+
+  const timePart = d.toLocaleTimeString("en-SG", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  const place = location === "home" ? "at home" : "at school";
+  return `${dayPart}, ${timePart} · ${place}`;
+}
+
+function dedupeSessionsByMilestoneDay(
+  sessions: ActivitySession[],
+  childId: string
+): ActivitySession[] {
+  const mine = sessions.filter((s) => s.childId === childId);
+  const sorted = [...mine].sort(
+    (a, b) => new Date(b.attemptedAt).getTime() - new Date(a.attemptedAt).getTime()
+  );
+  const seen = new Set<string>();
+  const out: ActivitySession[] = [];
+  for (const s of sorted) {
+    const day = s.attemptedAt.slice(0, 10);
+    const key = `${s.milestoneId}|${day}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(s);
+  }
+  return out;
+}
+
+function isOldMilestoneAchievement(item: HomeFeedItem): boolean {
+  if (item.type !== "milestone_achieved") return false;
+  const ageMs = Date.now() - new Date(item.timestamp).getTime();
+  return ageMs > OLD_MILESTONE_DAYS * 24 * 60 * 60 * 1000;
+}
+
+function compareFeedItems(a: HomeFeedItem, b: HomeFeedItem): number {
+  const aOld = isOldMilestoneAchievement(a);
+  const bOld = isOldMilestoneAchievement(b);
+  if (aOld && !bOld) return 1;
+  if (!aOld && bOld) return -1;
+  return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+}
+
+type CollectFeedOptions = {
+  /** Home preview: SED only. Full feed: all behaviour-based areas. */
+  sedOnlyObservations: boolean;
+  /** Include published developmental reports (term / periodic summaries). */
+  includeReports: boolean;
 };
 
-export function getFeedItems(
+/**
+ * Raw candidate rows for parent feeds (not sorted / limited).
+ */
+function collectParentFeedItems(
   childId: string,
+  childFirstName: string,
   sessions: ActivitySession[],
   progress: ChildMilestoneProgress[],
   milestones: Milestone[],
   chatMessages: ChatMessage[],
   teachers: { id: string; firstName: string; lastName: string }[],
-  dailyUpdates: DailyUpdate[]
-): FeedItem[] {
-  void sessions; // activity completions are shown in area drill-down, not the home feed
-  const items: FeedItem[] = [];
-  const cutoff = Date.now() - 14 * 24 * 60 * 60 * 1000;
+  dailyUpdates: DailyUpdate[],
+  observations: TeacherObservation[],
+  reports: Report[],
+  options: CollectFeedOptions
+): HomeFeedItem[] {
+  const cutoff = Date.now() - FEED_CANDIDATE_MS;
+  const items: HomeFeedItem[] = [];
 
-  // Daily updates
-  for (const du of dailyUpdates) {
-    if (du.childId !== childId) continue;
-    if (new Date(du.createdAt).getTime() < cutoff) continue;
+  const teacherFirst = (id: string) =>
+    teachers.find((t) => t.id === id)?.firstName?.trim() || "Teacher";
+
+  // Activity completions (skill milestones only)
+  for (const s of dedupeSessionsByMilestoneDay(sessions, childId)) {
+    if (new Date(s.attemptedAt).getTime() < cutoff) continue;
+    const milestone = milestones.find((m) => m.id === s.milestoneId);
+    if (!milestone || isBehaviourBased(milestone.areaId)) continue;
+    const cfg = getActivityConfig(s.milestoneId);
+    const activityTitle = cfg?.name ?? milestone.parentDescription;
+    const loc: "home" | "school" = s.location ?? "school";
     items.push({
-      id: du.id,
-      type: "daily_update",
-      timestamp: du.createdAt,
-      mood: du.mood,
-      text: du.text,
-      photos: du.photos,
+      id: `activity-${s.id}`,
+      type: "activity_completed",
+      timestamp: s.attemptedAt,
+      href: `/parent/${childId}/area/${milestone.areaId}/milestone/${s.milestoneId}`,
+      title: `Completed: ${activityTitle}`,
+      subtitle: `Got ${s.score} out of 3 right — ${qualitativeGloss(s.score)} · ${areaName(milestone.areaId)}`,
+      icon: "activity",
+      location: loc,
     });
   }
 
-  // Milestone achievements (last 14 days)
+  // Milestone achieved
   for (const p of progress) {
     if (p.childId !== childId || p.status !== "achieved" || !p.achievedAt) continue;
     if (new Date(p.achievedAt).getTime() < cutoff) continue;
     const milestone = milestones.find((m) => m.id === p.milestoneId);
     if (!milestone) continue;
+    const ts =
+      p.achievedAt.length > 10
+        ? p.achievedAt
+        : `${p.achievedAt}T12:00:00`;
     items.push({
-      id: `achieved-${p.milestoneId}`,
+      id: `milestone-${p.milestoneId}`,
       type: "milestone_achieved",
-      timestamp: p.achievedAt,
-      headline: milestone.parentDescription,
-      whatThisMeans: AREA_CONTEXT[milestone.areaId] ?? "",
+      timestamp: ts,
+      href: `/parent/${childId}/area/${milestone.areaId}/milestone/${p.milestoneId}`,
+      title: "Milestone reached!",
+      subtitle: nowChildStatement(childFirstName, milestone.parentDescription),
+      icon: "milestone",
+      location: "school",
     });
   }
 
-  // Progress updates from teacher (kind === "progress_update" only)
-  const progressUpdates = chatMessages.filter(
-    (m) =>
-      m.childId === childId &&
-      m.senderType === "teacher" &&
-      m.kind === "progress_update" &&
-      new Date(m.createdAt).getTime() >= cutoff
-  );
-  for (const m of progressUpdates) {
-    const teacher = teachers.find((t) => t.id === m.senderId);
-    const teacherName = teacher
-      ? [teacher.firstName, teacher.lastName].filter(Boolean).join(" ").trim() || "Teacher"
-      : "Teacher";
+  // Teacher notes (progress updates in thread) — highlights
+  for (const m of chatMessages) {
+    if (
+      m.childId !== childId ||
+      m.senderType !== "teacher" ||
+      m.kind !== "progress_update"
+    ) {
+      continue;
+    }
+    if (new Date(m.createdAt).getTime() < cutoff) continue;
+    const first = teacherFirst(m.senderId);
     items.push({
-      id: m.id,
-      type: "teacher_update",
+      id: `note-${m.id}`,
+      type: "teacher_note",
       timestamp: m.createdAt,
-      teacherName,
-      updateText: m.text,
-      media: m.media,
+      href: `/parent/${childId}/messages`,
+      title: `Note from ${first}`,
+      subtitle: truncateNote(m.text),
+      icon: "note",
+      location: "school",
     });
   }
 
-  // Sort chronologically descending
-  items.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  // Daily / class updates (teacher feed)
+  for (const du of dailyUpdates) {
+    if (du.childId !== childId) continue;
+    if (new Date(du.createdAt).getTime() < cutoff) continue;
+    const first = teacherFirst(du.teacherId);
+    items.push({
+      id: `class-${du.id}`,
+      type: "class_update",
+      timestamp: du.createdAt,
+      href: `/parent/${childId}/messages`,
+      title: `Update from ${first}`,
+      subtitle: truncateNote(du.text),
+      icon: "note",
+      location: "school",
+    });
+  }
+
+  // Behaviour observations (home: SED only; full feed: ACE, DOW, HMS, SED)
+  for (const o of observations) {
+    if (o.childId !== childId) continue;
+    const milestone = milestones.find((m) => m.id === o.milestoneId);
+    if (!milestone) continue;
+    if (options.sedOnlyObservations) {
+      if (milestone.areaId !== "SED") continue;
+    } else if (!isBehaviourBased(milestone.areaId)) {
+      continue;
+    }
+    const ts = `${o.observedAt}T12:00:00`;
+    if (new Date(ts).getTime() < cutoff) continue;
+    const msName = o.teacherId ? teacherFirst(o.teacherId) : "Teacher";
+    const subtitle = truncateNote(
+      o.note?.trim() || milestone.statement || milestone.parentDescription
+    );
+    const title =
+      milestone.areaId === "SED"
+        ? `${msName} noticed something`
+        : `Observation · ${areaName(milestone.areaId)}`;
+    items.push({
+      id: `obs-${o.id}`,
+      type: "behaviour_observation",
+      timestamp: ts,
+      href: `/parent/${childId}/area/${milestone.areaId}/milestone/${o.milestoneId}`,
+      title,
+      subtitle,
+      icon: "observation",
+      location: "school",
+    });
+  }
+
+  // Published developmental reports (term / periodic)
+  if (options.includeReports) {
+    for (const r of reports) {
+      if (r.childId !== childId || r.status !== "published" || !r.publishedAt) continue;
+      if (new Date(r.publishedAt).getTime() < cutoff) continue;
+      const firstLine =
+        r.draftContent
+          .split(/\n+/)
+          .map((p) => p.trim())
+          .find(Boolean) ?? r.draftContent;
+      const periodLabel = new Date(r.publishedAt).toLocaleDateString("en-SG", {
+        month: "long",
+        year: "numeric",
+      });
+      items.push({
+        id: `report-${r.id}`,
+        type: "report_published",
+        timestamp: r.publishedAt,
+        href: `/parent/${childId}/reports`,
+        title: "Developmental report",
+        subtitle: `Term summary · ${periodLabel} — ${truncateNote(firstLine, 100)}`,
+        icon: "note",
+        location: "school",
+      });
+    }
+  }
 
   return items;
+}
+
+/**
+ * Up to `limit` most recent feed rows (spec: interleaved, milestone >7d demoted).
+ * Activity completions: one row per milestone per calendar day (most recent session).
+ */
+export function getHomeActivityFeed(
+  childId: string,
+  childFirstName: string,
+  sessions: ActivitySession[],
+  progress: ChildMilestoneProgress[],
+  milestones: Milestone[],
+  chatMessages: ChatMessage[],
+  teachers: { id: string; firstName: string; lastName: string }[],
+  dailyUpdates: DailyUpdate[],
+  observations: TeacherObservation[],
+  limit = 3
+): HomeFeedItem[] {
+  const items = collectParentFeedItems(
+    childId,
+    childFirstName,
+    sessions,
+    progress,
+    milestones,
+    chatMessages,
+    teachers,
+    dailyUpdates,
+    observations,
+    [],
+    { sedOnlyObservations: true, includeReports: false }
+  );
+  items.sort(compareFeedItems);
+  return items.slice(0, limit);
+}
+
+/**
+ * Full parent feed: activities, milestones, teacher highlights, daily updates,
+ * behaviour observations (all observation-based domains), and published reports.
+ */
+export function getParentUnifiedFeed(
+  childId: string,
+  childFirstName: string,
+  sessions: ActivitySession[],
+  progress: ChildMilestoneProgress[],
+  milestones: Milestone[],
+  chatMessages: ChatMessage[],
+  teachers: { id: string; firstName: string; lastName: string }[],
+  dailyUpdates: DailyUpdate[],
+  observations: TeacherObservation[],
+  reports: Report[],
+  limit = 100
+): HomeFeedItem[] {
+  const items = collectParentFeedItems(
+    childId,
+    childFirstName,
+    sessions,
+    progress,
+    milestones,
+    chatMessages,
+    teachers,
+    dailyUpdates,
+    observations,
+    reports,
+    { sedOnlyObservations: false, includeReports: true }
+  );
+  items.sort(compareFeedItems);
+  return items.slice(0, limit);
+}
+
+// ─── Calendar helpers (local date, Monday week start) ──────────────────────
+
+/** Today's calendar date in local timezone, YYYY-MM-DD. */
+export function getTodayLocalISO(ref: Date = new Date()): string {
+  const d = new Date(ref.getFullYear(), ref.getMonth(), ref.getDate());
+  const y = d.getFullYear();
+  const m = `${d.getMonth() + 1}`.padStart(2, "0");
+  const day = `${d.getDate()}`.padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+/** Monday of the ISO week containing `ref`, in local timezone, YYYY-MM-DD. */
+export function getISOWeekStartMonday(ref: Date = new Date()): string {
+  const d = new Date(ref.getFullYear(), ref.getMonth(), ref.getDate());
+  const dow = d.getDay();
+  const offset = dow === 0 ? -6 : 1 - dow;
+  d.setDate(d.getDate() + offset);
+  const y = d.getFullYear();
+  const m = `${d.getMonth() + 1}`.padStart(2, "0");
+  const day = `${d.getDate()}`.padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function addDaysISO(iso: string, delta: number): string {
+  const [y, mo, da] = iso.split("-").map(Number);
+  const d = new Date(y, mo - 1, da + delta);
+  const yy = d.getFullYear();
+  const mm = `${d.getMonth() + 1}`.padStart(2, "0");
+  const dd = `${d.getDate()}`.padStart(2, "0");
+  return `${yy}-${mm}-${dd}`;
+}
+
+function sessionDate(s: ActivitySession): string {
+  return s.attemptedAt.slice(0, 10);
 }
 
 // ─── Hero card summary ────────────────────────────────────────────────────
@@ -259,21 +596,30 @@ export function getHeroSummary(
   sessions: ActivitySession[],
   progress: ChildMilestoneProgress[],
   milestones: Milestone[],
-  weekStart: string // YYYY-MM-DD
+  weekStart: string, // YYYY-MM-DD (Monday)
+  todayISO: string = getTodayLocalISO()
 ): string {
   const p = pronoun;
   const childSessions = sessions.filter((s) => s.childId === childId);
+  const lastWeekStart = addDaysISO(weekStart, -7);
 
-  const thisWeekSessions = childSessions.filter(
-    (s) => s.attemptedAt.slice(0, 10) >= weekStart
-  );
+  const thisWeekSessions = childSessions.filter((s) => {
+    const day = sessionDate(s);
+    return day >= weekStart && day <= todayISO;
+  });
+
+  const lastWeekSessionCount = childSessions.filter((s) => {
+    const day = sessionDate(s);
+    return day >= lastWeekStart && day < weekStart;
+  }).length;
 
   const achievedThisWeek = progress.filter(
     (pr) =>
       pr.childId === childId &&
       pr.status === "achieved" &&
       pr.achievedAt &&
-      pr.achievedAt.slice(0, 10) >= weekStart
+      pr.achievedAt.slice(0, 10) >= weekStart &&
+      pr.achievedAt.slice(0, 10) <= todayISO
   );
 
   const sorted = [...childSessions].sort(
@@ -286,36 +632,62 @@ export function getHeroSummary(
       )
     : Infinity;
 
-  // Rule 1: milestone achieved this week — most celebratory
+  const milestoneIds = milestones.map((m) => m.id);
+  const achievedIds = new Set(
+    progress
+      .filter((pr) => pr.childId === childId && pr.status === "achieved")
+      .map((pr) => pr.milestoneId)
+  );
+  const allMilestonesAchieved =
+    milestoneIds.length > 0 && milestoneIds.every((id) => achievedIds.has(id));
+
+  // All P1-readiness milestones done (spec: special hero variant)
+  if (allMilestonesAchieved) {
+    const ready =
+      p === "they"
+        ? "They're ready for Primary 1!"
+        : p === "he"
+          ? "He's ready for Primary 1!"
+          : "She's ready for Primary 1!";
+    return `${childName} has achieved all ${poss(p)} P1-readiness milestones. ${ready}`;
+  }
+
+  // Milestone achieved this week — celebratory, two short sentences
   if (achievedThisWeek.length > 0) {
-    const milestone = milestones.find((m) => m.id === achievedThisWeek[0].milestoneId);
+    const latest = [...achievedThisWeek].sort((a, b) =>
+      (b.achievedAt ?? "").localeCompare(a.achievedAt ?? "")
+    )[0];
+    const milestone = milestones.find((m) => m.id === latest.milestoneId);
     const desc = milestone?.parentDescription ?? "a new skill";
-    const lower = desc[0].toLowerCase() + desc.slice(1);
-    return `${childName} reached a big milestone this week — ${lower} ${Subj(p)} is making wonderful progress!`;
+    return `${childName} reached a big milestone this week — ${desc}. ${Subj(p)}'s ready for the next step on ${poss(p)} journey.`;
   }
 
-  // Rule 2: active week (3+ sessions)
-  if (thisWeekSessions.length >= 3) {
-    return `${childName} had a great week — ${subj(p)} completed ${thisWeekSessions.length} activities and is building ${poss(p)} skills steadily. Keep it up!`;
-  }
-
-  // Rule 3: brand new (no sessions ever)
+  // Brand new (no sessions ever)
   if (childSessions.length === 0) {
-    return `${childName} is just getting started — ${poss(p)} personalised learning journey begins this week. We can't wait to see what ${subj(p)} discovers!`;
+    return `${childName} is just getting started — ${poss(p)} personalised learning journey begins this week.`;
   }
 
-  // Rule 4: quiet period (5+ days since last session)
+  // Active week (3+ sessions in the current week)
+  if (thisWeekSessions.length >= 3) {
+    const n = thisWeekSessions.length;
+    return `${childName} had a great week — ${subj(p)} completed ${n} ${n === 1 ? "activity" : "activities"}. Keep it up!`;
+  }
+
+  // Quieter week: nothing this week but had activity before (incl. last week)
+  if (thisWeekSessions.length === 0 && lastWeekSessionCount >= 1) {
+    return `It's been a quieter week for ${childName} — no activities completed this week. A quick session when you can would help keep ${poss(p)} momentum going.`;
+  }
+
+  // No completions this week, gap in rhythm (spec: 5+ days)
   if (daysSinceLast >= 5) {
     return `It's been a few days since ${childName}'s last activity. A quick session this weekend could help keep ${poss(p)} momentum going.`;
   }
 
-  // Rule 5: some activity this week
   const n = thisWeekSessions.length;
   if (n > 0) {
-    return `${childName} is making steady progress this week — ${n} ${n === 1 ? "activity" : "activities"} completed. ${Subj(p)} is on the right track.`;
+    return `${childName} is making steady progress this week — ${n} ${n === 1 ? "activity" : "activities"} completed. ${Subj(p)}'s on the right track.`;
   }
 
-  // Default
   return `${childName} is on ${poss(p)} learning journey. ${Poss(p)} personalised activities are ready whenever ${subj(p)} is.`;
 }
 

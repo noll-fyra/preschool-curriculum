@@ -9,14 +9,13 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  ReferenceLine,
 } from "recharts";
 import { useStore } from "@/lib/store";
 import { LEARNING_AREAS, type LearningAreaId } from "@/lib/types";
 import {
   getAchievementTimeline,
-  buildChartSeries,
-  buildReferenceSeries,
+  getChartMonthStarts,
+  buildMonthlyChartSeries,
   type MilestoneAchievement,
   type ChartDataPoint,
 } from "@/lib/chart-utils";
@@ -43,10 +42,6 @@ const AREA_SHORT: Record<LearningAreaId, string> = {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function toYYYYMMDD(iso: string): string {
-  return iso.slice(0, 10);
-}
-
 function formatXTick(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00");
   return d.toLocaleDateString("en-SG", { month: "short" });
@@ -55,6 +50,12 @@ function formatXTick(dateStr: string): string {
 function formatFullDate(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00");
   return d.toLocaleDateString("en-SG", { day: "numeric", month: "short", year: "numeric" });
+}
+
+/** Chart x-axis points are month starts (YYYY-MM-01). */
+function formatMonthLabel(monthStart: string): string {
+  const d = new Date(monthStart + "T00:00:00");
+  return d.toLocaleDateString("en-SG", { month: "long", year: "numeric" });
 }
 
 // ─── Custom tooltip ──────────────────────────────────────────────────────────
@@ -82,7 +83,7 @@ function ChartTooltip({
       style={{ background: "#fff", border: "1px solid #E5E5E5", minWidth: 140 }}
     >
       <p className="font-semibold mb-1" style={{ color: "#1A1A1A" }}>
-        {formatFullDate(label)}
+        {formatMonthLabel(label)}
       </p>
       {payload.map((p) => (
         <div key={p.name} className="flex items-center gap-2">
@@ -149,6 +150,7 @@ interface DotProps {
   areaId: LearningAreaId;
   color: string;
   achievements: MilestoneAchievement[];
+  academicYear: number;
   onSelect: (m: MilestoneAchievement) => void;
 }
 
@@ -159,15 +161,23 @@ function AchievementDot({
   areaId,
   color,
   achievements,
+  academicYear,
   onSelect,
 }: DotProps) {
   if (cx == null || cy == null || !payload) return null;
 
-  // Only show a dot if a milestone was achieved on this exact date for this area
-  const match = achievements.find(
-    (a) => a.date === payload.date && a.areaId === areaId
+  const yearStart = `${academicYear}-01-01`;
+  const yearEnd = `${academicYear}-12-31`;
+  const ym = payload.date.slice(0, 7);
+  const inMonth = achievements.filter(
+    (a) =>
+      a.areaId === areaId &&
+      a.date.slice(0, 7) === ym &&
+      a.date >= yearStart &&
+      a.date <= yearEnd
   );
-  if (!match) return null;
+  if (inMonth.length === 0) return null;
+  const match = [...inMonth].sort((a, b) => b.date.localeCompare(a.date))[0];
 
   return (
     <circle
@@ -188,14 +198,30 @@ function AchievementDot({
 interface ProgressChartProps {
   childId: string;
   academicYear: number;
+  /** When set, shows only this area (no toggles). */
+  focusAreaId?: LearningAreaId;
 }
 
-export function ProgressChart({ childId, academicYear }: ProgressChartProps) {
+export function ProgressChart({
+  childId,
+  academicYear,
+  focusAreaId,
+}: ProgressChartProps) {
   const { milestones, sessions, observations } = useStore();
 
+  const milestonesInFocusArea = useMemo(() => {
+    if (!focusAreaId) return 9;
+    return milestones.filter((m) => m.areaId === focusAreaId).length;
+  }, [milestones, focusAreaId]);
+
   const [activeAreas, setActiveAreas] = useState<Set<LearningAreaId>>(
-    new Set(["LL", "NUM", "SED", "ACE", "DOW", "HMS"])
+    () =>
+      focusAreaId
+        ? new Set([focusAreaId])
+        : new Set(["LL", "NUM", "SED", "ACE", "DOW", "HMS"])
   );
+
+  const displayAreas = focusAreaId ? new Set<LearningAreaId>([focusAreaId]) : activeAreas;
   const [selectedMilestone, setSelectedMilestone] =
     useState<MilestoneAchievement | null>(null);
 
@@ -204,71 +230,23 @@ export function ProgressChart({ childId, academicYear }: ProgressChartProps) {
     [childId, milestones, sessions, observations]
   );
 
-  const startDate = `${academicYear}-01-01`;
-
-  const chartData = useMemo(
-    () => buildChartSeries(achievements, startDate),
-    [achievements, startDate]
-  );
-
-  const referencePoints = useMemo(
-    () => buildReferenceSeries(academicYear),
+  const monthStarts = useMemo(
+    () => getChartMonthStarts(academicYear, new Date()),
     [academicYear]
   );
 
-  // Merge reference into chart data for rendering
-  const mergedData = useMemo(() => {
-    const refMap = new Map(referencePoints.map((r) => [r.date, r.reference]));
-    // Build a unified date set from both series
-    const allDates = new Set([
-      ...chartData.map((d) => d.date),
-      ...referencePoints.map((r) => r.date),
-    ]);
-    const sorted = [...allDates].sort();
+  const mergedData = useMemo(
+    () => buildMonthlyChartSeries(achievements, academicYear, monthStarts),
+    [achievements, academicYear, monthStarts]
+  );
 
-    // Interpolate reference value linearly between start and end
-    const refStart = referencePoints[0];
-    const refEnd = referencePoints[referencePoints.length - 1];
-    const totalMs =
-      new Date(refEnd.date).getTime() - new Date(refStart.date).getTime();
-
-    return sorted.map((date) => {
-      const chartPoint = chartData.find((d) => d.date === date) ?? {
-        date,
-        LL: 0, NUM: 0, SED: 0, ACE: 0, DOW: 0, HMS: 0, total: 0,
-      };
-      // Fill forward for area counts
-      const prev = sorted
-        .slice(0, sorted.indexOf(date))
-        .reverse()
-        .map((d) => chartData.find((cd) => cd.date === d))
-        .find(Boolean);
-
-      const filled = prev
-        ? {
-            ...chartPoint,
-            LL: chartPoint.LL || prev.LL,
-            NUM: chartPoint.NUM || prev.NUM,
-            SED: chartPoint.SED || prev.SED,
-            ACE: chartPoint.ACE || prev.ACE,
-            DOW: chartPoint.DOW || prev.DOW,
-            HMS: chartPoint.HMS || prev.HMS,
-          }
-        : chartPoint;
-
-      // Compute interpolated reference
-      const elapsed =
-        new Date(date).getTime() - new Date(refStart.date).getTime();
-      const progress = totalMs > 0 ? Math.max(0, Math.min(1, elapsed / totalMs)) : 0;
-      const reference = parseFloat(
-        (refStart.reference + progress * (refEnd.reference - refStart.reference)).toFixed(2)
-      );
-
-      return { ...filled, reference: refMap.has(date) ? refMap.get(date) : reference };
-    });
-  }, [chartData, referencePoints]);
+  const xTicks = useMemo(
+    () => mergedData.map((d) => d.date),
+    [mergedData]
+  );
 
   function toggleArea(id: LearningAreaId) {
+    if (focusAreaId) return;
     setActiveAreas((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
@@ -281,39 +259,53 @@ export function ProgressChart({ childId, academicYear }: ProgressChartProps) {
     });
   }
 
-  const maxY = Math.max(
-    9,
-    ...mergedData.map((d) =>
-      Math.max(...LEARNING_AREAS.map((a) => {
-        const v = d[a.id as keyof typeof d];
-        return typeof v === "number" ? v : 0;
-      }))
-    )
-  );
+  const maxY = focusAreaId
+    ? Math.max(
+        3,
+        milestonesInFocusArea,
+        ...mergedData.map((d) => {
+          const v = d[focusAreaId as keyof typeof d];
+          return typeof v === "number" ? v : 0;
+        })
+      )
+    : Math.max(
+        9,
+        ...mergedData.map((d) =>
+          Math.max(
+            ...LEARNING_AREAS.map((a) => {
+              const v = d[a.id as keyof typeof d];
+              return typeof v === "number" ? v : 0;
+            })
+          )
+        )
+      );
 
   return (
     <div>
-      {/* Area toggle pills */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {LEARNING_AREAS.map((area) => {
-          const active = activeAreas.has(area.id);
-          const color = AREA_COLORS[area.id];
-          return (
-            <button
-              key={area.id}
-              onClick={() => toggleArea(area.id)}
-              className="px-3 py-1 rounded-full text-xs font-semibold transition-all"
-              style={{
-                background: active ? color : "#F5F5F5",
-                color: active ? "#fff" : "#707070",
-                border: `1.5px solid ${active ? color : "#E5E5E5"}`,
-              }}
-            >
-              {AREA_SHORT[area.id]} — {area.name.split(" ")[0]}
-            </button>
-          );
-        })}
-      </div>
+      {/* Area toggle pills (full progress view only) */}
+      {!focusAreaId && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {LEARNING_AREAS.map((area) => {
+            const active = activeAreas.has(area.id);
+            const color = AREA_COLORS[area.id];
+            return (
+              <button
+                key={area.id}
+                type="button"
+                onClick={() => toggleArea(area.id)}
+                className="px-3 py-1 rounded-full text-xs font-semibold transition-all"
+                style={{
+                  background: active ? color : "#F5F5F5",
+                  color: active ? "#fff" : "#707070",
+                  border: `1.5px solid ${active ? color : "#E5E5E5"}`,
+                }}
+              >
+                {AREA_SHORT[area.id]} — {area.name.split(" ")[0]}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Chart */}
       <ResponsiveContainer width="100%" height={260}>
@@ -324,11 +316,13 @@ export function ProgressChart({ childId, academicYear }: ProgressChartProps) {
           <CartesianGrid strokeDasharray="3 3" stroke="#E5E5E5" vertical={false} />
           <XAxis
             dataKey="date"
+            type="category"
+            ticks={xTicks}
             tickFormatter={formatXTick}
             tick={{ fontSize: 11, fill: "#707070" }}
             axisLine={false}
             tickLine={false}
-            interval="preserveStartEnd"
+            interval={0}
           />
           <YAxis
             domain={[0, maxY]}
@@ -340,20 +334,8 @@ export function ProgressChart({ childId, academicYear }: ProgressChartProps) {
           />
           <Tooltip content={<ChartTooltip />} />
 
-          {/* Reference line — dashed, labelled */}
-          <Line
-            type="linear"
-            dataKey="reference"
-            stroke="#C0C0C0"
-            strokeDasharray="6 3"
-            strokeWidth={1.5}
-            dot={false}
-            name="On track"
-            connectNulls
-          />
-
           {/* One line per active learning area */}
-          {LEARNING_AREAS.filter((a) => activeAreas.has(a.id)).map((area) => (
+          {LEARNING_AREAS.filter((a) => displayAreas.has(a.id)).map((area) => (
             <Line
               key={area.id}
               type="stepAfter"
@@ -371,6 +353,7 @@ export function ProgressChart({ childId, academicYear }: ProgressChartProps) {
                     areaId={area.id}
                     color={AREA_COLORS[area.id]}
                     achievements={achievements}
+                    academicYear={academicYear}
                     onSelect={setSelectedMilestone}
                   />
                 );
@@ -383,17 +366,6 @@ export function ProgressChart({ childId, academicYear }: ProgressChartProps) {
         </ComposedChart>
       </ResponsiveContainer>
 
-      {/* Reference line legend */}
-      <div className="flex items-center gap-1.5 mt-1 mb-1">
-        <svg width="20" height="8">
-          <line
-            x1="0" y1="4" x2="20" y2="4"
-            stroke="#C0C0C0" strokeWidth="1.5" strokeDasharray="5 3"
-          />
-        </svg>
-        <span className="text-xs" style={{ color: "#707070" }}>On track (linear)</span>
-      </div>
-
       {/* Milestone detail popup */}
       {selectedMilestone && (
         <MilestonePopup
@@ -402,9 +374,12 @@ export function ProgressChart({ childId, academicYear }: ProgressChartProps) {
         />
       )}
 
-      {achievements.length === 0 && (
+      {achievements.filter((a) => !focusAreaId || a.areaId === focusAreaId).length ===
+        0 && (
         <p className="text-sm text-center mt-6" style={{ color: "#707070" }}>
-          No milestones achieved yet this year.
+          {focusAreaId
+            ? "No milestones achieved in this area yet this year."
+            : "No milestones achieved yet this year."}
         </p>
       )}
     </div>

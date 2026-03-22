@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { getChildDisplayName, getPronounFromGender } from "@/lib/display-name";
-import { LEARNING_AREAS } from "@/lib/types";
+import { getP1ReadinessSnapshot } from "@/lib/selectors";
 
 export default function P1ReadinessPage() {
   const params = useParams();
@@ -23,39 +23,15 @@ export default function P1ReadinessPage() {
     );
   }
 
-  const totalMilestones = store.milestones.length;
-  const achievedAll = store.progress.filter(
-    (p) => p.childId === childId && p.status === "achieved",
-  ).length;
-
-  // Per area breakdown
-  const areaStats = LEARNING_AREAS.map((area) => {
-    const areaMilestones = store.milestones.filter((m) => m.areaId === area.id);
-    const total = areaMilestones.length;
-    const achieved = areaMilestones.filter((m) =>
-      store.progress.some(
-        (p) =>
-          p.childId === childId &&
-          p.milestoneId === m.id &&
-          p.status === "achieved",
-      ),
-    ).length;
-    const inProgress = areaMilestones.filter((m) =>
-      store.progress.some(
-        (p) =>
-          p.childId === childId &&
-          p.milestoneId === m.id &&
-          p.status === "in_progress",
-      ),
-    ).length;
-    return { area, total, achieved, inProgress };
-  });
+  const { achieved: achievedAll, total: totalMilestones, byArea: areaStats } =
+    getP1ReadinessSnapshot(childId, store);
 
   // On-track check: ≥50% of total milestones achieved
-  const isOnTrack = achievedAll / totalMilestones >= 0.5;
+  const isOnTrack =
+    totalMilestones > 0 && achievedAll / totalMilestones >= 0.5;
 
   return (
-    <div className="px-4 py-5 max-w-lg mx-auto">
+    <div className="px-4 py-5">
       {/* Back */}
       <Link
         href={`/parent/${childId}`}
@@ -92,12 +68,21 @@ export default function P1ReadinessPage() {
         {areaStats.map(({ area, total, achieved, inProgress }) => {
           const fillPct = total > 0 ? Math.round((achieved / total) * 100) : 0;
           return (
-            <div
+            <Link
               key={area.id}
-              className="rounded-2xl border p-4"
+              href={`/parent/${childId}/area/${area.id}`}
+              className="block rounded-2xl border p-4 transition-colors active:opacity-80"
               style={{
                 background: "white",
                 borderColor: "var(--color-border)",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background =
+                  "var(--color-bg-cream)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background =
+                  "white";
               }}
             >
               <p
@@ -130,7 +115,7 @@ export default function P1ReadinessPage() {
                   </span>
                 )}
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
