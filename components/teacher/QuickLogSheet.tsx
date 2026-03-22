@@ -1,26 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useStore } from "@/lib/store";
 import { ChildAvatar } from "@/components/teacher/ChildAvatar";
-import { AttendanceDot } from "@/components/teacher/AttendanceDot";
 import { DomainTag } from "@/components/teacher/DomainTag";
-import type { Milestone, Child, LearningAreaId, AttendanceStatus } from "@/lib/types";
+import type { Milestone, Child, LearningAreaId } from "@/lib/types";
 import { LEARNING_AREAS } from "@/lib/types";
 
-// ── Step state machine ────────────────────────────────────────────────────────
+type Screen = "children" | "main" | "skill";
 
-type Step =
-  | { name: "select_child"; multiMode: boolean; selectedIds: string[] }
-  | { name: "select_milestone"; childIds: string[] }
-  | { name: "add_note"; childIds: string[]; milestone: Milestone }
-  | { name: "done"; childIds: string[]; milestoneId: string };
-
-const QUICK_PRESETS = [
-  "Demonstrated independently",
-  "Demonstrated with prompting",
-  "Attempted — needs more practice",
-  "First time observed doing this",
+const SUGGESTIONS = [
+  "Shared materials with a classmate",
+  "Asked for help using words",
+  "Took turns during group play",
+  "Expressed feelings calmly",
+  "Included others in play",
+  "Showed care for a friend",
+  "Listened attentively during circle time",
 ];
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -30,105 +26,93 @@ export function QuickLogSheet() {
   const children = useStore((s) => s.children);
   const milestones = useStore((s) => s.milestones);
   const activeClassId = useStore((s) => s.activeClassId);
-  const attendance = useStore((s) => s.attendance);
-  const plannedActivities = useStore((s) => s.plannedActivities);
   const logObservation = useStore((s) => s.logObservation);
 
-  const [step, setStep] = useState<Step>({ name: "select_child", multiMode: false, selectedIds: [] });
+  const [screen, setScreen] = useState<Screen>("children");
+  const [selectedChildIds, setSelectedChildIds] = useState<string[]>([]);
+  const [text, setText] = useState("");
+  const [selectedMilestones, setSelectedMilestones] = useState<Milestone[]>([]);
   const [filterArea, setFilterArea] = useState<LearningAreaId | null>(null);
+  const [done, setDone] = useState(false);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const today = new Date().toISOString().slice(0, 10);
   const classChildren = [...children.filter((c) => c.classId === activeClassId)]
     .sort((a, b) => a.firstName.localeCompare(b.firstName));
 
-  const todayActivities = plannedActivities.filter(
-    (a) => a.classId === activeClassId && a.date === today
-  );
-
-  const attendanceMap = new Map<string, AttendanceStatus>();
-  for (const a of attendance) {
-    if (a.date === today) attendanceMap.set(a.childId, a.status);
-  }
 
   useEffect(() => {
     if (!quickLogOpen) {
       const t = setTimeout(() => {
-        setStep({ name: "select_child", multiMode: false, selectedIds: [] });
+        setScreen("children");
+        setSelectedChildIds([]);
+        setText("");
+        setSelectedMilestones([]);
         setFilterArea(null);
+        setDone(false);
       }, 300);
       return () => clearTimeout(t);
     }
   }, [quickLogOpen]);
 
-  // ── Handlers ────────────────────────────────────────────────────────────────
+  function toggleChild(childId: string) {
+    setSelectedChildIds((prev) =>
+      prev.includes(childId) ? prev.filter((id) => id !== childId) : [...prev, childId]
+    );
+  }
 
-  function handleChildTap(childId: string) {
-    if (step.name !== "select_child") return;
+  function appendSuggestion(suggestion: string) {
+    setText((prev) => {
+      if (!prev) return suggestion;
+      if (prev.endsWith(" ") || prev.endsWith("\n")) return prev + suggestion;
+      return prev + " " + suggestion;
+    });
+    textareaRef.current?.focus();
+  }
 
-    if (!step.multiMode) {
-      // Single mode — advance immediately
-      setStep({ name: "select_milestone", childIds: [childId] });
-    } else {
-      // Multi mode — toggle selection
-      const next = step.selectedIds.includes(childId)
-        ? step.selectedIds.filter((id) => id !== childId)
-        : [...step.selectedIds, childId];
-      setStep({ ...step, selectedIds: next });
+  function toggleMilestone(milestone: Milestone) {
+    setSelectedMilestones((prev) =>
+      prev.some((m) => m.id === milestone.id)
+        ? prev.filter((m) => m.id !== milestone.id)
+        : [...prev, milestone]
+    );
+  }
+
+  function handleLog() {
+    if (selectedChildIds.length === 0) return;
+    if (!text.trim() && selectedMilestones.length === 0) return;
+
+    for (const milestone of selectedMilestones) {
+      for (const childId of selectedChildIds) {
+        logObservation(childId, milestone.id, text.trim() || undefined);
+      }
     }
-  }
-
-  function handleMultiConfirm() {
-    if (step.name !== "select_child" || step.selectedIds.length === 0) return;
-    setStep({ name: "select_milestone", childIds: step.selectedIds });
-  }
-
-  function handleMilestoneSelect(milestone: Milestone) {
-    if (step.name !== "select_milestone") return;
-    setStep({ name: "add_note", childIds: step.childIds, milestone });
-  }
-
-  function handleLog(childIds: string[], milestoneId: string, note?: string) {
-    for (const childId of childIds) {
-      logObservation(childId, milestoneId, note || undefined);
-    }
-    setStep({ name: "done", childIds, milestoneId });
+    setDone(true);
   }
 
   function reset() {
-    setStep({ name: "select_child", multiMode: false, selectedIds: [] });
+    setSelectedChildIds([]);
+    setText("");
+    setSelectedMilestones([]);
     setFilterArea(null);
+    setDone(false);
+    setScreen("children");
   }
-
-  // ── Derived ─────────────────────────────────────────────────────────────────
-
-  const stepChildIds: string[] =
-    step.name === "select_child"
-      ? step.selectedIds
-      : "childIds" in step
-      ? step.childIds
-      : [];
-
-  const selectedChildren = classChildren.filter((c) => stepChildIds.includes(c.id));
-
-  const subheading =
-    selectedChildren.length === 0
-      ? null
-      : selectedChildren.length === 1
-      ? `for ${selectedChildren[0].firstName}`
-      : `for ${selectedChildren.length} children`;
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
   if (!quickLogOpen) return null;
 
+  const canSubmit = selectedChildIds.length > 0 && (!!text.trim() || selectedMilestones.length > 0);
+
   return (
     <>
-      {/* Backdrop + centering wrapper */}
       <div
         className="fixed inset-0 z-100 flex items-end justify-center bg-black/40 md:items-center"
         onClick={closeQuickLog}
       >
-        {/* Modal panel — stops click propagation so backdrop doesn't close it */}
         <div
           role="dialog"
           aria-modal="true"
@@ -136,221 +120,299 @@ export function QuickLogSheet() {
           className="w-full max-h-[88vh] overflow-y-auto rounded-t-[20px] bg-white px-5 pb-8 pt-6 md:w-[500px] md:max-w-[calc(100vw-2rem)] md:rounded-2xl md:shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20 }}>
-          <div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: "var(--color-text-dark)" }}>
-              Log Observation
+          {/* Header */}
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20 }}>
+            <div>
+              {screen === "skill" ? (
+                <button
+                  onClick={() => setScreen("main")}
+                  style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 14, fontWeight: 600, color: "var(--color-text-dark)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Log Observation
+                </button>
+              ) : screen === "main" ? (
+                <button
+                  onClick={() => setScreen("children")}
+                  style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 14, fontWeight: 600, color: "var(--color-text-dark)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Log Observation
+                </button>
+              ) : (
+                <div style={{ fontSize: 16, fontWeight: 700, color: "var(--color-text-dark)" }}>
+                  {done ? "Observation logged!" : "Log Observation"}
+                </div>
+              )}
             </div>
-            {subheading && (
-              <div style={{ fontSize: 13, color: "var(--color-text-muted)", marginTop: 2 }}>
-                {subheading}
-              </div>
-            )}
+            <button
+              onClick={closeQuickLog}
+              aria-label="Close"
+              style={{ background: "none", border: "none", cursor: "pointer", color: "var(--color-text-muted)", padding: 4, marginTop: -2, flexShrink: 0 }}
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                <path d="M4 4l10 10M14 4L4 14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            </button>
           </div>
-          <button
-            onClick={closeQuickLog}
-            aria-label="Close"
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "var(--color-text-muted)",
-              padding: 4,
-              marginTop: -2,
-              flexShrink: 0,
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-              <path d="M4 4l10 10M14 4L4 14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            </svg>
-          </button>
-        </div>
 
-        {/* Step content */}
-        {step.name === "select_child" && (
-          <SelectChildStep
-            students={classChildren}
-            attendanceMap={attendanceMap}
-            multiMode={step.multiMode}
-            selectedIds={step.selectedIds}
-            onToggleMulti={() =>
-              setStep({ name: "select_child", multiMode: !step.multiMode, selectedIds: [] })
-            }
-            onChildTap={handleChildTap}
-            onConfirmMulti={handleMultiConfirm}
-          />
-        )}
+          {/* Done screen */}
+          {done && (
+            <DoneStep
+              students={classChildren.filter((c) => selectedChildIds.includes(c.id))}
+              onLogAnother={reset}
+              onDone={closeQuickLog}
+            />
+          )}
 
-        {step.name === "select_milestone" && (
-          <SelectMilestoneStep
-            milestones={milestones}
-            filterArea={filterArea}
-            onFilterArea={setFilterArea}
-            onSelect={handleMilestoneSelect}
-            onBack={() => setStep({ name: "select_child", multiMode: step.childIds.length > 1, selectedIds: step.childIds })}
-          />
-        )}
+          {/* Child selection screen */}
+          {!done && screen === "children" && (
+            <div>
+              <p style={{ fontSize: 12, fontWeight: 600, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
+                Who did you observe?
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 20 }}>
+                {classChildren.map((child) => {
+                  const isSelected = selectedChildIds.includes(child.id);
+                  return (
+                    <button
+                      key={child.id}
+                      onClick={() => toggleChild(child.id)}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 5,
+                        padding: "10px 6px",
+                        borderRadius: 10,
+                        background: isSelected ? "var(--color-primary-wash)" : "var(--color-bg-warm)",
+                        border: isSelected ? "2px solid var(--color-primary)" : "1px solid var(--color-border)",
+                        cursor: "pointer",
+                        position: "relative",
+                      }}
+                    >
+                      {isSelected && (
+                        <span style={{ position: "absolute", top: 4, right: 4, width: 14, height: 14, borderRadius: "50%", background: "var(--color-primary)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, color: "#fff", fontWeight: 700 }}>
+                          ✓
+                        </span>
+                      )}
+                      <div style={{ position: "relative" }}>
+                        <ChildAvatar name={child.firstName} size="sm" />
+                      </div>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: "var(--color-text-dark)", lineHeight: 1.2 }}>
+                        {child.firstName}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <button
+                disabled={selectedChildIds.length === 0}
+                onClick={() => setScreen("main")}
+                style={{ ...primaryBtn, opacity: selectedChildIds.length > 0 ? 1 : 0.4, cursor: selectedChildIds.length > 0 ? "pointer" : "default" }}
+              >
+                Continue{selectedChildIds.length > 0 ? ` with ${selectedChildIds.length} ${selectedChildIds.length === 1 ? "child" : "children"}` : ""}
+              </button>
+            </div>
+          )}
 
-        {step.name === "add_note" && (
-          <AddNoteStep
-            students={selectedChildren}
-            milestone={step.milestone}
-            todayActivities={todayActivities}
-            onLog={(text) => handleLog(step.childIds, step.milestone.id, text)}
-            onBack={() => setStep({ name: "select_milestone", childIds: step.childIds })}
-          />
-        )}
+          {/* Skill selection screen */}
+          {!done && screen === "skill" && (
+            <SkillScreen
+              milestones={milestones}
+              filterArea={filterArea}
+              selectedMilestones={selectedMilestones}
+              onFilterArea={setFilterArea}
+              onToggle={toggleMilestone}
+              onDone={() => setScreen("main")}
+            />
+          )}
 
-        {step.name === "done" && (
-          <DoneStep
-            students={classChildren.filter((c) => step.childIds.includes(c.id))}
-            onLogAnother={reset}
-            onDone={closeQuickLog}
-          />
-        )}
+          {/* Main screen */}
+          {!done && screen === "main" && (
+            <div>
+              {/* Selected children summary */}
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
+                {classChildren.filter((c) => selectedChildIds.includes(c.id)).map((child) => (
+                  <div key={child.id} style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 10px 4px 6px", borderRadius: 20, background: "var(--color-primary-wash)", border: "1px solid var(--color-primary)" }}>
+                    <ChildAvatar name={child.firstName} size="xs" />
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "var(--color-primary)" }}>{child.firstName}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Observation textarea */}
+              <div
+                style={{
+                  borderRadius: 14,
+                  border: "1.5px solid var(--color-border)",
+                  background: "#fff",
+                  overflow: "hidden",
+                  marginBottom: 14,
+                }}
+              >
+                <textarea
+                  ref={textareaRef}
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder="What did you observe?"
+                  rows={4}
+                  style={{
+                    width: "100%",
+                    padding: "14px 14px 8px",
+                    fontSize: 14,
+                    color: "var(--color-text-dark)",
+                    resize: "none",
+                    outline: "none",
+                    border: "none",
+                    background: "transparent",
+                    boxSizing: "border-box",
+                    lineHeight: 1.5,
+                  }}
+                />
+                {/* Media buttons */}
+                <div style={{ display: "flex", gap: 2, padding: "4px 10px 10px" }}>
+                  <input ref={fileInputRef} type="file" accept="audio/*,image/*,video/*" style={{ display: "none" }} />
+                  {[
+                    {
+                      label: "Audio",
+                      icon: (
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                          <rect x="6" y="2" width="6" height="9" rx="3" stroke="currentColor" strokeWidth="1.4" />
+                          <path d="M3 9a6 6 0 0012 0" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                          <path d="M9 15v2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      label: "Photo",
+                      icon: (
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                          <rect x="2" y="5" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.4" />
+                          <circle cx="9" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.4" />
+                          <path d="M6.5 5l1.5-2h3l1.5 2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      label: "Video",
+                      icon: (
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                          <rect x="2" y="5" width="10" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
+                          <path d="M12 8l4-2v6l-4-2V8z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+                        </svg>
+                      ),
+                    },
+                  ].map(({ label, icon }) => (
+                    <button
+                      key={label}
+                      onClick={() => fileInputRef.current?.click()}
+                      title={label}
+                      style={{ padding: 6, borderRadius: 8, background: "none", border: "none", cursor: "pointer", color: "var(--color-text-muted)" }}
+                    >
+                      {icon}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Suggestions */}
+              <p style={{ fontSize: 12, fontWeight: 600, color: "var(--color-text-muted)", marginBottom: 7 }}>
+                Suggestions
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>
+                {SUGGESTIONS.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => appendSuggestion(s)}
+                    style={{
+                      padding: "5px 11px",
+                      borderRadius: 20,
+                      fontSize: 12,
+                      border: "1px solid var(--color-border)",
+                      background: "#fff",
+                      color: "var(--color-text-mid)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+
+              {/* Domain & skill tags */}
+              <div style={{ marginBottom: 20 }}>
+                {selectedMilestones.length > 0 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+                    {selectedMilestones.map((m) => (
+                      <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 8px 4px 6px", borderRadius: 20, background: "#E8F5EE" }}>
+                        <DomainTag areaId={m.areaId} size="sm" />
+                        <span style={{ fontSize: 12, fontWeight: 600, color: "#2D7A4F" }}>{m.statement}</span>
+                        <button
+                          onClick={() => toggleMilestone(m)}
+                          style={{ marginLeft: 2, background: "none", border: "none", cursor: "pointer", color: "#2D7A4F", padding: 0, lineHeight: 1 }}
+                          aria-label={`Remove ${m.statement}`}
+                        >
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                            <path d="M2 2l8 8M10 2L2 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button
+                  onClick={() => setScreen("skill")}
+                  style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--color-primary)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.3" />
+                    <path d="M8 5v6M5 8h6" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                  </svg>
+                  {selectedMilestones.length > 0 ? "Add another skill" : "Tag domain & skill"}
+                </button>
+              </div>
+
+              {/* Submit */}
+              <button
+                disabled={!canSubmit}
+                onClick={handleLog}
+                style={{
+                  ...primaryBtn,
+                  opacity: canSubmit ? 1 : 0.4,
+                  cursor: canSubmit ? "pointer" : "default",
+                }}
+              >
+                Log observation
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </>
   );
 }
 
-// ── Step: Select child ────────────────────────────────────────────────────────
+// ── Skill selection screen ────────────────────────────────────────────────────
 
-function SelectChildStep({
-  students,
-  attendanceMap,
-  multiMode,
-  selectedIds,
-  onToggleMulti,
-  onChildTap,
-  onConfirmMulti,
-}: {
-  students: Child[];
-  attendanceMap: Map<string, AttendanceStatus>;
-  multiMode: boolean;
-  selectedIds: string[];
-  onToggleMulti: () => void;
-  onChildTap: (id: string) => void;
-  onConfirmMulti: () => void;
-}) {
-  return (
-    <div>
-      {/* Header row */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-        <p style={{ fontSize: 13, color: "var(--color-text-mid)", margin: 0 }}>
-          {multiMode ? "Select children" : "Who did you observe?"}
-        </p>
-        <button
-          onClick={onToggleMulti}
-          style={{
-            fontSize: 12,
-            fontWeight: 600,
-            color: multiMode ? "var(--color-primary)" : "var(--color-text-muted)",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: "2px 0",
-          }}
-        >
-          {multiMode ? "Single select" : "Select multiple"}
-        </button>
-      </div>
-
-      {/* Child grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
-        {students.map((child) => {
-          const status = attendanceMap.get(child.id) ?? "pending";
-          const isSelected = selectedIds.includes(child.id);
-
-          return (
-            <button
-              key={child.id}
-              onClick={() => onChildTap(child.id)}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 5,
-                padding: "10px 6px",
-                borderRadius: 10,
-                background: isSelected ? "var(--color-primary-wash)" : "var(--color-bg-warm)",
-                border: isSelected
-                  ? "2px solid var(--color-primary)"
-                  : "1px solid var(--color-border)",
-                cursor: "pointer",
-                position: "relative",
-              }}
-            >
-              {/* Multi-select checkmark */}
-              {multiMode && isSelected && (
-                <span
-                  style={{
-                    position: "absolute",
-                    top: 4,
-                    right: 4,
-                    width: 14,
-                    height: 14,
-                    borderRadius: "50%",
-                    background: "var(--color-primary)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 9,
-                    color: "#fff",
-                    fontWeight: 700,
-                  }}
-                >
-                  ✓
-                </span>
-              )}
-
-              <div style={{ position: "relative" }}>
-                <ChildAvatar name={child.firstName} size="sm" />
-                <span style={{ position: "absolute", bottom: -1, right: -1 }}>
-                  <AttendanceDot status={status} size={8} />
-                </span>
-              </div>
-              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--color-text-dark)", lineHeight: 1.2 }}>
-                {child.firstName}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Multi-select confirm */}
-      {multiMode && (
-        <button
-          onClick={onConfirmMulti}
-          disabled={selectedIds.length === 0}
-          style={{
-            ...primaryBtn,
-            marginTop: 14,
-            opacity: selectedIds.length > 0 ? 1 : 0.4,
-          }}
-        >
-          Continue with {selectedIds.length > 0 ? `${selectedIds.length} selected` : "selection"}
-        </button>
-      )}
-    </div>
-  );
-}
-
-// ── Step: Select milestone ────────────────────────────────────────────────────
-
-function SelectMilestoneStep({
+function SkillScreen({
   milestones,
   filterArea,
+  selectedMilestones,
   onFilterArea,
-  onSelect,
-  onBack,
+  onToggle,
+  onDone,
 }: {
   milestones: Milestone[];
   filterArea: LearningAreaId | null;
+  selectedMilestones: Milestone[];
   onFilterArea: (area: LearningAreaId | null) => void;
-  onSelect: (m: Milestone) => void;
-  onBack: () => void;
+  onToggle: (m: Milestone) => void;
+  onDone: () => void;
 }) {
   const visible = filterArea
     ? milestones.filter((m) => m.areaId === filterArea)
@@ -359,7 +421,7 @@ function SelectMilestoneStep({
   return (
     <div>
       <p style={{ fontSize: 13, color: "var(--color-text-mid)", marginBottom: 10 }}>
-        What area did you observe?
+        Select domain & skill
       </p>
 
       {/* Domain filter pills */}
@@ -390,199 +452,57 @@ function SelectMilestoneStep({
       </div>
 
       {/* Milestone list */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 300, overflowY: "auto" }}>
-        {visible.map((m) => (
-          <button
-            key={m.id}
-            onClick={() => onSelect(m)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "10px 12px",
-              borderRadius: 10,
-              background: "var(--color-bg-warm)",
-              border: "1px solid var(--color-border)",
-              cursor: "pointer",
-              textAlign: "left",
-            }}
-          >
-            <DomainTag areaId={m.areaId} size="sm" />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text-dark)", lineHeight: 1.3 }}>
-                {m.statement}
+      <div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 300, overflowY: "auto", marginBottom: 14 }}>
+        {visible.map((m) => {
+          const isSelected = selectedMilestones.some((s) => s.id === m.id);
+          return (
+            <button
+              key={m.id}
+              onClick={() => onToggle(m)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "10px 12px",
+                borderRadius: 10,
+                background: isSelected ? "#E8F5EE" : "var(--color-bg-warm)",
+                border: isSelected ? "1.5px solid var(--color-primary)" : "1px solid var(--color-border)",
+                cursor: "pointer",
+                textAlign: "left",
+              }}
+            >
+              <DomainTag areaId={m.areaId} size="sm" />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text-dark)", lineHeight: 1.3 }}>
+                  {m.statement}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--color-text-muted)", marginTop: 1 }}>
+                  {m.id} · Level {m.levelId}
+                </div>
               </div>
-              <div style={{ fontSize: 11, color: "var(--color-text-muted)", marginTop: 1 }}>
-                {m.id} · Level {m.levelId}
-              </div>
-            </div>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ flexShrink: 0, opacity: 0.4 }}>
-              <path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-        ))}
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
+                {isSelected ? (
+                  <>
+                    <circle cx="8" cy="8" r="7" fill="var(--color-primary)" />
+                    <path d="M5 8l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </>
+                ) : (
+                  <circle cx="8" cy="8" r="7" stroke="var(--color-border)" strokeWidth="1.5" />
+                )}
+              </svg>
+            </button>
+          );
+        })}
       </div>
 
-      <button onClick={onBack} style={{ ...secondaryBtn, marginTop: 12 }}>
-        Back
+      <button onClick={onDone} style={primaryBtn}>
+        Done{selectedMilestones.length > 0 ? ` (${selectedMilestones.length} selected)` : ""}
       </button>
     </div>
   );
 }
 
-// ── Step: Add note (optional) ─────────────────────────────────────────────────
-
-function AddNoteStep({
-  students,
-  milestone,
-  todayActivities,
-  onLog,
-  onBack,
-}: {
-  students: Child[];
-  milestone: Milestone;
-  todayActivities: { id: string; title: string }[];
-  onLog: (text: string, activityId?: string) => void;
-  onBack: () => void;
-}) {
-  const [note, setNote] = useState("");
-  const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
-
-  function applyPreset(text: string) {
-    setNote(text);
-  }
-
-  return (
-    <div>
-      {/* Milestone summary */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "10px 12px",
-          borderRadius: 10,
-          background: "var(--color-bg-warm)",
-          border: "1px solid var(--color-border)",
-          marginBottom: 16,
-        }}
-      >
-        <DomainTag areaId={milestone.areaId} />
-        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text-dark)", flex: 1 }}>
-          {milestone.statement}
-        </span>
-      </div>
-
-      {/* Child list (if multiple) */}
-      {students.length > 1 && (
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-          {students.map((c) => (
-            <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <ChildAvatar name={c.firstName} size="xs" />
-              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--color-text-dark)" }}>{c.firstName}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Quick presets */}
-      <p style={{ fontSize: 12, fontWeight: 600, color: "var(--color-text-mid)", marginBottom: 7 }}>
-        Quick note
-      </p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 5, marginBottom: 12 }}>
-        {QUICK_PRESETS.map((preset) => (
-          <button
-            key={preset}
-            onClick={() => applyPreset(preset)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: 8,
-              fontSize: 13,
-              textAlign: "left",
-              background: note === preset ? "var(--color-primary-wash)" : "var(--color-bg-warm)",
-              border: note === preset
-                ? "1.5px solid var(--color-primary)"
-                : "1px solid var(--color-border)",
-              color: note === preset ? "var(--color-primary)" : "var(--color-text-dark)",
-              fontWeight: note === preset ? 600 : 400,
-              cursor: "pointer",
-            }}
-          >
-            {preset}
-          </button>
-        ))}
-      </div>
-
-      {/* Free text (optional) */}
-      <p style={{ fontSize: 12, fontWeight: 600, color: "var(--color-text-mid)", marginBottom: 7 }}>
-        Or write your own <span style={{ fontWeight: 400, color: "var(--color-text-muted)" }}>(optional)</span>
-      </p>
-      <textarea
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-        placeholder="Add any specific details…"
-        rows={3}
-        style={{
-          width: "100%",
-          padding: "10px 12px",
-          borderRadius: 10,
-          border: "1.5px solid var(--color-border)",
-          fontSize: 13,
-          resize: "none",
-          outline: "none",
-          lineHeight: 1.5,
-          boxSizing: "border-box",
-          marginBottom: 14,
-        }}
-      />
-
-      {/* Activity tag (optional) */}
-      {todayActivities.length > 0 && (
-        <div style={{ marginBottom: 16 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, color: "var(--color-text-mid)", marginBottom: 7 }}>
-            During activity <span style={{ fontWeight: 400, color: "var(--color-text-muted)" }}>(optional)</span>
-          </p>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {todayActivities.map((act) => {
-              const isSelected = selectedActivityId === act.id;
-              return (
-                <button
-                  key={act.id}
-                  onClick={() => setSelectedActivityId(isSelected ? null : act.id)}
-                  style={{
-                    padding: "5px 11px",
-                    borderRadius: 20,
-                    fontSize: 12,
-                    fontWeight: isSelected ? 600 : 400,
-                    border: "1.5px solid",
-                    borderColor: isSelected ? "var(--color-secondary-dark)" : "var(--color-border)",
-                    background: isSelected ? "var(--color-secondary-dark)" : "var(--color-bg-warm)",
-                    color: isSelected ? "#fff" : "var(--color-text-mid)",
-                    cursor: "pointer",
-                  }}
-                >
-                  {act.title}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Action buttons */}
-      <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={onBack} style={secondaryBtn}>
-          Back
-        </button>
-        <button onClick={() => onLog(note, selectedActivityId ?? undefined)} style={primaryBtn}>
-          Log it ✓
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ── Step: Done ────────────────────────────────────────────────────────────────
+// ── Done screen ───────────────────────────────────────────────────────────────
 
 function DoneStep({
   students,
@@ -617,9 +537,6 @@ function DoneStep({
       >
         ✓
       </div>
-      <div style={{ fontSize: 16, fontWeight: 700, color: "var(--color-text-dark)", marginBottom: 4 }}>
-        Observation logged!
-      </div>
       <p style={{ fontSize: 13, color: "var(--color-text-muted)", marginBottom: 22 }}>
         Saved for {names}
       </p>
@@ -638,8 +555,8 @@ function DoneStep({
 // ── Shared styles ─────────────────────────────────────────────────────────────
 
 const primaryBtn: React.CSSProperties = {
-  flex: 1,
-  padding: "10px 16px",
+  width: "100%",
+  padding: "11px 16px",
   borderRadius: 10,
   background: "var(--color-primary)",
   color: "#fff",
@@ -660,4 +577,3 @@ const secondaryBtn: React.CSSProperties = {
   border: "1px solid var(--color-border)",
   cursor: "pointer",
 };
-

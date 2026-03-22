@@ -13,9 +13,13 @@ export default function AdminLayout({
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <DemoRoleBar activeRole="school" />
       <DemoPersonaBar role="school" />
-      <div className="flex flex-1 min-h-0">
+      <div className="flex min-h-0 flex-1 items-stretch">
         <AdminNav />
-        <main className="flex-1 min-w-0 overflow-y-auto pb-20 md:pb-0">{children}</main>
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden pb-20 md:pb-0">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-contain">
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   );

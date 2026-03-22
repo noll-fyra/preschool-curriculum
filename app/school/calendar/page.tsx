@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useId } from "react";
 import { useStore } from "@/lib/store";
 import type { NurtureStore } from "@/lib/store";
 import type { CalendarHoliday, ClassSchedule, YearLevelId, RecurrenceType, ScheduleScope } from "@/lib/types";
@@ -37,6 +37,7 @@ const YEAR_LEVELS: YearLevelId[] = ["N1", "N2", "K1", "K2"];
 export default function AdminCalendarPage() {
   const store = useStore();
   const { calendarHolidays, classSchedules, classes, school } = store;
+  const weekClassSelectId = useId();
 
   const todayISO = toISO(new Date());
   const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
@@ -321,6 +322,7 @@ export default function AdminCalendarPage() {
             <div className="mb-4 flex shrink-0 items-center gap-2">
               <span className="text-muted-foreground text-xs font-medium">Class:</span>
               <Select
+                id={weekClassSelectId}
                 value={weekClassId}
                 onValueChange={(v) => v != null && setWeekClassId(String(v))}
                 items={classItems}

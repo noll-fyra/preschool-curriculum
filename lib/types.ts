@@ -226,6 +226,10 @@ export interface ChildAttendance {
   status: AttendanceStatus;
   /** Required when status is "absent"; reason provided by parent or teacher */
   absentReason?: string;
+  /** Employee ID of the staff member who recorded this check-in */
+  checkedInBy?: string;
+  /** ISO 8601 timestamp of when the status was last set to present or late */
+  checkedInAt?: string;
 }
 
 export interface ActivityFeedback {

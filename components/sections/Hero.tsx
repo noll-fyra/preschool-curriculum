@@ -62,7 +62,7 @@ export default function Hero() {
                   "#F79863";
               }}
             >
-              Get started free
+              Try the demo
             </Link>
           </div>
         </AnimateIn>

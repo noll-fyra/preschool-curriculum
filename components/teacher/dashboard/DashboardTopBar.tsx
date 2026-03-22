@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { Bell, Plus } from "lucide-react";
 
 import type { Class } from "@/lib/types";
@@ -43,6 +44,7 @@ export function DashboardTopBar({
   onNotificationsOpen,
   notificationCount = 0,
 }: DashboardTopBarProps) {
+  const classPickerId = useId();
   const classItems = Object.fromEntries(
     classes.map((c) => [c.id, `${c.name} (${c.preschoolYear})`])
   );
@@ -56,6 +58,7 @@ export function DashboardTopBar({
 
       <div className="shrink-0">
         <Select
+          id={classPickerId}
           value={activeClassId}
           onValueChange={(v) => {
             if (v != null) onClassChange(String(v));

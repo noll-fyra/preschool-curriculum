@@ -206,7 +206,7 @@ export default function ForParentsPage() {
           headline="Always know how your child is doing."
           subheadline="Nurture gives you a live window into your child's learning — what they're working on, what they've just achieved, and exactly how you can help — updated every time they complete an activity."
           primaryCTA={{
-            label: "See how it works",
+            label: "Try the demo",
             href: "/demo/parent",
           }}
           visual={<ParentHomeMockup />}
@@ -402,17 +402,17 @@ export default function ForParentsPage() {
           options={[
             {
               icon: "📱",
-              title: "Download the app",
-              desc: "Parent app for iOS and Android — free to get started.",
-              ctaLabel: "Download Nurture →",
-              ctaHref: "mailto:hello@nurture.edu.sg",
+              title: "Try the parent experience",
+              desc: "Explore the parent app in your browser with sample data — no install required.",
+              ctaLabel: "Try the demo",
+              ctaHref: "/demo/parent",
               primary: true,
             },
             {
-              icon: "🏫",
-              title: "Ask your child's school",
-              desc: "Share Nurture with your child's preschool and invite them to join the pilot.",
-              ctaLabel: "Share with school →",
+              icon: "📲",
+              title: "Download the app",
+              desc: "Parent app for iOS and Android — free to get started.",
+              ctaLabel: "Download Nurture →",
               ctaHref: "mailto:hello@nurture.edu.sg",
             },
           ]}

@@ -91,13 +91,30 @@ export function DomainSnapshot({
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  gap: 8,
                   marginBottom: 3,
                 }}
               >
-                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--color-text-dark)" }}>
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "var(--color-text-dark)",
+                    flex: 1,
+                    minWidth: 0,
+                    overflowWrap: "break-word",
+                  }}
+                >
                   {area.name}
                 </span>
-                <span style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
+                <span
+                  style={{
+                    fontSize: 12,
+                    color: "var(--color-text-muted)",
+                    flexShrink: 0,
+                  }}
+                >
                   {count} / {total}
                 </span>
               </div>

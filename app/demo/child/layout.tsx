@@ -1,12 +1,21 @@
 "use client";
 
-import StudentLayout from "@/app/student/layout";
+import { DemoRoleBar } from "@/components/shared/DemoRoleBar";
 
+/** Handoff entry: teacher picks a child before the student shell (persona bar) appears. */
 export default function DemoChildLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <StudentLayout>{children}</StudentLayout>;
+  return (
+    <div
+      className="flex flex-col min-h-screen"
+      style={{ background: "var(--color-bg-warm)" }}
+    >
+      <DemoRoleBar activeRole="student" />
+      <main className="flex-1">{children}</main>
+    </div>
+  );
 }
 

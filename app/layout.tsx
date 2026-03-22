@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Livvic, Geist } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { FloatingNurtureAI } from "@/components/shared/FloatingNurtureAI";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -30,6 +31,7 @@ export default function RootLayout({
           Skip to main content
         </a>
         {children}
+        <FloatingNurtureAI />
       </body>
     </html>
   );

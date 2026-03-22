@@ -435,7 +435,7 @@ export default function Problem() {
                 ),
               },
               {
-                label: "Try demo",
+                label: "Try the demo",
                 href: "/demo",
                 dark: true,
                 icon: (

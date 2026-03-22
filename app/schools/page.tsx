@@ -30,8 +30,8 @@ export default function ForSchoolsPage() {
           headline="The learning platform built for Singapore preschools."
           subheadline="Nurture closes the gap between your curriculum and your data — aligning every classroom activity, every milestone, and every parent update to the NEL Framework, automatically."
           primaryCTA={{
-            label: "See how it works",
-            href: "/demo/teacher",
+            label: "Try the demo",
+            href: "/demo/school",
           }}
           visual={<HeroDashboardMockup />}
         />
@@ -218,17 +218,17 @@ export default function ForSchoolsPage() {
           options={[
             {
               icon: "🏫",
-              title: "Request a demo",
-              desc: "See Nurture set up for your school with your own context in mind.",
-              ctaLabel: "Request a demo →",
-              ctaHref: "mailto:hello@nurture.edu.sg",
+              title: "School dashboard demo",
+              desc: "Explore cohort analytics and school tools in the browser with sample data.",
+              ctaLabel: "Try the demo",
+              ctaHref: "/demo/school",
               primary: true,
             },
             {
-              icon: "📄",
-              title: "Download product overview",
-              desc: "Get a concise overview PDF to share with your leadership team.",
-              ctaLabel: "Download overview →",
+              icon: "🎓",
+              title: "Request a demo",
+              desc: "See Nurture set up for your school with your own context in mind.",
+              ctaLabel: "Book a demo →",
               ctaHref: "mailto:hello@nurture.edu.sg",
             },
           ]}

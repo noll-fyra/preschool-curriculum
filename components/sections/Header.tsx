@@ -91,7 +91,7 @@ export default function Header() {
                 "#F79863";
             }}
           >
-            Get started free
+            Try the demo
           </Link>
         </div>
 
@@ -101,7 +101,7 @@ export default function Header() {
           className="md:hidden text-sm font-semibold px-3 py-1.5 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2"
           style={{ backgroundColor: "#F79863", color: "white" }}
         >
-          Get started
+          Try the demo
         </Link>
       </div>
     </header>

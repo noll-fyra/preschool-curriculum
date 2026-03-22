@@ -39,7 +39,7 @@ export default function ForStudentsPage() {
           headline="Learning that feels like play."
           subheadline="Nurture gives every child a companion, a queue of activities matched to exactly where they are, and a celebration every time they finish — whether they got every answer right or not."
           primaryCTA={{
-            label: "See how it works",
+            label: "Try the demo",
             href: "/demo/child",
           }}
           visual={<HeroPhoneMockup />}
@@ -237,17 +237,17 @@ export default function ForStudentsPage() {
           options={[
             {
               icon: "🌱",
-              title: "Get early access",
-              desc: "Reserve a spot for your child or class in the pilot rollout.",
-              ctaLabel: "Get early access →",
-              ctaHref: "mailto:hello@nurture.edu.sg",
+              title: "Child activities demo",
+              desc: "Play through sample tap-to-select activities as a child would — right in the browser.",
+              ctaLabel: "Try the demo",
+              ctaHref: "/demo/child",
               primary: true,
             },
             {
-              icon: "🎬",
-              title: "See it for yourself",
-              desc: "Watch a short demo of the child experience from a parent's phone.",
-              ctaLabel: "Watch the demo →",
+              icon: "✉️",
+              title: "Get early access",
+              desc: "Reserve a spot for your child or class in the pilot rollout.",
+              ctaLabel: "Get early access →",
               ctaHref: "mailto:hello@nurture.edu.sg",
             },
           ]}

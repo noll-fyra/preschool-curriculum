@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useId } from "react";
 import { useStore } from "@/lib/store";
 import type { ClassSchedule, LearningAreaId } from "@/lib/types";
 import {
@@ -38,6 +38,7 @@ type CalTab = "schedule" | "activity_library";
 export default function TeacherCalendarPage() {
   const store = useStore();
   const { calendarHolidays, classSchedules, classes, classTeacherAssignments, demoPersona, plannedActivities, milestones, activeClassId } = store;
+  const weekClassSelectId = useId();
 
   // Derive teacher's classes
   const teacherClassIds = useMemo(
@@ -282,6 +283,7 @@ export default function TeacherCalendarPage() {
         <div className="mb-4 flex shrink-0 items-center gap-2">
           <span className="text-muted-foreground text-xs font-medium">Class:</span>
           <Select
+            id={weekClassSelectId}
             value={weekClassId}
             onValueChange={(v) => v != null && setWeekClassId(String(v))}
             items={classItems}

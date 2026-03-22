@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useId } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { useStore } from "@/lib/store";
@@ -44,6 +44,9 @@ function matchesAge(ageYears: number | undefined, ageFilter: string): boolean {
 
 export default function AdminStudentsPage() {
   const { children, classes } = useStore();
+  const ageSelectId = useId();
+  const gradeSelectId = useId();
+  const classSelectId = useId();
   const [classFilter, setClassFilter] = useState<string>("");
   const [gradeFilter, setGradeFilter] = useState<YearLevelId | "">("");
   const [ageFilter, setAgeFilter] = useState<"" | "3" | "4" | "5" | "6+">("");
@@ -76,6 +79,7 @@ export default function AdminStudentsPage() {
         <div className="space-y-1">
           <Label className="text-xs">Age</Label>
           <Select
+            id={ageSelectId}
             value={ageFilter || "all"}
             onValueChange={(v) => setAgeFilter(v === "all" ? "" : (v as typeof ageFilter))}
             items={ageItems}
@@ -95,6 +99,7 @@ export default function AdminStudentsPage() {
         <div className="space-y-1">
           <Label className="text-xs">Grade</Label>
           <Select
+            id={gradeSelectId}
             value={gradeFilter || "all"}
             onValueChange={(v) => setGradeFilter(v === "all" ? "" : (v as YearLevelId))}
             items={gradeItems}
@@ -114,6 +119,7 @@ export default function AdminStudentsPage() {
         <div className="space-y-1">
           <Label className="text-xs">Class</Label>
           <Select
+            id={classSelectId}
             value={classFilter || "all"}
             onValueChange={(v) =>
               setClassFilter(v == null || v === "all" ? "" : String(v))

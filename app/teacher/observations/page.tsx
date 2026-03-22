@@ -314,12 +314,13 @@ export default function ObservationsPage() {
   const showInsightPanel = childFilter.length === 1;
 
   return (
-    <div style={{ display: "flex", height: "100%", overflow: "hidden" }}>
+    <div className="flex min-h-0 w-full flex-1 overflow-hidden">
       {/* Main content */}
       <div
         style={{
           flex: 1,
           minWidth: 0,
+          minHeight: 0,
           overflowY: "auto",
           padding: "20px 20px 40px",
         }}
@@ -777,7 +778,7 @@ export default function ObservationsPage() {
       {/* Insight panel (desktop only) */}
       {showInsightPanel && (
         <div
-          className="hidden lg:block"
+          className="hidden min-h-0 lg:block"
           style={{
             width: 260,
             flexShrink: 0,

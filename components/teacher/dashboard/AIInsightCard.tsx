@@ -46,6 +46,7 @@ export function AIInsightCard({ phase, stats, teacherName }: AIInsightCardProps)
 
   return (
     <div
+      className="min-w-0"
       style={{
         background: "var(--color-secondary-wash, #E5F4F1)",
         borderRadius: 12,
@@ -55,12 +56,14 @@ export function AIInsightCard({ phase, stats, teacherName }: AIInsightCardProps)
       <div
         style={{
           display: "flex",
+          flexWrap: "wrap",
           alignItems: "center",
           gap: 6,
           marginBottom: 8,
+          minWidth: 0,
         }}
       >
-        <span style={{ fontSize: 14 }}>✦</span>
+        <span style={{ fontSize: 14, flexShrink: 0 }}>✦</span>
         <span
           style={{
             fontSize: 11,
@@ -68,6 +71,9 @@ export function AIInsightCard({ phase, stats, teacherName }: AIInsightCardProps)
             color: "var(--color-secondary-dark, #1C2B29)",
             textTransform: "uppercase",
             letterSpacing: "0.06em",
+            minWidth: 0,
+            flex: "1 1 auto",
+            overflowWrap: "break-word",
           }}
         >
           Insight · {PHASE_LABELS[phase]}
@@ -79,6 +85,7 @@ export function AIInsightCard({ phase, stats, teacherName }: AIInsightCardProps)
               fontSize: 11,
               color: "var(--color-text-muted)",
               fontStyle: "italic",
+              flexShrink: 0,
             }}
           >
             updating…
@@ -86,6 +93,7 @@ export function AIInsightCard({ phase, stats, teacherName }: AIInsightCardProps)
         )}
       </div>
       <p
+        className="wrap-break-word"
         style={{
           fontSize: 13,
           lineHeight: 1.6,

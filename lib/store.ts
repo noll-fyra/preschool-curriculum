@@ -136,7 +136,7 @@ export interface NurtureStore {
 
   // Actions
   setActiveClass: (classId: string) => void;
-  markAttendance: (childId: string, date: string, status: AttendanceStatus, reason?: string) => void;
+  markAttendance: (childId: string, date: string, status: AttendanceStatus, reason?: string, employeeId?: string) => void;
   setChildTeacherNote: (childId: string, note: string) => void;
   recordSession: (childId: string, milestoneId: string, score: number) => void;
   logObservation: (childId: string, milestoneId: string, note?: string, teacherId?: string) => void;
@@ -263,12 +263,18 @@ export const useStore = create<NurtureStore>((set, get) => ({
   // ── Switch active class ──────────────────────────────────────────────────
   setActiveClass: (classId) => set({ activeClassId: classId }),
 
-  markAttendance: (childId, date, status, reason) =>
+  markAttendance: (childId, date, status, reason, employeeId) =>
     set((state) => {
       const existing = state.attendance.findIndex(
         (a) => a.childId === childId && a.date === date
       );
-      const patch = { status, absentReason: status === "absent" ? reason : undefined };
+      const isCheckIn = status === "present" || status === "late";
+      const patch = {
+        status,
+        absentReason: status === "absent" ? reason : undefined,
+        checkedInBy: isCheckIn ? employeeId : undefined,
+        checkedInAt: isCheckIn ? new Date().toISOString() : undefined,
+      };
       if (existing >= 0) {
         const updated = [...state.attendance];
         updated[existing] = { ...updated[existing], ...patch };

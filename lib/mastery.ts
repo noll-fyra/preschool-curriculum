@@ -115,38 +115,31 @@ export function getCurrentLevel(
   childId: string,
   areaId: LearningAreaId
 ): LevelId {
-  const levelOrder: LevelId[] = ["B", "D", "S"];
-
-  const areaMilestones = milestones.filter((m) => m.areaId === areaId);
-
   const progressMap = new Map(
     progress
       .filter((p) => p.childId === childId)
       .map((p) => [p.milestoneId, p.status])
   );
+  return getCurrentLevelFromStatusMap(milestones, areaId, progressMap);
+}
 
-  // Find highest level with an in_progress milestone
-  for (const level of [...levelOrder].reverse()) {
-    const levelMilestones = areaMilestones.filter((m) => m.levelId === level);
-    const hasInProgress = levelMilestones.some(
-      (m) => progressMap.get(m.id) === "in_progress"
-    );
-    if (hasInProgress) return level;
-  }
-
-  // Fallback: lowest level with a not_started milestone
-  for (const level of levelOrder) {
-    const levelMilestones = areaMilestones.filter((m) => m.levelId === level);
-    const hasNotStarted = levelMilestones.some(
-      (m) =>
-        progressMap.get(m.id) === "not_started" ||
-        progressMap.get(m.id) === undefined
-    );
-    if (hasNotStarted) return level;
-  }
-
-  // All achieved — return Secure
-  return "S";
+/**
+ * Next milestone the child is working toward in this area (aligned with weekly assignment pick):
+ * first `in_progress` at {@link getCurrentLevel}, else first `not_started` (or missing row) there;
+ * if none, the first such milestone at a higher level. `null` when every milestone in the area is achieved.
+ */
+export function getNextFocusMilestone(
+  milestones: Milestone[],
+  progress: ChildMilestoneProgress[],
+  childId: string,
+  areaId: LearningAreaId
+): Milestone | null {
+  const progressMap = new Map(
+    progress
+      .filter((p) => p.childId === childId)
+      .map((p) => [p.milestoneId, p.status])
+  );
+  return getNextFocusMilestoneFromStatusMap(milestones, areaId, progressMap);
 }
 
 // ─── Historical achievement date from raw data ─────────────────────────────
@@ -207,4 +200,81 @@ export function computeStatus(
     return evaluateSEDMastery(observations, childId, milestone.id);
   }
   return evaluateSkillMastery(sessions, childId, milestone.id);
+}
+
+/** Per-milestone status from sessions + observations (matches child profile / selectors). */
+export function computeStatusMapForChild(
+  childId: string,
+  milestones: Milestone[],
+  sessions: ActivitySession[],
+  observations: TeacherObservation[]
+): Map<string, MilestoneStatus> {
+  const map = new Map<string, MilestoneStatus>();
+  for (const m of milestones) {
+    map.set(m.id, computeStatus(m, childId, sessions, observations));
+  }
+  return map;
+}
+
+export function getCurrentLevelFromStatusMap(
+  milestones: Milestone[],
+  areaId: LearningAreaId,
+  statusByMilestoneId: Map<string, MilestoneStatus>
+): LevelId {
+  const levelOrder: LevelId[] = ["B", "D", "S"];
+  const areaMilestones = milestones.filter((m) => m.areaId === areaId);
+
+  const get = (milestoneId: string) => statusByMilestoneId.get(milestoneId);
+
+  for (const level of [...levelOrder].reverse()) {
+    const levelMilestones = areaMilestones.filter((m) => m.levelId === level);
+    const hasInProgress = levelMilestones.some((m) => get(m.id) === "in_progress");
+    if (hasInProgress) return level;
+  }
+
+  for (const level of levelOrder) {
+    const levelMilestones = areaMilestones.filter((m) => m.levelId === level);
+    const hasNotStarted = levelMilestones.some((m) => {
+      const s = get(m.id);
+      return s === "not_started" || s === undefined;
+    });
+    if (hasNotStarted) return level;
+  }
+
+  return "S";
+}
+
+export function getNextFocusMilestoneFromStatusMap(
+  milestones: Milestone[],
+  areaId: LearningAreaId,
+  statusByMilestoneId: Map<string, MilestoneStatus>
+): Milestone | null {
+  const currentLevel = getCurrentLevelFromStatusMap(milestones, areaId, statusByMilestoneId);
+  const levelOrder: LevelId[] = ["B", "D", "S"];
+  const get = (id: string) => statusByMilestoneId.get(id);
+
+  const pickFromLevel = (level: LevelId): Milestone | null => {
+    const levelMilestones = milestones
+      .filter((m) => m.areaId === areaId && m.levelId === level)
+      .sort((a, b) => a.sequence - b.sequence);
+
+    const inProgress = levelMilestones.find((m) => get(m.id) === "in_progress");
+    if (inProgress) return inProgress;
+
+    const notStarted = levelMilestones.find(
+      (m) => get(m.id) === "not_started" || get(m.id) === undefined
+    );
+    return notStarted ?? null;
+  };
+
+  let next = pickFromLevel(currentLevel);
+  if (next) return next;
+
+  const startIdx = levelOrder.indexOf(currentLevel);
+  for (let i = startIdx + 1; i < levelOrder.length; i++) {
+    next = pickFromLevel(levelOrder[i]);
+    if (next) return next;
+  }
+
+  return null;
 }

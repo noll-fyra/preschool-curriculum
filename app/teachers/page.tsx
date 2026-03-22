@@ -45,7 +45,7 @@ export default function ForTeachersPage() {
           }
           subheadline="Your morning dashboard answers three questions before the first child walks in — who's here, what are we doing, and who needs your attention."
           primaryCTA={{
-            label: "See how it works",
+            label: "Try the demo",
             href: "/demo/teacher",
           }}
           visual={<HeroDashboardMockup />}
@@ -244,7 +244,7 @@ export default function ForTeachersPage() {
               icon: "💻",
               title: "Get started free",
               desc: "Full teacher dashboard. No credit card required.",
-              ctaLabel: "Open on web →",
+              ctaLabel: "Try the demo",
               ctaHref: "/demo/teacher",
               primary: true,
             },

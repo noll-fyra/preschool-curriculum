@@ -1,12 +1,20 @@
 "use client";
 
-import StudentLayout from "@/app/student/layout";
+import { DemoRoleBar } from "@/components/shared/DemoRoleBar";
 
+/** Alias route → `/demo/child`; keep layout light until redirect runs. */
 export default function DemoStudentLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <StudentLayout>{children}</StudentLayout>;
+  return (
+    <div
+      className="flex flex-col min-h-screen"
+      style={{ background: "var(--color-bg-warm)" }}
+    >
+      <DemoRoleBar activeRole="student" />
+      <main className="flex-1">{children}</main>
+    </div>
+  );
 }
-
