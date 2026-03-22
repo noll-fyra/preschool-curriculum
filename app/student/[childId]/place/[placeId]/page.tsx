@@ -2,58 +2,39 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { ChevronLeft, List, X } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { getPlaceById } from "@/lib/places";
-import { autoSelectAssignments } from "@/lib/assignments";
 import { ACTIVITY_CONFIGS } from "@/lib/activity-data";
+import {
+  PATH_STEP_COUNT,
+  compareMilestonesForPath,
+  computePathSlotStatuses,
+} from "@/lib/student-path";
+import { DuolingoActivityPath, PATH_CIRCLE_NODE_PX } from "@/components/student/DuolingoActivityPath";
+import { LEARNING_AREAS, type LearningAreaId } from "@/lib/types";
 
-// Child-palette colours — hardcoded, never CSS variables (spec §1)
 const C = {
   bg: "#FFF8F0",
   surface: "#FFFFFF",
-  textDark: "#251B14",
   textMuted: "#7A6A5A",
+  textDark: "#2D3A2E",
   green: "#7DC873",
-  greenLight: "#F0FAF0",
   borderWarm: "#E8D5B0",
 };
 
-function CharacterBubble({ text, color }: { text: string; color: string }) {
-  return (
-    <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 20 }}>
-      <div
-        style={{
-          flexShrink: 0,
-          width: 40,
-          height: 40,
-          borderRadius: "50%",
-          background: "#FFF8EC",
-          border: `2px solid ${color}`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 22,
-        }}
-      >
-        🦉
-      </div>
-      <div
-        style={{
-          background: C.surface,
-          border: `2px solid ${C.borderWarm}`,
-          borderRadius: "0 16px 16px 16px",
-          padding: "10px 14px",
-          fontSize: 14,
-          lineHeight: 1.4,
-          color: C.textDark,
-          flex: 1,
-        }}
-      >
-        {text}
-      </div>
-    </div>
-  );
-}
+const BTN = PATH_CIRCLE_NODE_PX;
+
+/** Short child-friendly blurb per NEL learning area (domain description in the info modal). */
+const DOMAIN_DESCRIPTION: Record<LearningAreaId, string> = {
+  LL: "Stories, letters, sounds, and words — building the skills that help you read, write, and share ideas.",
+  NUM: "Counting, shapes, and patterns — playing with numbers and how they fit together.",
+  SED: "Feelings, friends, and solving problems together — growing confident and kind.",
+  ACE: "Colours, music, movement, and making things — expressing yourself in lots of ways.",
+  DOW: "Asking why, trying things out, and noticing the world around you.",
+  HMS: "Moving your body, staying safe, and looking after yourself.",
+};
 
 export default function PlacePage() {
   const params = useParams();
@@ -63,6 +44,98 @@ export default function PlacePage() {
   const store = useStore();
   const child = store.children.find((c) => c.id === childId);
   const place = getPlaceById(placeId);
+  const [infoOpen, setInfoOpen] = useState(false);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+
+  const pathSteps = useMemo(() => {
+    if (!place) return [];
+    const activityConfigOverrides = store.activityConfigOverrides;
+    const domainMilestones = store.milestones.filter((m) => m.areaId === place.areaId);
+    const rows = domainMilestones
+      .filter((m) => {
+        const config = activityConfigOverrides[m.id] ?? ACTIVITY_CONFIGS.find((a) => a.milestoneId === m.id);
+        return !!config;
+      })
+      .sort((a, b) => compareMilestonesForPath(a, b))
+      .map((m) => ({
+        milestone: m,
+        config: activityConfigOverrides[m.id] ?? ACTIVITY_CONFIGS.find((a) => a.milestoneId === m.id)!,
+      }));
+
+    if (rows.length === 0) return [];
+
+    const cycle = rows.map((r) => ({
+      milestoneId: r.milestone.id,
+      emoji: r.config.emoji,
+    }));
+
+    const slots = Array.from({ length: PATH_STEP_COUNT }, (_, i) => ({
+      slotIndex: i,
+      milestoneId: cycle[i % cycle.length]!.milestoneId,
+      emoji: cycle[i % cycle.length]!.emoji,
+    }));
+
+    const statuses = computePathSlotStatuses(
+      PATH_STEP_COUNT,
+      childId,
+      placeId,
+      store.pathSlotCompleted
+    );
+
+    return slots.map((s, i) => ({
+      slotIndex: s.slotIndex,
+      milestoneId: s.milestoneId,
+      emoji: s.emoji,
+      status: statuses[i]!,
+    }));
+  }, [
+    place,
+    childId,
+    placeId,
+    store.milestones,
+    store.activityConfigOverrides,
+    store.pathSlotCompleted,
+  ]);
+
+  const domainMeta = place ? LEARNING_AREAS.find((a) => a.id === place.areaId) : undefined;
+  const domainDescription = place ? DOMAIN_DESCRIPTION[place.areaId] : "";
+
+  const currentStep = useMemo(
+    () => pathSteps.find((s) => s.status === "current"),
+    [pathSteps]
+  );
+
+  const currentMilestone = useMemo(() => {
+    if (!currentStep) return undefined;
+    return store.milestones.find((m) => m.id === currentStep.milestoneId);
+  }, [currentStep, store.milestones]);
+
+  const currentActivityConfig = useMemo(() => {
+    if (!currentStep) return undefined;
+    return (
+      store.activityConfigOverrides[currentStep.milestoneId] ??
+      ACTIVITY_CONFIGS.find((a) => a.milestoneId === currentStep.milestoneId)
+    );
+  }, [currentStep, store.activityConfigOverrides]);
+
+  useEffect(() => {
+    if (!infoOpen) return;
+    document.body.style.overflow = "hidden";
+    const t = window.setTimeout(() => closeBtnRef.current?.focus(), 0);
+    return () => {
+      document.body.style.overflow = "";
+      window.clearTimeout(t);
+    };
+  }, [infoOpen]);
+
+  useEffect(() => {
+    if (!infoOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setInfoOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [infoOpen]);
 
   if (!child || !place) {
     return (
@@ -75,180 +148,250 @@ export default function PlacePage() {
     );
   }
 
-  // Find assigned milestone for this domain
-  const allAssigned = autoSelectAssignments(
-    childId,
-    store.milestones,
-    store.progress,
-    store.sessions,
-    store.observations
-  );
-  const assignedForDomain = allAssigned.find((m) => m.areaId === place.areaId);
+  const hasActivities = pathSteps.length > 0;
+  const headerPadTop = `calc(12px + env(safe-area-inset-top, 0px))`;
+  const headerBlockHeight = `calc(${headerPadTop} + ${BTN}px + 12px)`;
 
-  // Get all milestones for this domain that have an activity config (max 5)
-  const activityConfigOverrides = store.activityConfigOverrides;
-  const domainMilestones = store.milestones.filter((m) => m.areaId === place.areaId);
-  const activitiesForPlace = domainMilestones
-    .filter((m) => {
-      const config = activityConfigOverrides[m.id] ?? ACTIVITY_CONFIGS.find((a) => a.milestoneId === m.id);
-      return !!config;
-    })
-    .slice(0, 5)
-    .map((m) => ({
-      milestone: m,
-      config: activityConfigOverrides[m.id] ?? ACTIVITY_CONFIGS.find((a) => a.milestoneId === m.id)!,
-    }));
-
-  // Which activities has the child passed today?
-  const today = new Date().toISOString().slice(0, 10);
-  const passedTodayIds = new Set(
-    store.sessions
-      .filter((s) => s.childId === childId && s.passed && s.attemptedAt.slice(0, 10) === today)
-      .map((s) => s.milestoneId)
-  );
-
-  const hasActivities = activitiesForPlace.length > 0;
-
-  // Build character message
-  let bubbleText: string;
-  if (!hasActivities) {
-    bubbleText = `${place.greeting} More activities are coming soon — check back later!`;
-  } else if (assignedForDomain) {
-    const cfg = activityConfigOverrides[assignedForDomain.id] ?? ACTIVITY_CONFIGS.find((a) => a.milestoneId === assignedForDomain.id);
-    bubbleText = cfg
-      ? `Your teacher picked "${cfg.name}" for you today! You can also explore the other activities here.`
-      : place.greeting;
-  } else {
-    bubbleText = place.greeting;
-  }
+  const pathButtonStyle: CSSProperties = {
+    width: BTN,
+    height: BTN,
+    borderRadius: "50%",
+    background: C.surface,
+    border: `2px solid ${C.borderWarm}`,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    boxShadow: "0 2px 0 rgba(0,0,0,0.04)",
+    textDecoration: "none",
+    color: C.textDark,
+    padding: 0,
+    cursor: "pointer",
+  };
 
   return (
     <div style={{ background: place.bg, minHeight: "100vh" }}>
-      <div style={{ maxWidth: 480, margin: "0 auto", padding: "20px 20px 48px" }}>
-
-        {/* Header: place name */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-          {/* Home button — illustrated world icon (spec §4.2) */}
+      <header
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 40,
+          background: place.bg,
+          borderBottom: `1px solid ${C.borderWarm}99`,
+          paddingTop: headerPadTop,
+          paddingLeft: "max(16px, env(safe-area-inset-left))",
+          paddingRight: "max(16px, env(safe-area-inset-right))",
+          paddingBottom: 12,
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 520,
+            margin: "0 auto",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <Link
             href={`/student/${childId}`}
-            style={{
-              flexShrink: 0,
-              width: 44,
-              height: 44,
-              borderRadius: "50%",
-              background: C.surface,
-              border: `2px solid ${C.borderWarm}`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 22,
-              textDecoration: "none",
-            }}
-            title="Back to world"
+            style={pathButtonStyle}
+            aria-label="Back to world"
+            title="Back"
           >
-            🏠
+            <ChevronLeft size={28} strokeWidth={2.5} aria-hidden />
           </Link>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1 }}>
-            <span style={{ fontSize: 32 }}>{place.emoji}</span>
-            <span style={{ fontSize: 18, fontWeight: 700, color: C.textDark }}>{place.name}</span>
-          </div>
+          <button
+            type="button"
+            style={pathButtonStyle}
+            onClick={() => setInfoOpen(true)}
+            aria-label="About this place"
+            title="About this place"
+          >
+            <List size={26} strokeWidth={2.5} aria-hidden />
+          </button>
         </div>
+      </header>
 
-        {/* Character speech bubble */}
-        <CharacterBubble text={bubbleText} color={place.color} />
-
-        {/* Activity shelf */}
+      <div
+        style={{
+          maxWidth: 520,
+          margin: "0 auto",
+          padding: `16px 16px 40px`,
+          paddingTop: headerBlockHeight,
+        }}
+      >
         {!hasActivities ? (
           <div
             style={{
               borderRadius: 20,
-              padding: "32px 20px",
+              padding: "48px 20px",
               textAlign: "center",
               background: C.surface,
               border: `2px solid ${C.borderWarm}`,
             }}
+            aria-hidden
           >
-            <div style={{ fontSize: 48, marginBottom: 12 }}>🌟</div>
-            <p style={{ color: C.textMuted, fontSize: 15 }}>
-              Amazing things are being built here — come back soon!
-            </p>
+            <div style={{ fontSize: 56 }}>🌟</div>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {activitiesForPlace.map(({ milestone, config }) => {
-              const isDone = passedTodayIds.has(milestone.id);
-              const isAssigned = milestone.id === assignedForDomain?.id;
-
-              let cardBg = C.surface;
-              let cardBorder = C.borderWarm;
-              if (isDone) {
-                cardBg = C.greenLight;
-                cardBorder = C.green;
-              } else if (isAssigned) {
-                cardBg = place.bg;
-                cardBorder = place.color;
-              }
-
-              return (
-                <div
-                  key={milestone.id}
-                  style={{
-                    borderRadius: 20,
-                    border: `3px solid ${cardBorder}`,
-                    background: cardBg,
-                    overflow: "hidden",
-                    boxShadow: isAssigned && !isDone ? `0 0 0 2px ${place.color}40` : "none",
-                  }}
-                >
-                  <div style={{ padding: "16px 16px 12px", display: "flex", alignItems: "center", gap: 14 }}>
-                    <span style={{ fontSize: 36, lineHeight: 1 }}>{config.emoji}</span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <span style={{ fontSize: 17, fontWeight: 600, color: C.textDark, display: "block" }}>
-                        {config.name}
-                      </span>
-                      {isAssigned && !isDone && (
-                        <span style={{ fontSize: 12, color: place.color, fontWeight: 600, display: "block", marginTop: 3 }}>
-                          ✨ Your teacher picked this!
-                        </span>
-                      )}
-                      {isDone && (
-                        <span style={{ fontSize: 13, fontWeight: 600, color: C.green, display: "block", marginTop: 3 }}>
-                          ✓ Done!
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div style={{ padding: "0 16px 16px" }}>
-                    <Link
-                      href={`/student/${childId}/play/${milestone.id}?from=${placeId}`}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 8,
-                        width: "100%",
-                        padding: "14px",
-                        borderRadius: 32,
-                        border: "none",
-                        background: isDone ? C.borderWarm : place.color,
-                        color: isDone ? C.textMuted : "#FFFFFF",
-                        fontSize: 17,
-                        fontWeight: 700,
-                        cursor: "pointer",
-                        textDecoration: "none",
-                        boxSizing: "border-box",
-                      }}
-                    >
-                      {isDone ? "Play again" : "▶  Play"}
-                    </Link>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <DuolingoActivityPath
+            steps={pathSteps}
+            childId={childId}
+            placeId={placeId}
+            accentColor={place.color}
+          />
         )}
       </div>
+
+      {infoOpen ? (
+        <div
+          role="presentation"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 50,
+            background: "rgba(45, 58, 46, 0.45)",
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "center",
+            padding: "max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom))",
+          }}
+          onClick={() => setInfoOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="place-info-title"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              maxWidth: 440,
+              maxHeight: "min(85vh, 560px)",
+              overflow: "auto",
+              borderRadius: 20,
+              background: C.surface,
+              border: `2px solid ${C.borderWarm}`,
+              boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
+              padding: "20px 20px 24px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 16 }}>
+              <h2
+                id="place-info-title"
+                style={{
+                  margin: 0,
+                  fontSize: 22,
+                  fontWeight: 800,
+                  color: C.textDark,
+                  lineHeight: 1.25,
+                  fontFamily: "var(--font-nunito), Nunito, system-ui, sans-serif",
+                }}
+              >
+                {domainMeta?.name ?? "This place"}
+              </h2>
+              <button
+                ref={closeBtnRef}
+                type="button"
+                onClick={() => setInfoOpen(false)}
+                aria-label="Close"
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  border: `2px solid ${C.borderWarm}`,
+                  background: place.bg,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  flexShrink: 0,
+                  color: C.textDark,
+                }}
+              >
+                <X size={22} strokeWidth={2.5} aria-hidden />
+              </button>
+            </div>
+
+            <p
+              style={{
+                margin: "0 0 20px",
+                fontSize: 16,
+                lineHeight: 1.5,
+                color: C.textMuted,
+                fontFamily: "var(--font-nunito), Nunito, system-ui, sans-serif",
+              }}
+            >
+              {domainDescription}
+            </p>
+
+            <div
+              style={{
+                borderRadius: 16,
+                padding: "16px 18px",
+                background: place.bg,
+                border: `1px solid ${C.borderWarm}`,
+              }}
+            >
+              <p
+                style={{
+                  margin: "0 0 8px",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                  color: place.color,
+                  fontFamily: "var(--font-nunito), Nunito, system-ui, sans-serif",
+                }}
+              >
+                What you&apos;re practising now
+              </p>
+              {currentActivityConfig && currentMilestone ? (
+                <>
+                  <p
+                    style={{
+                      margin: "0 0 10px",
+                      fontSize: 18,
+                      fontWeight: 700,
+                      color: C.textDark,
+                      fontFamily: "var(--font-nunito), Nunito, system-ui, sans-serif",
+                    }}
+                  >
+                    {currentActivityConfig.emoji} {currentActivityConfig.name}
+                  </p>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 15,
+                      lineHeight: 1.5,
+                      color: C.textMuted,
+                      fontFamily: "var(--font-nunito), Nunito, system-ui, sans-serif",
+                    }}
+                  >
+                    {currentMilestone.parentDescription}
+                  </p>
+                </>
+              ) : (
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 15,
+                    lineHeight: 1.5,
+                    color: C.textMuted,
+                    fontFamily: "var(--font-nunito), Nunito, system-ui, sans-serif",
+                  }}
+                >
+                  {hasActivities
+                    ? "Your next activity will show here when you’re on the path."
+                    : "Activities will appear here when this place is ready."}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -1,9 +1,20 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowRight, X } from "lucide-react";
 import type { ActivityConfig, ActivityQuestion } from "@/lib/activity-data";
 import { generateNameCardQuestions } from "@/lib/activity-data";
+import {
+  hashStringToSeed,
+  mulberry32,
+  shuffleDeterministic,
+} from "@/lib/seeded-shuffle";
+import {
+  cancelActivitySpeech,
+  prefersReducedMotion,
+  speakActivityText,
+} from "@/lib/activity-speech";
 
 // ── Child-palette colours (hardcoded — never CSS variables, spec §Visual design system) ──
 const C = {
@@ -20,6 +31,8 @@ const C = {
   textDark: "#251B14",
   textMuted: "#5C4A3A",
   textAmber: "#5C4200",
+  progressBlue: "#7BA3D4",
+  progressBlueDark: "#5B8ABF",
 };
 
 const CONFETTI_COLOURS = [
@@ -31,104 +44,100 @@ const CONFETTI_COLOURS = [
   "#C5B3E6",
 ];
 
-function mulberry32(seed: number) {
-  let a = seed >>> 0;
-  return () => {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
 interface ActivityPlayerProps {
   childId: string;
   childName: string;
   config: ActivityConfig;
   onComplete: (score: number) => void;
+  /** When set, leaving the activity returns to this place’s path */
+  placeId?: string | null;
 }
 
-type Phase = "intro" | "question" | "feedback" | "result";
+type Phase = "question" | "feedback" | "result";
 
 function pickQuestions(
   config: ActivityConfig,
   childName: string,
+  childId: string,
 ): ActivityQuestion[] {
+  const baseSeed = hashStringToSeed(`${childId}:${config.milestoneId}`);
   let pool: ActivityQuestion[];
   if (config.isDynamic) {
-    pool = generateNameCardQuestions(childName);
+    pool = generateNameCardQuestions(childName, baseSeed);
   } else {
     pool = config.questions;
   }
-  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  const shuffled = shuffleDeterministic(
+    pool,
+    (baseSeed ^ 0xdeadbeef) >>> 0,
+  );
   return shuffled.slice(0, Math.min(3, shuffled.length));
 }
 
-// 800ms hold-to-exit home button
-function HomeButton({ onExit }: { onExit: () => void }) {
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [fillPct, setFillPct] = useState(0);
-  const rafRef = useRef<number | null>(null);
-  const startRef = useRef<number | null>(null);
-  const HOLD_MS = 800;
-
-  const startHold = useCallback(() => {
-    startRef.current = Date.now();
-    const tick = () => {
-      const elapsed = Date.now() - (startRef.current ?? 0);
-      setFillPct(Math.min(elapsed / HOLD_MS, 1));
-      if (elapsed < HOLD_MS) {
-        rafRef.current = requestAnimationFrame(tick);
-      } else {
-        onExit();
-        setFillPct(0);
-      }
-    };
-    rafRef.current = requestAnimationFrame(tick);
-  }, [onExit]);
-
-  const cancelHold = useCallback(() => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    setFillPct(0);
-    startRef.current = null;
-  }, []);
+function ActivityHeaderBar({
+  progress,
+  onClose,
+}: {
+  /** 0–1 filled amount */
+  progress: number;
+  onClose: () => void;
+}) {
+  const pct = Math.min(100, Math.max(0, Math.round(progress * 1000) / 10));
 
   return (
-    <button
-      onPointerDown={startHold}
-      onPointerUp={cancelHold}
-      onPointerLeave={cancelHold}
-      aria-label="Hold to exit activity"
+    <div
       style={{
-        position: "relative",
-        width: 44,
-        height: 44,
-        borderRadius: "50%",
-        border: `2px solid ${C.borderWarm}`,
-        background: C.surface,
-        overflow: "hidden",
-        cursor: "pointer",
-        flexShrink: 0,
         display: "flex",
         alignItems: "center",
-        justifyContent: "center",
+        gap: 10,
+        width: "100%",
       }}
     >
-      {/* Fill indicator */}
-      <div
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Leave activity"
         style={{
-          position: "absolute",
-          inset: 0,
-          background: C.yellowLight,
-          transformOrigin: "bottom",
-          transform: `scaleY(${fillPct})`,
-          transition: fillPct === 0 ? "none" : undefined,
+          flexShrink: 0,
+          width: 44,
+          height: 44,
+          borderRadius: "50%",
+          border: `2px solid ${C.borderWarm}`,
+          background: C.surface,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          color: C.textMuted,
         }}
-      />
-      <span style={{ position: "relative", fontSize: 18 }}>🏠</span>
-    </button>
+      >
+        <X strokeWidth={2.5} size={22} aria-hidden />
+      </button>
+      <div
+        role="progressbar"
+        aria-valuenow={pct}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label="Activity progress"
+        style={{
+          flex: 1,
+          height: 12,
+          borderRadius: 999,
+          background: C.borderWarm,
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            width: `${pct}%`,
+            height: "100%",
+            borderRadius: 999,
+            background: `linear-gradient(90deg, ${C.progressBlueDark} 0%, ${C.progressBlue} 100%)`,
+            transition: "width 0.3s ease",
+          }}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -173,16 +182,18 @@ function Confetti() {
 }
 
 export function ActivityPlayer({
+  childId,
   childName,
   config,
   onComplete,
+  placeId,
 }: ActivityPlayerProps) {
   const router = useRouter();
   const [questions] = useState<ActivityQuestion[]>(() =>
-    pickQuestions(config, childName),
+    pickQuestions(config, childName, childId),
   );
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [phase, setPhase] = useState<Phase>("intro");
+  const [phase, setPhase] = useState<Phase>("question");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [wrongAttempts, setWrongAttempts] = useState(0);
   const [scores, setScores] = useState<boolean[]>([]);
@@ -194,11 +205,30 @@ export function ActivityPlayer({
   const current = questions[questionIndex];
   const totalQuestions = questions.length;
 
+  useEffect(() => {
+    return () => cancelActivitySpeech();
+  }, []);
+
+  useEffect(() => {
+    if (phase === "result") cancelActivitySpeech();
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== "question") return;
+    if (prefersReducedMotion()) return;
+    const q = questions[questionIndex];
+    if (!q) return;
+    speakActivityText(q.prompt);
+  }, [phase, questionIndex, questions]);
+
   const handleOptionTap = useCallback(
     (optionId: string) => {
       if (phase !== "question") return;
       // Prevent tapping the already-wrong option
       if (optionId === lastWrongId) return;
+
+      const tapped = current.options.find((o) => o.id === optionId);
+      if (tapped) speakActivityText(tapped.label);
 
       setSelectedId(optionId);
 
@@ -245,109 +275,12 @@ export function ActivityPlayer({
   }, [scores, onComplete]);
 
   const handleExit = useCallback(() => {
-    router.back();
-  }, [router]);
-
-  // ── Intro screen (spec §Screen 2) ────────────────────────────────────────
-  if (phase === "intro") {
-    return (
-      <>
-        <style>{CSS_ANIMATIONS}</style>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: "70vh",
-            padding: "24px 24px 40px",
-            gap: 24,
-            background: C.bg,
-            position: "relative",
-          }}
-        >
-          {/* Home button — top right */}
-          <div style={{ position: "absolute", top: 16, right: 16 }}>
-            <HomeButton onExit={handleExit} />
-          </div>
-
-          {/* Activity emoji — large */}
-          <div style={{ fontSize: 72, lineHeight: 1 }}>{config.emoji}</div>
-
-          {/* Speech bubble */}
-          <div
-            style={{
-              background: C.surface,
-              border: `2px solid ${C.borderWarm}`,
-              borderRadius: 20,
-              padding: "16px 20px",
-              maxWidth: 300,
-              textAlign: "center",
-              position: "relative",
-            }}
-          >
-            {/* Bubble tail */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: -14,
-                left: "50%",
-                transform: "translateX(-50%)",
-                width: 0,
-                height: 0,
-                borderLeft: "10px solid transparent",
-                borderRight: "10px solid transparent",
-                borderTop: `14px solid ${C.surface}`,
-                zIndex: 1,
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                bottom: -17,
-                left: "50%",
-                transform: "translateX(-50%)",
-                width: 0,
-                height: 0,
-                borderLeft: "12px solid transparent",
-                borderRight: "12px solid transparent",
-                borderTop: `16px solid ${C.borderWarm}`,
-              }}
-            />
-            <p
-              style={{
-                fontSize: 16,
-                color: C.textDark,
-                margin: 0,
-                lineHeight: 1.5,
-              }}
-            >
-              {config.name}
-            </p>
-          </div>
-
-          {/* Let's go button */}
-          <button
-            onClick={() => setPhase("question")}
-            style={{
-              marginTop: 16,
-              padding: "16px 48px",
-              borderRadius: 32,
-              border: "none",
-              background: C.yellow,
-              color: C.textAmber,
-              fontSize: 20,
-              fontWeight: 600,
-              cursor: "pointer",
-              boxShadow: `0 4px 0 ${C.yellowDark}`,
-            }}
-          >
-            Let's go! ▶
-          </button>
-        </div>
-      </>
-    );
-  }
+    if (placeId) {
+      router.push(`/student/${childId}/place/${placeId}`);
+    } else {
+      router.push(`/student/${childId}`);
+    }
+  }, [router, childId, placeId]);
 
   // ── Result / Celebration screen (spec §Screen 6) ─────────────────────────
   if (phase === "result") {
@@ -358,19 +291,37 @@ export function ActivityPlayer({
         <Confetti />
         <div
           style={{
+            minHeight: "100vh",
+            background: C.bg,
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: "70vh",
-            padding: "40px 24px",
-            gap: 24,
-            background: C.bg,
-            position: "relative",
-            zIndex: 1,
-            textAlign: "center",
           }}
         >
+          <div
+            style={{
+              padding: "16px 20px 0",
+              maxWidth: 440,
+              width: "100%",
+              margin: "0 auto",
+              boxSizing: "border-box",
+            }}
+          >
+            <ActivityHeaderBar progress={1} onClose={handleExit} />
+          </div>
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "24px 24px 40px",
+              gap: 24,
+              position: "relative",
+              zIndex: 1,
+              textAlign: "center",
+            }}
+          >
           {/* Character placeholder — celebration emoji (Pip would go here) */}
           <div
             style={{
@@ -397,45 +348,33 @@ export function ActivityPlayer({
             ))}
           </div>
 
-          {/* Always celebratory — no performance language (spec Principle 5) */}
-          <div>
-            <h2
-              style={{
-                fontSize: 26,
-                fontWeight: 700,
-                color: C.textDark,
-                margin: 0,
-              }}
-            >
-              {childName}! You finished!
-            </h2>
-            <p style={{ fontSize: 16, color: C.textMuted, marginTop: 6 }}>
-              Amazing work today! 🎉
-            </p>
-          </div>
-
-          {/* Done button */}
+          {/* Continue — icon only (large arrow) */}
           <button
+            type="button"
             onClick={handleDone}
+            aria-label="Back to activities"
             style={{
-              padding: "16px 40px",
-              borderRadius: 32,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 112,
+              height: 112,
+              borderRadius: "50%",
               border: "none",
               background: C.yellow,
               color: C.textAmber,
-              fontSize: 20,
-              fontWeight: 600,
               cursor: "pointer",
-              boxShadow: `0 4px 0 ${C.yellowDark}`,
+              boxShadow: `0 6px 0 ${C.yellowDark}`,
             }}
           >
-            Back to activities →
+            <ArrowRight strokeWidth={3.2} size={72} aria-hidden />
           </button>
 
           {/* Hidden from child — data captured invisibly (spec §Session scoring) */}
           <p style={{ display: "none" }} aria-hidden="true">
             score:{passCount}
           </p>
+          </div>
         </div>
       </>
     );
@@ -446,6 +385,11 @@ export function ActivityPlayer({
 
   const isInFeedback = phase === "feedback";
   const lastScoreCorrect = scores[scores.length - 1] === true;
+  const progressRatio =
+    totalQuestions > 0
+      ? (phase === "feedback" ? questionIndex + 1 : questionIndex) /
+        totalQuestions
+      : 0;
 
   return (
     <>
@@ -462,40 +406,7 @@ export function ActivityPlayer({
           minHeight: "100vh",
         }}
       >
-        {/* Top row: progress dots + home button */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {/* Progress dots (spec §Screens 3–5 — no fraction counter) */}
-          <div
-            style={{
-              display: "flex",
-              gap: 8,
-              flex: 1,
-              justifyContent: "center",
-            }}
-          >
-            {questions.map((_, i) => {
-              const done = i < questionIndex;
-              const current = i === questionIndex;
-              return (
-                <div
-                  key={i}
-                  style={{
-                    width: current ? 14 : 10,
-                    height: current ? 14 : 10,
-                    borderRadius: "50%",
-                    background: done
-                      ? C.green
-                      : current
-                        ? C.yellow
-                        : C.borderWarm,
-                    transition: "all 0.2s ease",
-                  }}
-                />
-              );
-            })}
-          </div>
-          <HomeButton onExit={handleExit} />
-        </div>
+        <ActivityHeaderBar progress={progressRatio} onClose={handleExit} />
 
         {/* Scene card */}
         {current.scene && (
@@ -535,37 +446,6 @@ export function ActivityPlayer({
           {current.prompt}
         </p>
 
-        {/* Warm re-prompt after 1 wrong attempt (spec §Wrong answer flow) */}
-        {phase === "question" && wrongAttempts === 1 && (
-          <p
-            style={{
-              fontSize: 15,
-              color: C.textMuted,
-              textAlign: "center",
-              margin: 0,
-            }}
-          >
-            Have another look! Which one do you think?
-          </p>
-        )}
-
-        {/* Feedback pill — shown after answering */}
-        {isInFeedback && (
-          <div
-            style={{
-              borderRadius: 16,
-              padding: "12px 16px",
-              fontSize: 15,
-              fontWeight: 500,
-              background: lastScoreCorrect ? C.greenLight : C.coralLight,
-              border: `2px solid ${lastScoreCorrect ? C.green : C.coral}`,
-              color: C.textDark,
-            }}
-          >
-            {lastScoreCorrect ? current.feedbackCorrect : current.feedbackWrong}
-          </div>
-        )}
-
         {/* Answer options grid (spec §Answer option specifications — min 140×120px) */}
         <div
           style={{
@@ -582,6 +462,9 @@ export function ActivityPlayer({
             // Hint pulse: after 1 wrong attempt on question phase, pulse the correct answer
             const showHintPulse =
               phase === "question" && wrongAttempts >= 1 && isCorrect;
+
+            const showSuccessPulse =
+              isInFeedback && lastScoreCorrect && isCorrect;
 
             // Feedback phase styling
             let bg = C.surface;
@@ -637,9 +520,11 @@ export function ActivityPlayer({
                     "opacity 0.2s, background 0.2s, border-color 0.2s",
                   animation: isShaking
                     ? "shake 0.4s ease-out"
-                    : showHintPulse
-                      ? "hint-pulse 0.6s ease-in-out infinite"
-                      : undefined,
+                    : showSuccessPulse
+                      ? "success-pulse 0.55s ease-in-out 3"
+                      : showHintPulse
+                        ? "hint-pulse 0.6s ease-in-out infinite"
+                        : undefined,
                 }}
               >
                 {option.label}
@@ -648,25 +533,39 @@ export function ActivityPlayer({
           })}
         </div>
 
-        {/* Next / Finish button — appears after feedback (child taps deliberately, no auto-advance) */}
+        {/* Continue — arrow only (after feedback); last question matches celebration arrow size */}
         {isInFeedback && (
           <button
+            type="button"
             onClick={handleNext}
+            aria-label={
+              questionIndex + 1 >= totalQuestions
+                ? "Continue"
+                : "Next question"
+            }
             style={{
               width: "100%",
-              padding: "16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding:
+                questionIndex + 1 >= totalQuestions
+                  ? "22px 16px"
+                  : "18px 16px",
               borderRadius: 32,
               border: "none",
               background: C.yellow,
               color: C.textAmber,
-              fontSize: 20,
-              fontWeight: 600,
               cursor: "pointer",
               boxShadow: `0 4px 0 ${C.yellowDark}`,
               marginTop: 4,
             }}
           >
-            {questionIndex + 1 >= totalQuestions ? "Finish! 🎉" : "Next ▶"}
+            <ArrowRight
+              strokeWidth={3.2}
+              size={questionIndex + 1 >= totalQuestions ? 72 : 44}
+              aria-hidden
+            />
           </button>
         )}
       </div>
@@ -686,6 +585,10 @@ const CSS_ANIMATIONS = `
 @keyframes hint-pulse {
   0%, 100% { border-color: #F5C518; box-shadow: 0 0 0 0 rgba(245,197,24,0.4); }
   50%       { border-color: #E5B518; box-shadow: 0 0 0 6px rgba(245,197,24,0); }
+}
+@keyframes success-pulse {
+  0%, 100% { border-color: #7DC873; box-shadow: 0 0 0 0 rgba(125,200,115,0.45); }
+  50%       { border-color: #5AB85A; box-shadow: 0 0 0 8px rgba(125,200,115,0); }
 }
 @keyframes confetti-fall {
   0%   { transform: translateY(-10px) rotate(0deg); opacity: 1; }

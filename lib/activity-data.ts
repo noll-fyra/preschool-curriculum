@@ -2,6 +2,8 @@
 // Each has a pool of questions; the player picks 3 per session.
 // Audio prompts are shown as text (simulating audio delivery).
 
+import { shuffleDeterministic } from "./seeded-shuffle";
+
 export interface QuestionOption {
   id: string;
   label: string;
@@ -1019,10 +1021,12 @@ export const NAME_DISTRACTORS = [
 ];
 
 // Generate LL-B-01 questions dynamically for a given child name
-export function generateNameCardQuestions(childName: string): ActivityQuestion[] {
+export function generateNameCardQuestions(
+  childName: string,
+  seed: number,
+): ActivityQuestion[] {
   const pool = NAME_DISTRACTORS.filter((n) => n !== childName);
-  // Shuffle pool
-  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  const shuffled = shuffleDeterministic(pool, seed);
 
   const questions: ActivityQuestion[] = [];
   for (let i = 0; i < 5; i++) {
@@ -1030,8 +1034,9 @@ export function generateNameCardQuestions(childName: string): ActivityQuestion[]
       id: name,
       label: name,
     }));
-    const options = [...distractors, { id: childName, label: childName }].sort(
-      () => Math.random() - 0.5
+    const options = shuffleDeterministic(
+      [...distractors, { id: childName, label: childName }],
+      (seed ^ (i + 1) * 0x9e3779b1) >>> 0,
     );
     questions.push({
       id: `llb01-${i + 1}`,

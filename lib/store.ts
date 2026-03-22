@@ -124,6 +124,10 @@ export interface NurtureStore {
   attendance: ChildAttendance[];
   dailyUpdates: DailyUpdate[];
 
+  /** Child place path: completed slots — key `childId|placeId|slotIndex` (demo). */
+  pathSlotCompleted: Record<string, boolean>;
+  markPathSlotCompleted: (childId: string, placeId: string, slotIndex: number) => void;
+
   // Quick-log sheet global state
   quickLogOpen: boolean;
   openQuickLog: () => void;
@@ -251,6 +255,15 @@ export const useStore = create<NurtureStore>((set, get) => ({
   generatedDocuments: [],
   attendance: DEMO_ATTENDANCE,
   dailyUpdates: DEMO_DAILY_UPDATES,
+
+  pathSlotCompleted: {},
+  markPathSlotCompleted: (childId, placeId, slotIndex) =>
+    set((state) => ({
+      pathSlotCompleted: {
+        ...state.pathSlotCompleted,
+        [`${childId}|${placeId}|${slotIndex}`]: true,
+      },
+    })),
 
   quickLogOpen: false,
   openQuickLog: () => set({ quickLogOpen: true }),

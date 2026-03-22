@@ -14,9 +14,12 @@ export default function ActivityPlayerPage() {
   const childId = params.childId as string;
   const milestoneId = params.milestoneId as string;
   const fromPlace = searchParams.get("from");
+  const pathSlotRaw = searchParams.get("slot");
+  const pathSlotIndex =
+    pathSlotRaw !== null && pathSlotRaw !== "" ? Number.parseInt(pathSlotRaw, 10) : NaN;
 
   const store = useStore();
-  const { recordSession, activityConfigOverrides } = store;
+  const { recordSession, activityConfigOverrides, markPathSlotCompleted } = store;
 
   const child = store.children.find((c) => c.id === childId);
   const config = activityConfigOverrides[milestoneId] ?? getActivityConfig(milestoneId);
@@ -44,6 +47,13 @@ export default function ActivityPlayerPage() {
 
   const handleComplete = (score: number) => {
     recordSession(childId, milestoneId, score);
+    if (
+      fromPlace &&
+      Number.isInteger(pathSlotIndex) &&
+      pathSlotIndex >= 0
+    ) {
+      markPathSlotCompleted(childId, fromPlace, pathSlotIndex);
+    }
     if (fromPlace) {
       router.push(`/student/${childId}/place/${fromPlace}`);
     } else {
@@ -59,6 +69,7 @@ export default function ActivityPlayerPage() {
         childName={getChildDisplayName(child)}
         config={config}
         onComplete={handleComplete}
+        placeId={fromPlace ?? undefined}
       />
     </div>
   );
